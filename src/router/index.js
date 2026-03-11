@@ -4,7 +4,7 @@ import OwnedListPage from '@/pages/OwnedListPage.vue'
 import TransportModelAdminPage from '@/pages/TransportModelAdminPage.vue'
 
 const routes = [
-  { path: '/', redirect: '/owned' },
+  { path: '/', component: OwnedListPage },
   { path: '/owned', component: OwnedListPage },
   { path: '/transport-models', component: TransportModelAdminPage }
 ]

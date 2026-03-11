@@ -5,7 +5,7 @@ const router = useRouter()
 
 function goHome()
 {
-  router.push('/owned')
+  router.push('/')
 }
 
 function goTransportModels()
