@@ -1,4 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
+// import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import OwnedListPage from '@/pages/OwnedListPage.vue'
 import TransportModelAdminPage from '@/pages/TransportModelAdminPage.vue'
 
@@ -9,6 +10,6 @@ const routes = [
 ]
 
 export default createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes
 })
