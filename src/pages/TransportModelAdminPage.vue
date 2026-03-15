@@ -5,39 +5,42 @@
         <div class="p-2 flex flex-col flex-1 min-h-0">
           <div ref="listCardRef" class="border border-neutral-700 rounded-md overflow-hidden flex flex-col flex-1 min-h-0">
             <!-- toolbar -->
-            <div class="flex items-center justify-between px-3 py-2 bg-neutral-900/30 border-b border-neutral-700">
-              <div class="flex items-center gap-2">
+            <div
+              class="flex items-center justify-between gap-3 px-3 py-2
+                    bg-neutral-900/30 border-b border-neutral-700 overflow-hidden"
+            >
+              <div class="flex items-center gap-2 min-w-0 flex-[0_1_360px]">
                 <input
                   v-model="keyword"
                   type="text"
                   placeholder="제조사 또는 모델명 검색"
-                  class="h-8 w-[260px] px-3 rounded-md
-                         bg-neutral-800/60 border border-neutral-600
-                         text-[13px] text-neutral-100 placeholder-neutral-400
-                         outline-none"
+                  class="h-8 min-w-0 flex-1 px-3 rounded-md
+                        bg-neutral-800/60 border border-neutral-600
+                        text-[13px] text-neutral-100 placeholder-neutral-400
+                        outline-none"
                   @keyup.enter="applySearch"
                 />
 
                 <button
                   type="button"
-                  class="h-8 px-3 rounded-md
-                         bg-neutral-800/60 border border-neutral-600
-                         text-[13px] text-neutral-200
-                         hover:bg-neutral-700 active:bg-neutral-600 transition"
+                  class="h-8 shrink-0 px-3 rounded-md
+                        bg-neutral-800/60 border border-neutral-600
+                        text-[13px] text-neutral-200
+                        hover:bg-neutral-700 active:bg-neutral-600 transition"
                   @click="applySearch"
                 >
                   검색
                 </button>
               </div>
 
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 shrink-0 ml-3">
                 <button
                   v-if="selectedRow"
                   type="button"
-                  class="h-8 px-3 rounded-md
-                         bg-neutral-800/60 border border-neutral-600
-                         text-[13px] text-neutral-200
-                         hover:bg-neutral-700 active:bg-neutral-600 transition"
+                  class="h-8 shrink-0 px-3 rounded-md
+                        bg-neutral-800/60 border border-neutral-600
+                        text-[13px] text-neutral-200
+                        hover:bg-neutral-700 active:bg-neutral-600 transition"
                   @click="openEdit"
                 >
                   수정
@@ -46,10 +49,10 @@
                 <button
                   v-if="selectedRow"
                   type="button"
-                  class="h-8 px-3 rounded-md
-                         bg-neutral-800/60 border border-red-700
-                         text-[13px] text-red-300
-                         hover:bg-red-900/40 active:bg-red-900/60 transition"
+                  class="h-8 shrink-0 px-3 rounded-md
+                        bg-neutral-800/60 border border-red-700
+                        text-[13px] text-red-300
+                        hover:bg-red-900/40 active:bg-red-900/60 transition"
                   @click="openDelete"
                 >
                   삭제
@@ -57,30 +60,30 @@
 
                 <button
                   type="button"
-                  class="h-8 px-3 flex items-center gap-1
-                         rounded-md
-                         bg-neutral-800/60
-                         border border-neutral-600
-                         text-[13px] text-neutral-200
-                         hover:bg-neutral-700
-                         active:bg-neutral-600
-                         transition"
+                  class="h-8 shrink-0 px-3 flex items-center gap-1
+                        rounded-md
+                        bg-neutral-800/60
+                        border border-neutral-600
+                        text-[13px] text-neutral-200
+                        hover:bg-neutral-700
+                        active:bg-neutral-600
+                        transition"
                   @click="openAdd"
                 >
-                  <Plus class="w-4 h-4" />
-                  <span>추가</span>
+                  <Plus class="w-4 h-4 shrink-0" />
+                  <span class="whitespace-nowrap">추가</span>
                 </button>
               </div>
             </div>
 
             <!-- table -->
-            <div class="mt-3 w-full flex-1 min-h-0 overflow-auto">
+            <div class="mt-2 sm:mt-3 w-full flex-1 min-h-0 overflow-auto">
               <table class="w-full text-sm text-neutral-200 border-separate border-spacing-0 table-fixed">
                 <thead class="bg-neutral-800">
                   <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap bg-neutral-900/30">
-                    <th class="sticky-col-1 px-3 py-2 text-left w-[160px] border-b border-r border-neutral-700">제조사</th>
-                    <th class="sticky-col-2 px-3 py-2 text-left w-[200px] border-b border-r border-neutral-700">모델명</th>
-                    <th class="sticky-col-3 px-3 py-2 text-left w-[140px] border-b border-r border-neutral-700">분류</th>
+                    <th class="px-3 py-2 text-left w-[160px] border-b border-r border-neutral-700">제조사</th>
+                    <th class="px-3 py-2 text-left w-[200px] border-b border-r border-neutral-700">모델명</th>
+                    <th class="px-3 py-2 text-left w-[140px] border-b border-r border-neutral-700">분류</th>
                     <th class="px-3 py-2 text-left w-[160px] border-b border-r border-neutral-700">개조유형</th>
                     <th class="px-3 py-2 text-left w-[200px] border-b border-r border-neutral-700">개조위치</th>
                     <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">랩타임</th>
@@ -106,24 +109,15 @@
                     @dblclick="handleRowDblClick(row)"
                   >
                     <template v-if="row">
-                      <td
-                        class="sticky-col-1 px-3 py-2 text-left border-b border-neutral-700 truncate"
-                        :class="getStickyCellClass(row)"
-                      >
+                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">
                         {{ row.manufacturer }}
                       </td>
 
-                      <td
-                        class="sticky-col-2 px-3 py-2 text-left border-b border-neutral-700 truncate"
-                        :class="getStickyCellClass(row)"
-                      >
+                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">
                         {{ row.name }}
                       </td>
 
-                      <td
-                        class="sticky-col-3 px-3 py-2 text-left border-b border-neutral-700 truncate"
-                        :class="getStickyCellClass(row)"
-                      >
+                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">
                         {{ row.transportCategory }}
                       </td>
 
@@ -184,12 +178,48 @@
               </table>
             </div>
 
-            <!-- footer -->
-            <div class="border-t border-neutral-600">
-              <div class="h-12 px-4 flex items-center justify-between text-xs text-neutral-200">
-                <div>총 {{ rows.length }}건</div>
+            <!-- footer (pagination bar) -->
+            <div class="flex items-center justify-between px-4 py-2 border-t border-neutral-700 bg-neutral-900/40">
+              <div class="text-[12px] text-neutral-400 tracking-wide">
+                총 {{ total }}건 / {{ page }} / {{ totalPages }} 페이지
+              </div>
+
+              <div class="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  class="px-2.5 h-8 rounded border border-neutral-600 bg-neutral-800/80 text-[12px] text-neutral-200
+                        hover:bg-neutral-700 active:bg-neutral-600 disabled:opacity-40 disabled:cursor-default transition"
+                  :disabled="page <= 1"
+                  @click="changePage(page - 1)"
+                >
+                  이전
+                </button>
+
+                <button
+                  v-for="num in pageNumbers"
+                  :key="num"
+                  type="button"
+                  class="min-w-[30px] h-7 px-2 rounded border text-[12px] leading-none transition"
+                  :class="num === page
+                    ? 'border-neutral-300 bg-neutral-200 text-neutral-900 font-semibold shadow-sm'
+                    : 'border-neutral-600 bg-neutral-800/80 text-neutral-200 hover:bg-neutral-700'"
+                  @click="changePage(num)"
+                >
+                  {{ num }}
+                </button>
+
+                <button
+                  type="button"
+                  class="px-2.5 h-8 rounded border border-neutral-600 bg-neutral-800/80 text-[12px] text-neutral-200
+                        hover:bg-neutral-700 active:bg-neutral-600 disabled:opacity-40 disabled:cursor-default transition"
+                  :disabled="page >= totalPages"
+                  @click="changePage(page + 1)"
+                >
+                  다음
+                </button>
               </div>
             </div>
+
           </div>
         </div>
       </div>
@@ -226,8 +256,13 @@ const editTarget = ref(null)
 const selectedRow = ref(null)
 const listCardRef = ref(null)
 
+const page = ref(1)
+const size = ref(20)
+const total = ref(0)
+const totalPages = ref(1)
+
 const displayRows = computed(() => {
-  const minRows = 15
+  const minRows = size.value
   const emptyCount = Math.max(0, minRows - rows.value.length)
 
   return [
@@ -236,12 +271,24 @@ const displayRows = computed(() => {
   ]
 })
 
+const pageNumbers = computed(() => {
+  const pages = []
+
+  for (let i = 1; i <= totalPages.value; i++) {
+    pages.push(i)
+  }
+
+  return pages
+})
+
 async function load()
 {
   try {
     const res = await http.get('/api/transport-models', {
       params: {
-        keyword: keyword.value
+        keyword: keyword.value,
+        page: page.value,
+        size: size.value
       }
     })
 
@@ -255,21 +302,43 @@ async function load()
       (Array.isArray(data) && data) ||
       []
 
+    const totalCount =
+      (Number.isFinite(data?.total) && data.total) ||
+      (Number.isFinite(data?.count) && data.count) ||
+      (Number.isFinite(data?.totalElements) && data.totalElements) ||
+      (Array.isArray(list) ? list.length : 0)
+
     rows.value = list.map((x) => ({
       ...x,
       id: x.id ?? x.transportModelId ?? x.modelId
     }))
 
+    total.value = totalCount
+    totalPages.value = Math.max(1, Math.ceil(totalCount / size.value))
+
     clearSelectionIfNotExists()
   } catch (err) {
     console.error('이동수단 모델 목록 조회 실패:', err)
     rows.value = []
+    total.value = 0
+    totalPages.value = 1
     selectedRow.value = null
   }
 }
 
+function changePage(newPage)
+{
+  if (newPage < 1 || newPage > totalPages.value) {
+    return
+  }
+
+  page.value = newPage
+  load()
+}
+
 function applySearch()
 {
+  page.value = 1
   load()
 }
 
@@ -439,24 +508,6 @@ function formatNumber(value)
   }
 
   return new Intl.NumberFormat().format(value)
-}
-
-function isSelectedRow(row)
-{
-  if (!row || !selectedRow.value) {
-    return false
-  }
-
-  return row.id === selectedRow.value.id
-}
-
-function getStickyCellClass(row)
-{
-  if (isSelectedRow(row)) {
-    return 'sticky-col-selected'
-  }
-
-  return 'group-hover:sticky-col-hover'
 }
 
 onMounted(() => {
