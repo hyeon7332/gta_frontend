@@ -1,9 +1,9 @@
 <template>
   <div class="min-h-[calc(100dvh-56px)] bg-neutral-700 flex flex-col">
-    <div class="w-full max-w-none px-4 py-4 md:py-6 flex flex-col flex-1 min-h-0">
-      <div class="bg-neutral-900/40 border border-neutral-700 rounded-lg shadow-lg overflow-hidden flex flex-col flex-1 min-h-0">
-        <div class="p-2 flex flex-col flex-1 min-h-0">
-          <div ref="listCardRef" class="border border-neutral-700 rounded-md overflow-hidden flex flex-col flex-1 min-h-0">
+    <div class="w-full max-w-none px-4 pt-2 pb-4">
+      <div class="bg-neutral-900/40 border border-neutral-700 rounded-lg shadow-lg overflow-hidden">
+        <div class="p-2">
+          <div ref="listCardRef" class="border border-neutral-700 rounded-md overflow-hidden">
             <!-- toolbar -->
             <div
               class="flex items-center justify-between gap-3 px-3 py-2
@@ -77,7 +77,7 @@
             </div>
 
             <!-- table -->
-            <div class="mt-2 sm:mt-3 w-full flex-1 min-h-0 overflow-auto">
+            <div class="mt-2 sm:mt-3 w-full overflow-auto max-h-[calc(100dvh-230px)]">
               <table class="w-full text-sm text-neutral-200 border-separate border-spacing-0 table-fixed">
                 <thead class="bg-neutral-800">
                   <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap bg-neutral-900/30">

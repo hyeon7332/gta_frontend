@@ -1,11 +1,11 @@
 <template>
   <!-- page background -->
   <div class="min-h-[calc(100dvh-56px)] bg-neutral-700 flex justify-center">
-    <div class="w-full max-w-[1200px] px-4 py-4 md:py-6 flex flex-col flex-1 min-h-0">
+    <div class="w-full max-w-[1200px] px-4 pt-2 pb-4">
       <!-- main panel -->
-      <div class="bg-neutral-900/40 border border-neutral-700 rounded-lg shadow-lg overflow-hidden flex flex-col flex-1 min-h-0">
-        <div class="p-2 flex flex-col flex-1 min-h-0">
-          <div class="border border-neutral-700 rounded-md overflow-hidden flex flex-col flex-1 min-h-0">
+      <div class="bg-neutral-900/40 border border-neutral-700 rounded-lg shadow-lg overflow-hidden">
+        <div class="p-2">
+          <div class="border border-neutral-700 rounded-md overflow-hidden">
             <!-- toolbar -->
             <div class="relative flex items-center justify-between px-3 py-2 bg-neutral-900/30 border-b border-neutral-700">
               <div class="text-[13px] text-neutral-200 font-medium">
@@ -43,7 +43,7 @@
             </div>
 
             <!-- table -->
-            <div class="flex-1 min-h-0 overflow-auto">
+            <div class="overflow-auto max-h-[calc(100dvh-220px)]">
               <table class="w-full min-w-[980px] table-fixed border-separate border-spacing-0">
                 <thead class="bg-neutral-800">
                   <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap bg-neutral-900/30">
