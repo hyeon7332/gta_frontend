@@ -476,7 +476,7 @@ function handleDocumentClick(event)
 function formatLapTime(ms)
 {
   if (ms === null || ms === undefined || ms === '') {
-    return ''
+    return '-'
   }
 
   const value = Number(ms)
