@@ -6,5 +6,6 @@ export const featureOptions = [
   '번호판 없음',
   '상징',
   '전기차',
+  '점프',
   '컨버터블'
 ]
