@@ -110,26 +110,26 @@
                   >
                     <template v-if="row">
                       <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">
-                        {{ row.manufacturer }}
+                        {{ displayValue(row.manufacturer) }}
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">
-                        {{ row.name }}
+                        {{ displayValue(row.name) }}
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">
-                        {{ row.transportCategory }}
+                        {{ displayValue(row.transportCategory) }}
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">
-                        {{ row.upgradeType }}
+                        {{ displayValue(row.upgradeType) }}
                       </td>
 
                       <td 
                         class="px-3 py-2 text-left border-b border-neutral-700 truncate"
                         :title="row.upgradeLocation"
                       >
-                        {{ row.upgradeLocation }}
+                        {{ displayValue(row.upgradeLocation) }}
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
@@ -137,35 +137,39 @@
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
-                        {{ row.topSpeed }} km/h
+                        {{ row.topSpeed ? row.topSpeed + ' km/h' : '-' }}
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
-                        {{ formatPrice(row.price) }}
+                        {{ row.price ? formatPrice(row.price) : '-' }}
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
-                        {{ row.releaseDate }}
+                        {{ displayValue(row.releaseDate) }}
                       </td>
 
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ row.source }}</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ formatNumber(row.weight) }} kg</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ row.driveGears }}</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ row.driveTrain }}</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">{{ row.seats }}</td>
+                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ displayValue(row.source) }}</td>
+
+                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ row.weight ? formatNumber(row.weight) + ' kg' : '-' }}</td>
+
+                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ displayValue(row.driveGears) }}</td>
+
+                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ displayValue(row.driveTrain) }}</td>
+
+                      <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">{{ displayValue(row.seats) }}</td>
 
                       <td
                         class="px-3 py-2 text-left border-b border-neutral-700 truncate"
-                        :title="row.features"
+                        :title="displayValue(row.features)"
                       >
-                        {{ row.features }}
+                        {{ displayValue(row.features) }}
                       </td>
 
                       <td
                         class="px-3 py-2 text-left border-b border-neutral-700 truncate"
-                        :title="row.performance"
+                        :title="displayValue(row.performance)"
                       >
-                        {{ row.performance }}
+                        {{ displayValue(row.performance) }}
                       </td>
                       
                     </template>
@@ -508,6 +512,15 @@ function formatNumber(value)
   }
 
   return new Intl.NumberFormat().format(value)
+}
+
+function displayValue(value)
+{
+  if (value === null || value === undefined || value === '') {
+    return '-'
+  }
+
+  return value
 }
 
 onMounted(() => {
