@@ -48,9 +48,9 @@
                 <thead class="bg-neutral-800">
                   <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap bg-neutral-900/30">
                     <th class="w-[100px] px-3 py-2 text-left border-b border-r border-neutral-700">제조사</th>
-                    <th class="w-[230px] px-3 py-2 text-left border-b border-r border-neutral-700">모델명</th>
-                    <th class="w-[140px] px-3 py-2 text-left border-b border-r border-neutral-700">분류</th>
-                    <th class="w-[200px] px-3 py-2 text-left border-b border-r border-neutral-700">상징</th>
+                    <th class="w-[220px] px-3 py-2 text-left border-b border-r border-neutral-700">모델명</th>
+                    <th class="w-[130px] px-3 py-2 text-left border-b border-r border-neutral-700">분류</th>
+                    <th class="w-[220px] px-3 py-2 text-left border-b border-r border-neutral-700">상징</th>
                     <th class="w-[100px] px-3 py-2 text-left border-b border-r border-neutral-700">가격</th>
                     <th class="w-[100px] px-3 py-2 text-left border-b border-r border-neutral-700">출시일</th>
                     <th class="w-[220px] px-3 py-2 text-left border-b border-r border-neutral-700">차고</th>
