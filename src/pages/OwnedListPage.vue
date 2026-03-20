@@ -44,7 +44,7 @@
 
             <!-- table -->
             <div class="overflow-auto max-h-[calc(100dvh-220px)]">
-              <table class="w-full min-w-[980px] table-fixed border-separate border-spacing-0">
+              <table class="w-full min-w-[1000px] table-fixed border-separate border-spacing-0">
                 <thead class="bg-neutral-800">
                   <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap bg-neutral-900/30">
                     <th class="w-[100px] px-3 py-2 text-left border-b border-r border-neutral-700">제조사</th>
