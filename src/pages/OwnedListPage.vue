@@ -1,7 +1,7 @@
 <template>
   <!-- page background -->
   <div class="min-h-[calc(100dvh-56px)] bg-neutral-700 flex justify-center">
-    <div class="w-full max-w-[1200px] px-4 pt-2 pb-4">
+    <div class="w-full max-w-[1000px] px-4 pt-2 pb-4">
       <!-- main panel -->
       <div class="bg-neutral-900/40 border border-neutral-700 rounded-lg shadow-lg overflow-hidden">
         <div class="p-2">
@@ -43,18 +43,22 @@
             </div>
 
             <!-- table -->
-            <div class="overflow-auto max-h-[calc(100dvh-220px)]">
-              <table class="w-full min-w-[1000px] table-fixed border-separate border-spacing-0">
-                <thead class="bg-neutral-800">
-                  <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap bg-neutral-900/30">
-                    <th class="w-[100px] px-3 py-2 text-left border-b border-r border-neutral-700">제조사</th>
-                    <th class="w-[220px] px-3 py-2 text-left border-b border-r border-neutral-700">모델명</th>
-                    <th class="w-[130px] px-3 py-2 text-left border-b border-r border-neutral-700">분류</th>
-                    <th class="w-[220px] px-3 py-2 text-left border-b border-r border-neutral-700">상징</th>
-                    <th class="w-[100px] px-3 py-2 text-left border-b border-r border-neutral-700">가격</th>
-                    <th class="w-[100px] px-3 py-2 text-left border-b border-r border-neutral-700">출시일</th>
-                    <th class="w-[220px] px-3 py-2 text-left border-b border-r border-neutral-700">차고</th>
-                    <th class="w-[50px] px-3 py-2 text-left border-b border-neutral-700">슬롯</th>
+            <div class="overflow-y-auto overflow-x-hidden h-[641px]">
+              <table class="w-full table-fixed border-separate border-spacing-0">
+                <colgroup>
+                  <col class="w-[6%]" />   <!-- 슬롯 -->
+                  <col class="w-[15%]" />  <!-- 제조사 -->
+                  <col class="w-[32%]" />  <!-- 모델명 -->
+                  <col class="w-[15%]" />  <!-- 분류 -->
+                  <col class="w-[32%]" />  <!-- 상징 -->
+                </colgroup>
+                <thead>
+                  <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap">
+                    <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">슬롯</th>
+                    <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">제조사</th>
+                    <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">모델명</th>
+                    <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">분류</th>
+                    <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">상징</th>
                   </tr>
                 </thead>
 
@@ -62,74 +66,43 @@
                   <tr
                     v-for="(row, index) in displayRows"
                     :key="row ? row.id : `empty-${index}`"
-                    :class="row ? 'hover:bg-neutral-700/40 transition cursor-pointer' : ''"
-                    @dblclick="openEdit(row)"
+                    :class="[
+                      'h-[40px]',
+                      row && row.type === 'slot' && !row.isEmpty ? 'hover:bg-neutral-700/40 transition cursor-pointer' : '',
+                      row && row.type === 'slot' && row.isEmpty ? 'text-neutral-500' : ''
+                    ]"
+                    @dblclick="row && row.type === 'slot' && !row.isEmpty && openEdit(row)"
                   >
-                    <template v-if="row">
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ row.manufacturer }}</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ row.name }}</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ row.category }}</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">
+                    <!-- 차고 헤더 -->
+                    <template v-if="row && row.type === 'garageHeader'">
+                      <td colspan="5"
+                          class="h-[40px] px-3 py-2
+                                bg-neutral-700/40
+                                border-b border-neutral-600
+                                text-[13px] font-semibold text-neutral-300 align-middle">
+                        {{ row.garage }}
+                      </td>
+                    </template>
+
+                    <!-- 일반 슬롯 row -->
+                    <template v-else-if="row">
+                      <td class="h-[40px] px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap align-middle">
+                        {{ row.slot }}
+                      </td>
+                      <td class="h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle">{{ row.manufacturer }}</td>
+                      <td class="h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle">{{ row.name }}</td>
+                      <td class="h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle">{{ row.category }}</td>
+                      <td class="h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle">
                         {{ row.decal }}
                       </td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
-                        {{ formatPrice(row.price) }}
-                      </td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
-                        {{ row.releaseDate }}
-                      </td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ row.garage }}</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">{{ row.slot }}</td>
                     </template>
 
                     <template v-else>
-                      <td colspan="8" class="h-[40px]"></td>
+                      <td colspan="5" class="h-[40px]"></td>
                     </template>
                   </tr>
                 </tbody>
               </table>
-            </div>
-
-            <!-- footer (pagination bar) -->
-            <div class="flex items-center justify-between px-4 py-2 border-t border-neutral-700 bg-neutral-900/40">
-              <div class="text-[12px] text-neutral-400 tracking-wide">
-                총 {{ total }}건 / {{ page }} / {{ totalPages }} 페이지
-              </div>
-
-              <div class="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  class="px-2.5 h-8 rounded border border-neutral-600 bg-neutral-800/80 text-[12px] text-neutral-200
-                        hover:bg-neutral-700 active:bg-neutral-600 disabled:opacity-40 disabled:cursor-default transition"
-                  :disabled="page <= 1"
-                  @click="changePage(page - 1)"
-                >
-                  이전
-                </button>
-
-                <button
-                  v-for="num in pageNumbers"
-                  :key="num"
-                  type="button"
-                  class="min-w-[30px] h-7 px-2 rounded border text-[12px] leading-none transition"
-                  :class="num === page
-                    ? 'border-neutral-300 bg-neutral-200 text-neutral-900 font-semibold shadow-sm'
-                    : 'border-neutral-600 bg-neutral-800/80 text-neutral-200 hover:bg-neutral-700'"
-                  @click="changePage(num)"
-                >
-                  {{ num }}
-                </button>
-
-                <button
-                  type="button"
-                  class="px-2.5 h-8 rounded border border-neutral-600 bg-neutral-800/80 text-[12px] text-neutral-200
-                        hover:bg-neutral-700 active:bg-neutral-600 disabled:opacity-40 disabled:cursor-default transition"
-                  :disabled="page >= totalPages"
-                  @click="changePage(page + 1)"
-                >
-                  다음
-                </button>
-              </div>
             </div>
 
           </div>
@@ -158,10 +131,6 @@ import OwnedTransportModal from '@/components/OwnedTransportModal.vue'
 
 // list state
 const rows = ref([])
-const page = ref(1)
-const size = ref(20)
-const total = ref(0)
-const totalPages = ref(0)
 
 // options for modal
 const transportList = ref([])
@@ -258,12 +227,63 @@ async function handleUpdate(payload)
   }
 }
 
+const slotRows = computed(() => {
+  const result = []
+
+  garageList.value.forEach((garage) => {
+    const garageId = garage.garageId
+    const garageName = garage.garageName
+    const slotCount = Number(garage.slotCount ?? 0)
+
+    result.push({
+      id: `garage-header-${garageId}`,
+      type: 'garageHeader',
+      garageId,
+      garage: garageName
+    })
+
+    for (let slotNo = 1; slotNo <= slotCount; slotNo++) {
+      const found = rows.value.find((row) => {
+        return Number(row.garageId) === Number(garageId) && Number(row.slot) === slotNo
+      })
+
+      if (found) {
+        result.push({
+          ...found,
+          type: 'slot',
+          garageId,
+          garage: garageName,
+          slot: slotNo,
+          isEmpty: false
+        })
+      } else {
+        result.push({
+          id: `empty-${garageId}-${slotNo}`,
+          type: 'slot',
+          garageId,
+          garage: garageName,
+          slot: slotNo,
+          manufacturer: '-',
+          name: '-',
+          category: '-',
+          decal: '-',
+          price: null,
+          releaseDate: '-',
+          isEmpty: true
+        })
+      }
+    }
+  })
+
+  return result
+})
+
 const displayRows = computed(() => {
-  const minRows = 20
-  const emptyCount = Math.max(0, minRows - rows.value.length)
+  const minRows = 15
+  const emptyCount = Math.max(0, minRows - slotRows.value.length)
 
   return [
-    ...rows.value,
+    ...slotRows.value,
     ...Array.from({ length: emptyCount }, () => null)
   ]
 })
@@ -272,13 +292,7 @@ const displayRows = computed(() => {
 async function load()
 {
   try {
-    const res = await http.get('/api/owned-transports', {
-      params: {
-        page: page.value,
-        size: size.value
-      }
-    })
-
+    const res = await http.get('/api/owned-transports')
     const data = res.data
 
     const list =
@@ -289,71 +303,24 @@ async function load()
       (Array.isArray(data) && data) ||
       []
 
-    const totalCount =
-      (Number.isFinite(data?.total) && data.total) ||
-      (Number.isFinite(data?.count) && data.count) ||
-      (Number.isFinite(data?.totalElements) && data.totalElements) ||
-      (Array.isArray(list) ? list.length : 0)
-
     rows.value = list.map((x) => ({
       id: x.id ?? x.ownedTransportId ?? x.ownedId ?? x.transportId,
-      manufacturer: x.manufacturer ?? x.maker ?? x.brand ?? x.manufacturerName,
-      name: x.name ?? x.modelName ?? x.transportName,
-      category: x.category ?? x.transportCategory ?? x.className ?? x.class,
-      decal: x.decal,
-      price: x.price ?? x.priceNumber ?? x.cost,
-      releaseDate: x.releaseDate ?? x.release_date,
-      garage: (x.garage ?? x.storage ?? x.garageName ?? '-') || '-',
-      slot: (x.slot ?? x.slotNo ?? x.slot_no ?? '-') ?? '-'
+      garageId: x.garageId ?? x.garage_id ?? null,
+      garage: (x.garage ?? x.storage ?? x.garageName ?? x.garage_name ?? '-') || '-',
+      slot: Number(x.slot ?? x.slotNo ?? x.slot_no ?? 0),
+
+      manufacturer: x.manufacturer ?? x.maker ?? x.brand ?? x.manufacturerName ?? '-',
+      name: x.name ?? x.modelName ?? x.transportName ?? '-',
+      category: x.category ?? x.transportCategory ?? x.className ?? x.class ?? '-',
+      decal: x.decal ?? '-',
+      price: x.price ?? x.priceNumber ?? x.cost ?? null,
+      releaseDate: x.releaseDate ?? x.release_date ?? '-'
     }))
 
-    total.value = totalCount
-    totalPages.value = Math.max(1, Math.ceil(totalCount / size.value))
   } catch (err) {
     console.error('목록 조회 실패:', err)
     rows.value = []
-    total.value = 0
-    totalPages.value = 1
   }
-}
-
-function changePage(newPage)
-{
-  if (newPage < 1 || newPage > totalPages.value) {
-    return
-  }
-
-  page.value = newPage
-  load()
-}
-
-const pageNumbers = computed(() => {
-  const pages = []
-
-  for (let i = 1; i <= totalPages.value; i++) {
-    pages.push(i)
-  }
-
-  return pages
-})
-
-function applyQuery()
-{
-  page.value = 1
-  load()
-}
-
-function formatPrice(value)
-{
-  if (value === null || value === undefined) {
-    return ''
-  }
-
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0
-  }).format(value)
 }
 
 // api: transports (options)
@@ -393,7 +360,11 @@ async function loadGarages()
       (Array.isArray(data) && data) ||
       []
 
-    garageList.value = list
+    garageList.value = list.map((x) => ({
+      garageId: x.garageId ?? x.id ?? x.garage_id,
+      garageName: x.garageName ?? x.name ?? x.garage ?? x.garage_name ?? '-',
+      slotCount: Number(x.slotCount ?? x.slot_count ?? x.totalSlots ?? x.capacity ?? 0)
+    }))
   } catch (err) {
     console.error('차고 목록 조회 실패:', err)
     garageList.value = []

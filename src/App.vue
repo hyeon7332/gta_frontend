@@ -1,5 +1,6 @@
 <script setup>
 import { useRouter } from 'vue-router'
+import { Warehouse, Car } from 'lucide-vue-next'
 
 const router = useRouter()
 
@@ -32,24 +33,26 @@ function goTransportModels()
         <div class="flex items-center gap-2">
           <button
             type="button"
-            class="h-9 px-4 rounded-md border border-neutral-600
+            class="h-9 px-4 flex items-center gap-1.5 rounded-md border border-neutral-600
                   bg-neutral-800/70 text-neutral-200 text-sm
                   hover:bg-neutral-700 active:bg-neutral-600
                   transition"
             @click="goHome"
           >
-            My Garage
+            <Warehouse class="w-4 h-4" />
+            <span>차고</span>
           </button>
 
           <button
             type="button"
-            class="h-9 px-4 rounded-md border border-neutral-600
-                  bg-neutral-800/70 text-neutral-200 text-sm
-                  hover:bg-neutral-700 active:bg-neutral-600
+            class="h-9 px-4 flex items-center gap-1.5 rounded-md border border-neutral-600
+                bg-neutral-800/70 text-neutral-200 text-sm
+                hover:bg-neutral-700 active:bg-neutral-600
                   transition"
             @click="goTransportModels"
           >
-            Model Library
+            <Car class="w-4 h-4" />
+            <span>이동수단</span>
           </button>
         </div>
       </div>
