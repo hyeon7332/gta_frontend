@@ -60,7 +60,7 @@
                       class="h-4 w-4"
                       @change="toggleGarageFilter(garage.garageId)"
                     />
-                    <span class="truncate">{{ garage.name }}</span>
+                    <span class="truncate">{{ garage.garageName }}</span>
                   </label>
                 </div>
               </div>
@@ -406,10 +406,10 @@ const displayRows = computed(() => {
 
 const garageFilterOptions = computed(() => {
   return [
-    { garageId: 'all', name: '전체' },
+    { garageId: 'all', garageName: '전체' },
     ...garageList.value.map((garage) => ({
       garageId: String(garage.garageId),
-      name: garage.name
+      garageName: garage.garageName
     }))
   ]
 })
@@ -488,6 +488,7 @@ async function loadGarages()
     garageList.value = list.map((x) => ({
       garageId: x.garageId ?? x.id ?? x.garage_id,
       garageName: x.garageName ?? x.name ?? x.garage ?? x.garage_name ?? '-',
+      type: x.type ?? x.garageType ?? '',
       slotCount: Number(x.slotCount ?? x.slot_count ?? x.totalSlots ?? x.capacity ?? 0)
     }))
   } catch (err) {

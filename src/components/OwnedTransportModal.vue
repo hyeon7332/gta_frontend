@@ -116,7 +116,7 @@
                         hover:bg-neutral-100 active:bg-neutral-200"
                   @click="selectGarage(g)"
                 >
-                  <div class="text-neutral-900">{{ g.name }}</div>
+                  <div class="text-neutral-900">{{ g.garageName }}</div>
                   <div class="text-neutral-500 text-[12px]">{{ g.type }}</div>
                 </button>
 
@@ -321,7 +321,7 @@ watch(() => props.open, async (v) => {
       const matched = garageName
         ? (Array.isArray(props.garageList)
             ? props.garageList.find((garage) => {
-                return String(garage?.name || '').trim() === garageName.trim()
+                return String(garage?.garageName || '').trim() === garageName.trim()
               })
             : null)
         : null
@@ -329,7 +329,7 @@ watch(() => props.open, async (v) => {
       if (matched) {
         selectedGarage.value = matched
         selectedGarageId.value = matched.garageId
-        garageText.value = String(matched.name || '').trim()
+        garageText.value = String(matched.garageName || '').trim()
         garageQuery.value = ''
 
         if (Number.isFinite(currentSlot) && currentSlot > 0) {
@@ -432,9 +432,9 @@ const filteredGarageList = computed(() => {
   const tokens = kwRaw.split(/\s+/).filter(Boolean)
 
   return (Array.isArray(props.garageList) ? props.garageList : []).filter((g) => {
-    const name = String(g?.name || '').toLowerCase()
+    const garageName = String(g?.garageName || '').toLowerCase()
     const type = String(g?.type || '').toLowerCase()
-    const hay = `${name} ${type}`
+    const hay = `${garageName} ${type}`
 
     return tokens.every((tok) => {
       return hay.includes(tok)
@@ -453,7 +453,7 @@ const slotOptions = computed(() => {
     return []
   }
 
-  const cap = Number(g.capacity)
+  const cap = Number(g.slotCount)
 
   if (!Number.isFinite(cap) || cap <= 0) {
     return []
@@ -747,7 +747,7 @@ async function selectGarage(g)
 {
   selectedGarage.value = g
   selectedGarageId.value = g.garageId
-  garageText.value = String(g.name || '').trim()
+  garageText.value = String(g.garageName || '').trim()
 
   slotNo.value = ''
   slotNoText.value = ''
