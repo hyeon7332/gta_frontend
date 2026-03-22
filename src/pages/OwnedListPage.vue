@@ -536,9 +536,11 @@ async function load()
 async function loadTransportModels()
 {
   try {
-    const res = await http.get('/api/transport-models')
+    const res = await http.get('/api/transport-models/options')
     const data = res.data
     const list = extractList(data)
+
+    console.log('transportList count =', list.length, list)
 
     transportList.value = list
   } catch (err) {
