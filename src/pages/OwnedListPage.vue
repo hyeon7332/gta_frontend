@@ -60,7 +60,7 @@
                       class="h-4 w-4"
                       @change="toggleGarageFilter(garage.garageId)"
                     />
-                    <span class="truncate">{{ garage.garageName }}</span>
+                    <span class="truncate">{{ garage.name }}</span>
                   </label>
                 </div>
               </div>
