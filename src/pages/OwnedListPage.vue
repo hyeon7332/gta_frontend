@@ -259,13 +259,16 @@ function handleClickOutside(e)
 function toggleGarageFilter(garageId)
 {
   const targetId = String(garageId)
+  const exists = selectedGarageIds.value.includes(targetId)
 
   if (targetId === 'unassigned') {
-    selectedGarageIds.value = ['unassigned']
+    if (exists) {
+      selectedGarageIds.value = []
+    } else {
+      selectedGarageIds.value = ['unassigned']
+    }
     return
   }
-
-  const exists = selectedGarageIds.value.includes(targetId)
 
   if (exists) {
     selectedGarageIds.value = selectedGarageIds.value.filter((id) => {
@@ -460,7 +463,7 @@ const unassignedDisplayRows = computed(() => {
 const displayRows = computed(() => {
   // 미배치 선택된 경우
   if (selectedGarageIds.value.includes('unassigned')) {
-    return unassignedRows.value
+    return unassignedDisplayRows.value
   }
 
   // 기존 슬롯 로직
@@ -509,8 +512,7 @@ async function load()
 {
   try {
     const res = await http.get('/api/owned-transports')
-    const data = res.data
-    const list = extractList(data)
+    const list = Array.isArray(res.data) ? res.data : []
 
     rows.value = list.map((x) => ({
       id: x.id ?? x.ownedTransportId ?? x.ownedId ?? x.transportId,
@@ -539,8 +541,6 @@ async function loadTransportModels()
     const res = await http.get('/api/transport-models/options')
     const data = res.data
     const list = extractList(data)
-
-    console.log('transportList count =', list.length, list)
 
     transportList.value = list
   } catch (err) {
