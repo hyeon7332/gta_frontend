@@ -406,10 +406,10 @@ const displayRows = computed(() => {
 
 const garageFilterOptions = computed(() => {
   return [
-    { garageId: 'all', garageName: '전체' },
+    { garageId: 'all', name: '전체' },
     ...garageList.value.map((garage) => ({
       garageId: String(garage.garageId),
-      garageName: garage.garageName
+      name: garage.name
     }))
   ]
 })
