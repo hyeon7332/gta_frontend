@@ -49,6 +49,24 @@
                         rounded-md border border-neutral-600
                         bg-neutral-900 shadow-lg"
                 >
+                  <!-- 전체 -->
+                  <button
+                    type="button"
+                    class="w-full flex items-center justify-between px-3 py-2 text-[13px] text-neutral-200 hover:bg-neutral-800 transition"
+                    @click="selectedGarageIds = []"
+                  >
+                    <span>전체</span>
+                    <span
+                      v-if="selectedGarageIds.length === 0"
+                      class="text-[11px] text-neutral-400"
+                    >
+                      선택됨
+                    </span>
+                  </button>
+
+                  <div class="mx-2 border-t border-neutral-700"></div>
+
+                  <!-- 미배치 + 차고 -->
                   <label
                     v-for="garage in garageFilterOptions.filter((item) => item.garageId !== 'all')"
                     :key="garage.garageId"
@@ -63,6 +81,7 @@
                     <span class="truncate">{{ garage.garageName }}</span>
                   </label>
                 </div>
+
               </div>
 
               <!-- toast -->
@@ -134,6 +153,17 @@
                                 border-b border-neutral-600
                                 text-[13px] font-semibold text-neutral-300 align-middle">
                         {{ row.garage }}
+                      </td>
+                    </template>
+                    
+                    <!-- 미배치 row -->
+                    <template v-else-if="row && row.type === 'unassigned'">
+                      <td class="px-3 py-2 border-b border-neutral-700">-</td>
+                      <td class="px-3 py-2 border-b border-neutral-700">{{ row.manufacturer }}</td>
+                      <td class="px-3 py-2 border-b border-neutral-700">{{ row.name }}</td>
+                      <td class="px-3 py-2 border-b border-neutral-700">{{ row.category }}</td>
+                      <td class="px-3 py-2 border-b border-neutral-700">
+                        {{ row.decal }}
                       </td>
                     </template>
 
@@ -229,6 +259,12 @@ function handleClickOutside(e)
 function toggleGarageFilter(garageId)
 {
   const targetId = String(garageId)
+
+  if (targetId === 'unassigned') {
+    selectedGarageIds.value = ['unassigned']
+    return
+  }
+
   const exists = selectedGarageIds.value.includes(targetId)
 
   if (exists) {
@@ -236,6 +272,9 @@ function toggleGarageFilter(garageId)
       return id !== targetId
     })
   } else {
+    selectedGarageIds.value = selectedGarageIds.value.filter((id) => {
+      return id !== 'unassigned'
+    })
     selectedGarageIds.value = [...selectedGarageIds.value, targetId]
   }
 }
@@ -394,7 +433,37 @@ const filteredSlotRows = computed(() => {
   })
 })
 
+const unassignedRows = computed(() => {
+  return rows.value.filter((row) => {
+    return !row.garageId
+  }).map((row) => ({
+    ...row,
+    type: 'unassigned'
+  }))
+})
+
+const unassignedDisplayRows = computed(() => {
+  if (unassignedRows.value.length === 0) {
+    return []
+  }
+
+  return [
+    {
+      id: 'unassigned-header',
+      type: 'garageHeader',
+      garage: '미배치'
+    },
+    ...unassignedRows.value
+  ]
+})
+
 const displayRows = computed(() => {
+  // 미배치 선택된 경우
+  if (selectedGarageIds.value.includes('unassigned')) {
+    return unassignedRows.value
+  }
+
+  // 기존 슬롯 로직
   const minRows = 15
   const emptyCount = Math.max(0, minRows - filteredSlotRows.value.length)
 
@@ -407,6 +476,7 @@ const displayRows = computed(() => {
 const garageFilterOptions = computed(() => {
   return [
     { garageId: 'all', garageName: '전체' },
+    { garageId: 'unassigned', garageName: '미배치' },
     ...garageList.value.map((garage) => ({
       garageId: String(garage.garageId),
       garageName: garage.garageName
