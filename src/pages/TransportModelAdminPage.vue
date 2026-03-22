@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-[calc(100dvh-56px)] bg-neutral-700 flex flex-col">
+  <div class="h-full bg-neutral-700">
     <div class="w-full max-w-none px-4 pt-2 pb-4">
       <div class="bg-neutral-900/40 border border-neutral-700 rounded-lg shadow-lg overflow-hidden">
         <div class="p-2">

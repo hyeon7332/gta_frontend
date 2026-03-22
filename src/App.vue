@@ -15,7 +15,7 @@ function goTransportModels()
 }
 </script>
 <template>
-  <div class="min-h-screen bg-neutral-700">
+  <div class="h-screen bg-neutral-700 overflow-hidden flex flex-col">
     <!-- Header -->
     <header class="sticky top-0 z-50 h-14 bg-gradient-to-b from-neutral-900 to-neutral-800 shadow border-b border-neutral-700">
       <div class="h-full px-6 flex items-center justify-between">
@@ -59,7 +59,7 @@ function goTransportModels()
     </header>
 
     <!-- Page -->
-    <main class="w-full px-6 py-6">
+    <main class="w-full px-6 py-6 flex-1 min-h-0 overflow-hidden">
       <router-view />
     </main>
   </div>
