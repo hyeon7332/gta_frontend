@@ -8,8 +8,61 @@
           <div class="border border-neutral-700 rounded-md overflow-hidden">
             <!-- toolbar -->
             <div class="relative flex items-center justify-between px-3 py-2 bg-neutral-900/30 border-b border-neutral-700">
-              <div class="text-[13px] text-neutral-200 font-medium">
-                필터 예정
+              
+              <div ref="garageFilterRef" class="relative flex items-center gap-2 min-w-0">
+                <button
+                  type="button"
+                  class="h-8 min-w-[180px] max-w-[260px] px-3
+                        flex items-center justify-between gap-2
+                        rounded-md
+                        bg-neutral-800/60
+                        border border-neutral-600
+                        text-[13px] text-neutral-200
+                        hover:bg-neutral-700
+                        active:bg-neutral-600
+                        transition"
+                  @click="showGarageFilterDropdown = !showGarageFilterDropdown"
+                >
+                  <span class="truncate">{{ selectedGarageFilterLabel }}</span>
+                  <span class="text-[11px] text-neutral-400">▼</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="h-8 w-8 flex items-center justify-center
+                        rounded-md
+                        bg-neutral-800/60
+                        border border-neutral-600
+                        text-neutral-200
+                        hover:bg-neutral-700
+                        active:bg-neutral-600
+                        transition"
+                  @click="selectedGarageIds = []"
+                >
+                  <RotateCcw class="w-4 h-4" />
+                </button>
+
+                <div
+                  v-if="showGarageFilterDropdown"
+                  class="absolute left-0 top-full mt-2 z-30
+                        w-[260px] max-h-[280px] overflow-y-auto
+                        rounded-md border border-neutral-600
+                        bg-neutral-900 shadow-lg"
+                >
+                  <label
+                    v-for="garage in garageFilterOptions.filter((item) => item.garageId !== 'all')"
+                    :key="garage.garageId"
+                    class="flex items-center gap-2 px-3 py-2 text-[13px] text-neutral-200 hover:bg-neutral-800 cursor-pointer"
+                  >
+                    <input
+                      :checked="selectedGarageIds.includes(String(garage.garageId))"
+                      type="checkbox"
+                      class="h-4 w-4"
+                      @change="toggleGarageFilter(garage.garageId)"
+                    />
+                    <span class="truncate">{{ garage.garageName }}</span>
+                  </label>
+                </div>
               </div>
 
               <!-- toast -->
@@ -124,9 +177,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { http } from '@/api/http'
-import { Plus } from 'lucide-vue-next'
+import { Plus, RotateCcw  } from 'lucide-vue-next'
 import OwnedTransportModal from '@/components/OwnedTransportModal.vue'
 
 // list state
@@ -139,6 +192,53 @@ const garageList = ref([])
 const showModal = ref(false)
 const modalMode = ref('create') // create | edit
 const editTarget = ref(null)
+
+const selectedGarageIds = ref([])
+const showGarageFilterDropdown = ref(false)
+const garageFilterRef = ref(null)
+
+function extractList(data)
+{
+  return (
+    (Array.isArray(data?.items) && data.items) ||
+    (Array.isArray(data?.list) && data.list) ||
+    (Array.isArray(data?.content) && data.content) ||
+    (Array.isArray(data?.data) && data.data) ||
+    (Array.isArray(data) && data) ||
+    []
+  )
+}
+
+function handleClickOutside(e)
+{
+  if (!showGarageFilterDropdown.value) {
+    return
+  }
+
+  const el = garageFilterRef.value
+
+  if (!el) {
+    return
+  }
+
+  if (!el.contains(e.target)) {
+    showGarageFilterDropdown.value = false
+  }
+}
+
+function toggleGarageFilter(garageId)
+{
+  const targetId = String(garageId)
+  const exists = selectedGarageIds.value.includes(targetId)
+
+  if (exists) {
+    selectedGarageIds.value = selectedGarageIds.value.filter((id) => {
+      return id !== targetId
+    })
+  } else {
+    selectedGarageIds.value = [...selectedGarageIds.value, targetId]
+  }
+}
 
 function openCreateModal()
 {
@@ -174,6 +274,14 @@ function showToast(text)
     toast.value.open = false
   }, 3000)
 }
+
+onUnmounted(() =>
+{
+  if (toastTimer) {
+    clearTimeout(toastTimer)
+    toastTimer = null
+  }
+})
 
 async function handleCreated(payload)
 {
@@ -267,8 +375,6 @@ const slotRows = computed(() => {
           name: '-',
           category: '-',
           decal: '-',
-          price: null,
-          releaseDate: '-',
           isEmpty: true
         })
       }
@@ -278,14 +384,54 @@ const slotRows = computed(() => {
   return result
 })
 
+const filteredSlotRows = computed(() => {
+  if (selectedGarageIds.value.length === 0) {
+    return slotRows.value
+  }
+
+  return slotRows.value.filter((row) => {
+    return selectedGarageIds.value.includes(String(row.garageId))
+  })
+})
+
 const displayRows = computed(() => {
   const minRows = 15
-  const emptyCount = Math.max(0, minRows - slotRows.value.length)
+  const emptyCount = Math.max(0, minRows - filteredSlotRows.value.length)
 
   return [
-    ...slotRows.value,
+    ...filteredSlotRows.value,
     ...Array.from({ length: emptyCount }, () => null)
   ]
+})
+
+const garageFilterOptions = computed(() => {
+  return [
+    { garageId: 'all', garageName: '전체' },
+    ...garageList.value.map((garage) => ({
+      garageId: String(garage.garageId),
+      garageName: garage.garageName
+    }))
+  ]
+})
+
+const selectedGarageFilterLabel = computed(() => {
+  if (selectedGarageIds.value.length === 0) {
+    return '전체'
+  }
+
+  const selectedOptions = garageFilterOptions.value.filter((garage) => {
+    return garage.garageId !== 'all' && selectedGarageIds.value.includes(String(garage.garageId))
+  })
+
+  if (selectedOptions.length === 0) {
+    return '전체'
+  }
+
+  if (selectedOptions.length === 1) {
+    return selectedOptions[0].garageName
+  }
+
+  return `${selectedOptions[0].garageName} 외 ${selectedOptions.length - 1}`
 })
 
 // api: list
@@ -294,14 +440,7 @@ async function load()
   try {
     const res = await http.get('/api/owned-transports')
     const data = res.data
-
-    const list =
-      (Array.isArray(data?.items) && data.items) ||
-      (Array.isArray(data?.list) && data.list) ||
-      (Array.isArray(data?.content) && data.content) ||
-      (Array.isArray(data?.data) && data.data) ||
-      (Array.isArray(data) && data) ||
-      []
+    const list = extractList(data)
 
     rows.value = list.map((x) => ({
       id: x.id ?? x.ownedTransportId ?? x.ownedId ?? x.transportId,
@@ -329,14 +468,7 @@ async function loadTransportModels()
   try {
     const res = await http.get('/api/transport-models')
     const data = res.data
-
-    const list =
-      (Array.isArray(data?.items) && data.items) ||
-      (Array.isArray(data?.list) && data.list) ||
-      (Array.isArray(data?.content) && data.content) ||
-      (Array.isArray(data?.data) && data.data) ||
-      (Array.isArray(data) && data) ||
-      []
+    const list = extractList(data)
 
     transportList.value = list
   } catch (err) {
@@ -351,14 +483,7 @@ async function loadGarages()
   try {
     const res = await http.get('/api/garages')
     const data = res.data
-
-    const list =
-      (Array.isArray(data?.items) && data.items) ||
-      (Array.isArray(data?.list) && data.list) ||
-      (Array.isArray(data?.content) && data.content) ||
-      (Array.isArray(data?.data) && data.data) ||
-      (Array.isArray(data) && data) ||
-      []
+    const list = extractList(data)
 
     garageList.value = list.map((x) => ({
       garageId: x.garageId ?? x.id ?? x.garage_id,
@@ -376,5 +501,11 @@ onMounted(() => {
   load()
   loadTransportModels()
   loadGarages()
+
+  document.addEventListener('mousedown', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('mousedown', handleClickOutside)
 })
 </script>
