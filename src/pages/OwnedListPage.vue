@@ -138,12 +138,20 @@
                   <tr
                     v-for="(row, index) in displayRows"
                     :key="row ? row.id : `empty-${index}`"
+                    :draggable="canDragRow(row)"
                     :class="[
                       'h-[40px]',
                       row && row.type === 'slot' && !row.isEmpty ? 'hover:bg-neutral-700/40 transition cursor-pointer' : '',
-                      row && row.type === 'slot' && row.isEmpty ? 'text-neutral-500' : ''
+                      row && row.type === 'slot' && row.isEmpty ? 'text-neutral-500' : '',
+                      draggingRow && row && row.type === 'slot' && row.isEmpty ? 'hover:bg-neutral-700/20' : '',
+                      isDropTarget(row) ? 'bg-green-900/20' : '',
+                      draggingRow && row && draggingRow.ownedId === row.id ? 'opacity-50' : ''
                     ]"
                     @dblclick="row && row.type === 'slot' && !row.isEmpty && openEdit(row)"
+                    @dragstart="handleDragStart(row)"
+                    @dragend="handleDragEnd"
+                    @dragover="handleDragOver($event, row)"
+                    @drop="handleDrop(row)"
                   >
                     <!-- 차고 헤더 -->
                     <template v-if="row && row.type === 'garageHeader'">
@@ -214,6 +222,10 @@ import OwnedTransportModal from '@/components/OwnedTransportModal.vue'
 
 // list state
 const rows = ref([])
+
+const draggingRow = ref(null)
+const dropLoading = ref(false)
+const activeDropSlotKey = ref('')
 
 // options for modal
 const transportList = ref([])
@@ -374,6 +386,128 @@ async function handleUpdate(payload)
   } catch (err) {
     console.error('수정 실패:', err)
     showToast('수정 실패')
+  }
+}
+
+function canDragRow(row)
+{
+  return !!row && row.type === 'slot' && !row.isEmpty
+}
+
+function canDropToRow(row)
+{
+  return !!row && row.type === 'slot' && row.isEmpty
+}
+
+function getSlotKey(row)
+{
+  if (!row) {
+    return ''
+  }
+
+  return `${row.garageId}-${row.slot}`
+}
+
+function isDropTarget(row)
+{
+  if (!draggingRow.value) {
+    return false
+  }
+
+  if (dropLoading.value) {
+    return false
+  }
+
+  if (!canDropToRow(row)) {
+    return false
+  }
+
+  return activeDropSlotKey.value === getSlotKey(row)
+}
+
+function handleDragStart(row)
+{
+  if (!canDragRow(row)) {
+    return
+  }
+
+  draggingRow.value = {
+    ownedId: row.id,
+    garageId: row.garageId,
+    slotNo: row.slot,
+    decal: row.decal ?? '-'
+  }
+}
+
+function handleDragEnd()
+{
+  draggingRow.value = null
+  activeDropSlotKey.value = ''
+}
+
+function handleDragOver(e, row)
+{
+  if (dropLoading.value) {
+    return
+  }
+
+  if (!draggingRow.value) {
+    return
+  }
+
+  if (!canDropToRow(row)) {
+    activeDropSlotKey.value = ''
+    return
+  }
+
+  activeDropSlotKey.value = getSlotKey(row)
+  e.preventDefault()
+}
+
+async function handleDrop(row)
+{
+  if (dropLoading.value) {
+    return
+  }
+
+  if (!draggingRow.value) {
+    return
+  }
+
+  if (!canDropToRow(row)) {
+    return
+  }
+
+  const source = draggingRow.value
+  const targetGarageId = row.garageId
+  const targetSlotNo = row.slot
+
+  if (
+    Number(source.garageId) === Number(targetGarageId) &&
+    Number(source.slotNo) === Number(targetSlotNo)
+  ) {
+    draggingRow.value = null
+    return
+  }
+
+  try {
+    dropLoading.value = true
+
+    await http.patch(`/api/owned-transports/${source.ownedId}`, {
+      decal: source.decal,
+      garageId: targetGarageId,
+      slotNo: targetSlotNo
+    })
+
+    showToast('슬롯 이동 완료')
+    await load()
+  } catch (err) {
+    console.error('슬롯 이동 실패:', err)
+    showToast('슬롯 이동 실패')
+  } finally {
+    draggingRow.value = null
+    activeDropSlotKey.value = ''
+    dropLoading.value = false
   }
 }
 
