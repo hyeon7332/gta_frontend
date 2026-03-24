@@ -501,6 +501,21 @@ function handleDocumentClick(e)
 
 async function handleSave()
 {
+  if (!form.manufacturer || form.manufacturer.trim() === '') {
+    alert('제조사는 필수입니다.')
+    return
+  }
+
+  if (!form.name || form.name.trim() === '') {
+    alert('모델명은 필수입니다.')
+    return
+  }
+
+  if (!form.transportCategory || form.transportCategory.trim() === '') {
+    alert('분류는 필수입니다.')
+    return
+  }
+  
   try {
     const payload = {
       manufacturer: form.manufacturer,
