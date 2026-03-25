@@ -147,7 +147,7 @@
                       isDropTarget(row) ? 'bg-green-900/20' : '',
                       draggingRow && row && draggingRow.ownedId === row.id ? 'opacity-50' : ''
                     ]"
-                    @dblclick="row && row.type === 'slot' && !row.isEmpty && openEdit(row)"
+                    @dblclick="handleSlotDoubleClick(row)"
                     @dragstart="handleDragStart(row)"
                     @dragend="handleDragEnd"
                     @dragover="handleDragOver($event, row)"
@@ -171,7 +171,7 @@
                       <td class="px-3 py-2 border-b border-neutral-700">{{ row.name }}</td>
                       <td class="px-3 py-2 border-b border-neutral-700">{{ row.category }}</td>
                       <td class="px-3 py-2 border-b border-neutral-700">
-                        {{ row.decal }}
+                        {{ row.decal || '-' }}
                       </td>
                     </template>
 
@@ -184,7 +184,7 @@
                       <td class="h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle">{{ row.name }}</td>
                       <td class="h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle">{{ row.category }}</td>
                       <td class="h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle">
-                        {{ row.decal }}
+                        {{ row.decal || '-' }}
                       </td>
                     </template>
 
@@ -312,6 +312,42 @@ function openEdit(row)
   showModal.value = true
 }
 
+function handleSlotDoubleClick(row)
+{
+  if (!row) {
+    return
+  }
+
+  if (row.type === 'garageHeader') {
+    return
+  }
+
+  // 미배치 차량 → 수정 모달
+  if (row.type === 'unassigned') {
+    openEdit(row)
+    return
+  }
+
+  // 일반 슬롯만 아래 정책 적용
+  if (row.type !== 'slot') {
+    return
+  }
+
+  // 빈 슬롯 → 추가 모달
+  if (row.isEmpty) {
+    modalMode.value = 'create'
+    editTarget.value = {
+      garageId: row.garageId,
+      slotNo: row.slot
+    }
+    showModal.value = true
+    return
+  }
+
+  // 차량 있는 슬롯 → 수정 모달
+  openEdit(row)
+}
+
 // toast
 const toast = ref({ open: false, text: '' })
 let toastTimer = null
@@ -435,7 +471,7 @@ function handleDragStart(row)
     ownedId: row.id,
     garageId: row.garageId,
     slotNo: row.slot,
-    decal: row.decal ?? '-'
+    decal: row.decal ?? ''
   }
 }
 
@@ -657,7 +693,7 @@ async function load()
       manufacturer: x.manufacturer ?? x.maker ?? x.brand ?? x.manufacturerName ?? '-',
       name: x.name ?? x.modelName ?? x.transportName ?? '-',
       category: x.category ?? x.transportCategory ?? x.className ?? x.class ?? '-',
-      decal: x.decal ?? '-',
+      decal: x.decal ?? '',
       price: x.price ?? x.priceNumber ?? x.cost ?? null,
       releaseDate: x.releaseDate ?? x.release_date ?? '-'
     }))

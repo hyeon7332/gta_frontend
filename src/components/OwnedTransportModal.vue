@@ -310,7 +310,10 @@ watch(() => props.open, async (v) => {
 
     if (isEditMode.value) {
 
-      decal.value = props.initialRow?.decal ?? ''
+      const currentDecal = props.initialRow?.decal
+      decal.value = currentDecal && currentDecal !== '-'
+        ? String(currentDecal).trim()
+        : ''
 
       const g = props.initialRow?.garage
       const s = props.initialRow?.slot
@@ -373,6 +376,31 @@ watch(() => props.open, async (v) => {
       slotQuery.value = ''
       currentSlotNo.value = null
       occupiedSlotList.value = []
+
+      const presetGarageId = props.initialRow?.garageId ?? null
+      const presetSlotNo = props.initialRow?.slotNo ?? props.initialRow?.slot ?? null
+
+      if (presetGarageId) {
+        const matched = Array.isArray(props.garageList)
+          ? props.garageList.find((garage) => {
+              return Number(garage?.garageId) === Number(presetGarageId)
+            })
+          : null
+
+        if (matched) {
+          selectedGarage.value = matched
+          selectedGarageId.value = matched.garageId
+          garageText.value = String(matched.garageName || '').trim()
+
+          await loadOccupiedSlots(matched.garageId)
+
+          if (Number.isFinite(Number(presetSlotNo)) && Number(presetSlotNo) > 0) {
+            slotNo.value = String(presetSlotNo)
+            slotNoText.value = String(presetSlotNo)
+            currentSlotNo.value = Number(presetSlotNo)
+          }
+        }
+      }
     }
 
     showTransportDropdown.value = false
