@@ -166,24 +166,24 @@
                     
                     <!-- 미배치 row -->
                     <template v-else-if="row && row.type === 'unassigned'">
-                      <td class="px-3 py-2 border-b border-neutral-700">-</td>
-                      <td class="px-3 py-2 border-b border-neutral-700">{{ row.manufacturer }}</td>
-                      <td class="px-3 py-2 border-b border-neutral-700">{{ row.name }}</td>
-                      <td class="px-3 py-2 border-b border-neutral-700">{{ row.category }}</td>
-                      <td class="px-3 py-2 border-b border-neutral-700">
+                      <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">-</td>
+                      <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
+                      <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">{{ row.name }}</td>
+                      <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">{{ row.category }}</td>
+                      <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">
                         {{ row.decal || '-' }}
                       </td>
                     </template>
 
                     <!-- 일반 슬롯 row -->
                     <template v-else-if="row">
-                      <td class="h-[40px] px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap align-middle">
+                      <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap align-middle', getRowHighlightClass(row)]">
                         {{ row.slot }}
                       </td>
-                      <td class="h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle">{{ row.manufacturer }}</td>
-                      <td class="h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle">{{ row.name }}</td>
-                      <td class="h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle">{{ row.category }}</td>
-                      <td class="h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle">
+                      <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
+                      <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.name }}</td>
+                      <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.category }}</td>
+                      <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">
                         {{ row.decal || '-' }}
                       </td>
                     </template>
@@ -215,7 +215,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { http } from '@/api/http'
 import { Plus, RotateCcw  } from 'lucide-vue-next'
 import OwnedTransportModal from '@/components/OwnedTransportModal.vue'
@@ -234,6 +234,9 @@ const garageList = ref([])
 const showModal = ref(false)
 const modalMode = ref('create') // create | edit
 const editTarget = ref(null)
+
+const activeRowKey = ref('')
+let activeRowTimer = null
 
 const selectedGarageIds = ref([])
 const showGarageFilterDropdown = ref(false)
@@ -312,6 +315,23 @@ function openEdit(row)
   showModal.value = true
 }
 
+watch(showModal, (isOpen) => {
+  if (!isOpen) {
+    activeRowKey.value = ''
+  }
+})
+
+function highlightRow(row)
+{
+  const key = getRowHighlightKey(row)
+
+  if (!key) {
+    return
+  }
+
+  activeRowKey.value = key
+}
+
 function handleSlotDoubleClick(row)
 {
   if (!row) {
@@ -321,6 +341,8 @@ function handleSlotDoubleClick(row)
   if (row.type === 'garageHeader') {
     return
   }
+
+  highlightRow(row)
 
   // 미배치 차량 → 수정 모달
   if (row.type === 'unassigned') {
@@ -380,6 +402,7 @@ async function handleCreated(payload)
 
     showModal.value = false
     editTarget.value = null
+    activeRowKey.value = ''
 
     showToast('등록 완료')
 
@@ -398,6 +421,8 @@ async function handleDelete(id)
     showToast('삭제 완료')
     showModal.value = false
     editTarget.value = null
+    activeRowKey.value = ''
+
     await load()
   } catch (err) {
     console.error('삭제 실패:', err)
@@ -417,6 +442,7 @@ async function handleUpdate(payload)
     showToast('수정 완료')
     showModal.value = false
     editTarget.value = null
+    activeRowKey.value = ''
 
     await load()
   } catch (err) {
@@ -442,6 +468,30 @@ function getSlotKey(row)
   }
 
   return `${row.garageId}-${row.slot}`
+}
+
+function getRowHighlightKey(row)
+{
+  if (!row) {
+    return ''
+  }
+
+  if (row.type === 'slot') {
+    return `slot-${row.garageId}-${row.slot}`
+  }
+
+  if (row.type === 'unassigned') {
+    return `unassigned-${row.id}`
+  }
+
+  return ''
+}
+
+function getRowHighlightClass(row)
+{
+  return getRowHighlightKey(row) === activeRowKey.value
+    ? 'bg-blue-900/40'
+    : ''
 }
 
 function isDropTarget(row)
@@ -750,5 +800,10 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('mousedown', handleClickOutside)
+
+  if (activeRowTimer) {
+    clearTimeout(activeRowTimer)
+    activeRowTimer = null
+  }
 })
 </script>
