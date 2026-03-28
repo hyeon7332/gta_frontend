@@ -168,7 +168,19 @@
                     <template v-else-if="row && row.type === 'unassigned'">
                       <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">-</td>
                       <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
-                      <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">{{ row.name }}</td>
+                      <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">
+                        <div class="flex items-baseline gap-1.5 min-w-0">
+                          <span
+                            v-if="getUpgradeTypeDisplayText(row.upgradeType)"
+                            class="text-[10px] text-neutral-400 shrink-0"
+                          >
+                            {{ getUpgradeTypeDisplayText(row.upgradeType) }}
+                          </span>
+                          <span class="truncate">
+                            {{ row.name }}
+                          </span>
+                        </div>
+                      </td>
                       <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">{{ row.category }}</td>
                       <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">
                         {{ row.decal || '-' }}
@@ -181,7 +193,19 @@
                         {{ row.slot }}
                       </td>
                       <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
-                      <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.name }}</td>
+                      <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 align-middle', getRowHighlightClass(row)]">
+                        <div class="flex items-baseline gap-1.5 min-w-0">
+                          <span
+                            v-if="getUpgradeTypeDisplayText(row.upgradeType)"
+                            class="text-[10px] text-neutral-400 shrink-0"
+                          >
+                            {{ getUpgradeTypeDisplayText(row.upgradeType) }}
+                          </span>
+                          <span class="truncate">
+                            {{ row.name }}
+                          </span>
+                        </div>
+                      </td>
                       <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.category }}</td>
                       <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">
                         {{ row.decal || '-' }}
@@ -242,6 +266,13 @@ const selectedGarageIds = ref([])
 const showGarageFilterDropdown = ref(false)
 const garageFilterRef = ref(null)
 
+const upgradeTypeDisplayMap = {
+  'HSW': 'HSW',
+  '드리프트': 'Drift',
+  '아레나': 'Arena',
+  '베니즈 커스텀': "Benny's"
+}
+
 function extractList(data)
 {
   return (
@@ -295,6 +326,34 @@ function toggleGarageFilter(garageId)
     })
     selectedGarageIds.value = [...selectedGarageIds.value, targetId]
   }
+}
+
+function getUpgradeTypeDisplayText(upgradeType)
+{
+  if (!upgradeType || upgradeType.trim() === '') {
+    return ''
+  }
+
+  const labels = upgradeType
+    .split(',')
+    .map((item) => {
+      return item.trim()
+    })
+    .filter((item) => {
+      return item !== ''
+    })
+    .map((item) => {
+      return upgradeTypeDisplayMap[item] ?? ''
+    })
+    .filter((item) => {
+      return item !== ''
+    })
+
+  if (labels.length === 0) {
+    return ''
+  }
+
+  return labels.join(' / ')
 }
 
 function openCreateModal()
@@ -458,7 +517,7 @@ function canDragRow(row)
 
 function canDropToRow(row)
 {
-  return !!row && row.type === 'slot' && row.isEmpty
+  return !!row && row.type === 'slot'
 }
 
 function getSlotKey(row)
@@ -573,23 +632,36 @@ async function handleDrop(row)
     Number(source.slotNo) === Number(targetSlotNo)
   ) {
     draggingRow.value = null
+    activeDropSlotKey.value = ''
     return
   }
 
   try {
     dropLoading.value = true
 
-    await http.patch(`/api/owned-transports/${source.ownedId}`, {
-      decal: source.decal,
-      garageId: targetGarageId,
-      slotNo: targetSlotNo
-    })
+    // 1) 빈 슬롯으로 이동
+    if (row.isEmpty) {
+      await http.patch(`/api/owned-transports/${source.ownedId}`, {
+        decal: source.decal,
+        garageId: targetGarageId,
+        slotNo: targetSlotNo
+      })
 
-    showToast('슬롯 이동 완료')
+      showToast('슬롯 이동 완료')
+    } else {
+      // 2) 차량 있는 슬롯과 자리 교체
+      await http.patch('/api/owned-transports/swap', {
+        sourceOwnedId: source.ownedId,
+        targetOwnedId: row.id
+      })
+
+      showToast('슬롯 교체 완료')
+    }
+
     await load()
   } catch (err) {
-    console.error('슬롯 이동 실패:', err)
-    showToast('슬롯 이동 실패')
+    console.error('슬롯 처리 실패:', err)
+    showToast('슬롯 처리 실패')
   } finally {
     draggingRow.value = null
     activeDropSlotKey.value = ''
@@ -742,6 +814,7 @@ async function load()
 
       manufacturer: x.manufacturer ?? x.maker ?? x.brand ?? x.manufacturerName ?? '-',
       name: x.name ?? x.modelName ?? x.transportName ?? '-',
+      upgradeType: x.upgradeType ?? x.upgrade_type ?? '',
       category: x.category ?? x.transportCategory ?? x.className ?? x.class ?? '-',
       decal: x.decal ?? '',
       price: x.price ?? x.priceNumber ?? x.cost ?? null,

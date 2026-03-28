@@ -95,8 +95,7 @@
                     <th class="px-3 py-2 text-left w-[70px] border-b border-r border-neutral-700">기어</th>
                     <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">구동방식</th>
                     <th class="px-3 py-2 text-left w-[70px] border-b border-r border-neutral-700">좌석</th>
-                    <th class="px-3 py-2 text-left w-[380px] border-b border-neutral-700">특징</th>
-                    <th class="px-3 py-2 text-left w-[380px] border-b border-r border-neutral-700">성능</th>
+                    <th class="px-3 py-2 text-left w-[720px] border-b border-r border-neutral-700">특징</th>
                   </tr>
                 </thead>
 
@@ -164,18 +163,11 @@
                       >
                         {{ displayValue(row.features) }}
                       </td>
-
-                      <td
-                        class="px-3 py-2 text-left border-b border-neutral-700 truncate"
-                        :title="displayValue(row.performance)"
-                      >
-                        {{ displayValue(row.performance) }}
-                      </td>
                       
                     </template>
 
                     <template v-else>
-                      <td colspan="16" class="h-[40px]"></td>
+                      <td colspan="15" class="h-[40px]"></td>
                     </template>
                   </tr>
                 </tbody>

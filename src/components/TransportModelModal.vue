@@ -205,27 +205,6 @@
               </div>
             </div>
           </div>
-          
-          <div class="col-span-2">
-            <label class="block mb-2 text-sm text-neutral-300">성능</label>
-
-            <div class="rounded-md border border-neutral-700 bg-neutral-800/50 p-3">
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-2">
-                <label
-                  v-for="option in performanceOptions"
-                  :key="option"
-                  class="flex items-center gap-2 min-w-0 text-sm text-neutral-200 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    :checked="selectedPerformanceOptions.includes(option)"
-                    @change="togglePerformance(option)"
-                  />
-                  <span class="break-words">{{ option }}</span>
-                </label>
-              </div>
-            </div>
-          </div>
 
         </div>
 
@@ -264,7 +243,6 @@ import { transportCategoryOptions } from '@/constants/transportCategoryOptions'
 import { upgradeTypeOptions } from '@/constants/upgradeTypeOptions'
 import { upgradeLocationOptions } from '@/constants/upgradeLocationOptions'
 import { transportSourceOptions } from '@/constants/transportSourceOptions'
-import { performanceOptions } from '@/constants/performanceOptions'
 import { featureOptions } from '@/constants/featureOptions'
 
 const props = defineProps({
@@ -303,7 +281,6 @@ const form = reactive({
   driveGears: '',
   driveTrain: '',
   seats: '',
-  performance: '',
   features: ''
 })
 
@@ -313,7 +290,6 @@ const showUpgradeLocationDropdown = ref(false)
 const selectedUpgradeLocations = ref([])
 const upgradeTypeBoxRef = ref(null)
 const upgradeLocationBoxRef = ref(null)
-const selectedPerformanceOptions = ref([])
 const selectedFeatureOptions = ref([])
 
 const upgradeLabel = computed(() => {
@@ -362,17 +338,6 @@ function toggleUpgradeLocation(location)
   }
 }
 
-function togglePerformance(option)
-{
-  const index = selectedPerformanceOptions.value.indexOf(option)
-
-  if (index === -1) {
-    selectedPerformanceOptions.value.push(option)
-  } else {
-    selectedPerformanceOptions.value.splice(index, 1)
-  }
-}
-
 function toggleFeature(option)
 {
   const index = selectedFeatureOptions.value.indexOf(option)
@@ -400,12 +365,10 @@ function resetForm()
   form.driveGears = ''
   form.driveTrain = ''
   form.seats = ''
-  form.performance = ''
   form.features = ''
 
   selectedUpgradeTypes.value = []
   selectedUpgradeLocations.value = []
-  selectedPerformanceOptions.value = []
   selectedFeatureOptions.value = []
   showUpgradeDropdown.value = false
   showUpgradeLocationDropdown.value = false
@@ -427,7 +390,6 @@ function fillForm()
   form.driveGears = props.model?.driveGears ?? ''
   form.driveTrain = props.model?.driveTrain ?? ''
   form.seats = props.model?.seats ?? ''
-  form.performance = props.model?.performance ?? ''
   form.features = props.model?.features ?? ''
 
   selectedUpgradeTypes.value = form.upgradeType
@@ -437,10 +399,6 @@ function fillForm()
   selectedUpgradeLocations.value = form.upgradeLocation
     ? form.upgradeLocation.split(',').map(v => v.trim())
     : []  
-
-  selectedPerformanceOptions.value = form.performance
-    ? form.performance.split(',').map(v => v.trim())
-    : []
 
   selectedFeatureOptions.value = form.features
     ? form.features.split(',').map(v => v.trim())
@@ -543,12 +501,6 @@ async function handleSave()
       driveGears: form.driveGears === '' ? null : Number(form.driveGears),
       driveTrain: form.driveTrain,
       seats: form.seats === '' ? null : Number(form.seats),
-
-      performance: performanceOptions
-        .filter((option) => {
-          return selectedPerformanceOptions.value.includes(option)
-        })
-        .join(', '),
 
       features: featureOptions
         .filter((option) => {
