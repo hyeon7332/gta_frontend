@@ -220,6 +220,36 @@
               </table>
             </div>
 
+            <!-- footer -->
+            <div
+              class="flex items-center justify-between px-3 py-2
+                    bg-neutral-900/30 border-t border-neutral-700
+                    text-[13px] text-neutral-300"
+            >
+              <div class="tabular-nums">
+                총 
+                <span class="font-semibold text-white">
+                  {{ totalSlotCount }}
+                </span>
+                칸 중
+                <span
+                  class="font-semibold"
+                  :class="
+                    totalSlotCount === 0
+                      ? 'text-neutral-400'
+                      : usedSlotCount / totalSlotCount > 0.8
+                      ? 'text-red-400'
+                      : usedSlotCount / totalSlotCount > 0.5
+                      ? 'text-yellow-400'
+                      : 'text-green-400'
+                  "
+                >
+                  {{ usedSlotCount }}
+                </span>
+                칸 사용중
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -797,6 +827,30 @@ const selectedGarageFilterLabel = computed(() => {
   }
 
   return `${selectedOptions[0].garageName} 외 ${selectedOptions.length - 1}`
+})
+
+const totalSlotCount = computed(() => {
+  return garageList.value.reduce((sum, garage) => {
+    return sum + Number(garage.slotCount ?? 0)
+  }, 0)
+})
+
+const usedSlotCount = computed(() => {
+  const occupiedSlotKeys = new Set()
+
+  rows.value.forEach((row) => {
+    if (!row.garageId || !row.slot) {
+      return
+    }
+
+    occupiedSlotKeys.add(`${row.garageId}-${row.slot}`)
+  })
+
+  return occupiedSlotKeys.size
+})
+
+const garageFooterText = computed(() => {
+  return `총 ${totalSlotCount.value}칸 중 ${usedSlotCount.value}칸 사용중`
 })
 
 // api: list
