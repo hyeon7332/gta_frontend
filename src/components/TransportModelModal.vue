@@ -64,35 +64,18 @@
             </select>
           </div>
 
-          <div ref="upgradeTypeBoxRef" class="relative">
+          <div>
             <label class="block mb-1 text-sm text-neutral-300">개조 유형</label>
-
-            <div
-              class="input-style flex items-center cursor-pointer"
-              @click="showUpgradeDropdown = !showUpgradeDropdown"
-            >
-              <span class="truncate">
-                {{ upgradeLabel || '선택하세요' }}
-              </span>
-            </div>
-
-            <div
-              v-if="showUpgradeDropdown"
-              class="absolute left-0 right-0 mt-1 bg-neutral-800 border border-neutral-700 rounded-md z-20 p-2"
-            >
-              <label
+            <select v-model="form.upgradeType" class="input-style">
+              <option value="">선택하세요</option>
+              <option
                 v-for="type in upgradeTypeOptions"
                 :key="type"
-                class="flex items-center gap-2 px-2 py-1 text-sm text-neutral-200 hover:bg-neutral-700 rounded cursor-pointer"
+                :value="type"
               >
-                <input
-                  type="checkbox"
-                  :checked="selectedUpgradeTypes.includes(type)"
-                  @change="toggleUpgrade(type)"
-                />
                 {{ type }}
-              </label>
-            </div>
+              </option>
+            </select>
           </div>
 
           <div ref="upgradeLocationBoxRef" class="relative">
@@ -284,25 +267,10 @@ const form = reactive({
   features: ''
 })
 
-const showUpgradeDropdown = ref(false)
-const selectedUpgradeTypes = ref([])
 const showUpgradeLocationDropdown = ref(false)
 const selectedUpgradeLocations = ref([])
-const upgradeTypeBoxRef = ref(null)
 const upgradeLocationBoxRef = ref(null)
 const selectedFeatureOptions = ref([])
-
-const upgradeLabel = computed(() => {
-  if (selectedUpgradeTypes.value.length === 0) {
-    return ''
-  }
-
-  const sorted = upgradeTypeOptions.filter((type) => {
-    return selectedUpgradeTypes.value.includes(type)
-  })
-
-  return sorted.join(', ')
-})
 
 const upgradeLocationLabel = computed(() => {
   if (selectedUpgradeLocations.value.length === 0) {
@@ -315,17 +283,6 @@ const upgradeLocationLabel = computed(() => {
 
   return sorted.join(', ')
 })
-
-function toggleUpgrade(type)
-{
-  const index = selectedUpgradeTypes.value.indexOf(type)
-
-  if (index === -1) {
-    selectedUpgradeTypes.value.push(type)
-  } else {
-    selectedUpgradeTypes.value.splice(index, 1)
-  }
-}
 
 function toggleUpgradeLocation(location)
 {
@@ -479,12 +436,7 @@ async function handleSave()
       manufacturer: form.manufacturer,
       name: form.name,
       transportCategory: form.transportCategory,
-
-      upgradeType: upgradeTypeOptions
-        .filter((type) => {
-          return selectedUpgradeTypes.value.includes(type)
-        })
-        .join(', '),
+      upgradeType: form.upgradeType,
 
       upgradeLocation: upgradeLocationOptions
         .filter((location) => {
