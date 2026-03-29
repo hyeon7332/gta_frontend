@@ -525,12 +525,17 @@ async function handleSave()
     emit('saved')
     emit('close')
   } catch (err) {
+    const message =
+      err?.response?.data?.message ||
+      err?.response?.data ||
+      (isEditMode.value ? '수정에 실패했습니다.' : '등록에 실패했습니다.')
+
     if (isEditMode.value) {
       console.error('이동수단 모델 수정 실패:', err)
-      alert('수정에 실패했습니다.')
+      alert(message)
     } else {
       console.error('이동수단 모델 등록 실패:', err)
-      alert('등록에 실패했습니다.')
+      alert(message)
     }
   }
 }
