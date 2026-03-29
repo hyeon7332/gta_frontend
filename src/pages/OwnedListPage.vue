@@ -170,14 +170,14 @@
                       <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
                       <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">
                         <div class="flex items-baseline gap-1.5 min-w-0">
+                          <span class="truncate">
+                            {{ row.name }}
+                          </span>
                           <span
                             v-if="getUpgradeTypeDisplayText(row.upgradeType)"
                             class="text-[10px] text-neutral-400 shrink-0"
                           >
                             {{ getUpgradeTypeDisplayText(row.upgradeType) }}
-                          </span>
-                          <span class="truncate">
-                            {{ row.name }}
                           </span>
                         </div>
                       </td>
@@ -195,14 +195,14 @@
                       <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
                       <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 align-middle', getRowHighlightClass(row)]">
                         <div class="flex items-baseline gap-1.5 min-w-0">
+                          <span class="truncate">
+                            {{ row.name }}
+                          </span>
                           <span
                             v-if="getUpgradeTypeDisplayText(row.upgradeType)"
                             class="text-[10px] text-neutral-400 shrink-0"
                           >
                             {{ getUpgradeTypeDisplayText(row.upgradeType) }}
-                          </span>
-                          <span class="truncate">
-                            {{ row.name }}
                           </span>
                         </div>
                       </td>

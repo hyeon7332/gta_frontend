@@ -51,7 +51,7 @@
                            hover:bg-neutral-100"
                     @click="selectTransport(t)"
                   >
-                    {{ t.manufacturer }} {{ t.name }}
+                    {{ t.manufacturer }} {{ t.name }} {{ getUpgradeTypeDisplayText(t.upgradeType) }}
                   </button>
 
                 </div>
@@ -444,7 +444,7 @@ const filteredTransportList = computed(() => {
 
   return props.transportList.filter((t) => {
 
-    const name = `${t.manufacturer} ${t.name}`.toLowerCase()
+    const name = `${t.manufacturer} ${t.name} ${getUpgradeTypeDisplayText(t.upgradeType)}`.toLowerCase()
 
     return name.includes(kw)
   })
@@ -511,10 +511,33 @@ const slotOptions = computed(() => {
   return list
 })
 
+function getUpgradeTypeDisplayText(upgradeType)
+{
+  if (!upgradeType || upgradeType.trim() === '') {
+    return ''
+  }
+
+  const map = {
+    'HSW': 'HSW',
+    '드리프트': 'Drift',
+    '아레나': 'Arena',
+    '베니즈 커스텀': "Benny's"
+  }
+
+  const labels = upgradeType
+    .split(',')
+    .map(v => v.trim())
+    .filter(v => v !== '')
+    .map(v => map[v] ?? '')
+    .filter(v => v !== '')
+
+  return labels.join(' / ')
+}
+
 function selectTransport(t)
 {
   selectedTransport.value = t
-  transportDisplay.value = `${t.manufacturer} ${t.name}`
+  transportDisplay.value = `${t.manufacturer} ${t.name} ${getUpgradeTypeDisplayText(t.upgradeType)}`
   showTransportDropdown.value = false
 }
 
