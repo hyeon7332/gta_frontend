@@ -84,8 +84,8 @@
                     <th class="px-3 py-2 text-left w-[160px] border-b border-r border-neutral-700">제조사</th>
                     <th class="px-3 py-2 text-left w-[200px] border-b border-r border-neutral-700">모델명</th>
                     <th class="px-3 py-2 text-left w-[140px] border-b border-r border-neutral-700">분류</th>
-                    <th class="px-3 py-2 text-left w-[160px] border-b border-r border-neutral-700">개조유형</th>
-                    <th class="px-3 py-2 text-left w-[200px] border-b border-r border-neutral-700">개조위치</th>
+                    <th class="px-3 py-2 text-left w-[150px] border-b border-r border-neutral-700">개조유형</th>
+                    <th class="px-3 py-2 text-left w-[250px] border-b border-r border-neutral-700">개조위치</th>
                     <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">랩타임</th>
                     <th class="px-3 py-2 text-left w-[110px] border-b border-r border-neutral-700">최고속도</th>
                     <th class="px-3 py-2 text-left w-[120px] border-b border-r border-neutral-700">가격</th>
@@ -95,7 +95,7 @@
                     <th class="px-3 py-2 text-left w-[70px] border-b border-r border-neutral-700">기어</th>
                     <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">구동방식</th>
                     <th class="px-3 py-2 text-left w-[70px] border-b border-r border-neutral-700">좌석</th>
-                    <th class="px-3 py-2 text-left w-[720px] border-b border-r border-neutral-700">특징</th>
+                    <th class="px-3 py-2 text-left w-[680px] border-b border-r border-neutral-700">특징</th>
                   </tr>
                 </thead>
 
