@@ -11,10 +11,10 @@ import { http } from './http'
  */
 export function fetchOwnedList(params)
 {
-  return http.get('/api/owned-transports', { params })
+  return http.get('/owned-transports', { params })
 }
 
 export function deleteOwned(id)
 {
-  return http.delete(`/api/owned-transports/${id}`)
+  return http.delete(`/owned-transports/${id}`)
 }

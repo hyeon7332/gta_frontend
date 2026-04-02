@@ -487,7 +487,7 @@ onUnmounted(() =>
 async function handleCreated(payload)
 {
   try {
-    await http.post('/api/owned-transports', payload)
+    await http.post('/owned-transports', payload)
 
     showModal.value = false
     editTarget.value = null
@@ -506,7 +506,7 @@ async function handleCreated(payload)
 async function handleDelete(id)
 {
   try {
-    await http.delete(`/api/owned-transports/${id}`)
+    await http.delete(`/owned-transports/${id}`)
     showToast('삭제 완료')
     showModal.value = false
     editTarget.value = null
@@ -522,7 +522,7 @@ async function handleDelete(id)
 async function handleUpdate(payload)
 {
   try {
-    await http.patch(`/api/owned-transports/${payload.ownedId}`, {
+    await http.patch(`/owned-transports/${payload.ownedId}`, {
       decal: payload.decal,
       garageId: payload.garageId,
       slotNo: payload.slotNo
@@ -671,7 +671,7 @@ async function handleDrop(row)
 
     // 1) 빈 슬롯으로 이동
     if (row.isEmpty) {
-      await http.patch(`/api/owned-transports/${source.ownedId}`, {
+      await http.patch(`/owned-transports/${source.ownedId}`, {
         decal: source.decal,
         garageId: targetGarageId,
         slotNo: targetSlotNo
@@ -680,7 +680,7 @@ async function handleDrop(row)
       showToast('슬롯 이동 완료')
     } else {
       // 2) 차량 있는 슬롯과 자리 교체
-      await http.patch('/api/owned-transports/swap', {
+      await http.patch('/owned-transports/swap', {
         sourceOwnedId: source.ownedId,
         targetOwnedId: row.id
       })
@@ -857,7 +857,7 @@ const garageFooterText = computed(() => {
 async function load()
 {
   try {
-    const res = await http.get('/api/owned-transports')
+    const res = await http.get('/owned-transports')
     const list = Array.isArray(res.data) ? res.data : []
 
     rows.value = list.map((x) => ({
@@ -885,7 +885,7 @@ async function load()
 async function loadTransportModels()
 {
   try {
-    const res = await http.get('/api/transport-models/options')
+    const res = await http.get('/transport-models/options')
     const data = res.data
     const list = extractList(data)
 
@@ -900,7 +900,7 @@ async function loadTransportModels()
 async function loadGarages()
 {
   try {
-    const res = await http.get('/api/garages')
+    const res = await http.get('/garages')
     const data = res.data
     const list = extractList(data)
 

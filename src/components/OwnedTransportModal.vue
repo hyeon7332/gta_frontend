@@ -726,7 +726,7 @@ async function loadOccupiedSlots(garageId)
   }
 
   try {
-    const res = await http.get(`/api/garages/${garageId}/occupied-slots`)
+    const res = await http.get(`/garages/${garageId}/occupied-slots`)
     const data = res.data
 
     const list =

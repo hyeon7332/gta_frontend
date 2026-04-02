@@ -469,9 +469,9 @@ async function handleSave()
         return
       }
 
-      await http.put(`/api/transport-models/${modelId}`, payload)
+      await http.put(`/transport-models/${modelId}`, payload)
     } else {
-      await http.post('/api/transport-models', payload)
+      await http.post('/transport-models', payload)
     }
 
     emit('saved')

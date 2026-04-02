@@ -280,7 +280,7 @@ const pageNumbers = computed(() => {
 async function load()
 {
   try {
-    const res = await http.get('/api/transport-models', {
+    const res = await http.get('/transport-models', {
       params: {
         keyword: keyword.value,
         page: page.value,
