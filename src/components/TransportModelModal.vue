@@ -78,34 +78,36 @@
             </select>
           </div>
 
-          <div ref="upgradeLocationBoxRef" class="relative">
+          <div>
             <label class="block mb-1 text-sm text-neutral-300">개조 위치</label>
 
-            <div
-              class="input-style flex items-center cursor-pointer"
-              @click="showUpgradeLocationDropdown = !showUpgradeLocationDropdown"
-            >
-              <span class="truncate">
-                {{ upgradeLocationLabel || '선택하세요' }}
-              </span>
-            </div>
-
-            <div
-              v-if="showUpgradeLocationDropdown"
-              class="absolute left-0 right-0 mt-1 bg-neutral-800 border border-neutral-700 rounded-md z-20 p-2"
-            >
-              <label
-                v-for="location in upgradeLocationOptions"
-                :key="location"
-                class="flex items-center gap-2 px-2 py-1 text-sm text-neutral-200 hover:bg-neutral-700 rounded cursor-pointer"
+            <div ref="upgradeLocationBoxRef" class="relative">
+              <div
+                class="input-style flex items-center cursor-pointer"
+                @click="showUpgradeLocationDropdown = !showUpgradeLocationDropdown"
               >
-                <input
-                  type="checkbox"
-                  :checked="selectedUpgradeLocations.includes(location)"
-                  @change="toggleUpgradeLocation(location)"
-                />
-                {{ location }}
-              </label>
+                <span class="truncate">
+                  {{ upgradeLocationLabel || '선택하세요' }}
+                </span>
+              </div>
+
+              <div
+                v-if="showUpgradeLocationDropdown"
+                class="absolute left-0 right-0 mt-1 bg-neutral-800 border border-neutral-700 rounded-md z-20 p-2 max-h-80 overflow-y-auto"
+              >
+                <label
+                  v-for="location in upgradeLocationOptions"
+                  :key="location"
+                  class="flex items-center gap-2 px-2 py-1 text-sm text-neutral-200 hover:bg-neutral-700 rounded cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="selectedUpgradeLocations.includes(location)"
+                    @change="toggleUpgradeLocation(location)"
+                  />
+                  {{ location }}
+                </label>
+              </div>
             </div>
           </div>
 
@@ -324,10 +326,8 @@ function resetForm()
   form.seats = ''
   form.features = ''
 
-  selectedUpgradeTypes.value = []
   selectedUpgradeLocations.value = []
   selectedFeatureOptions.value = []
-  showUpgradeDropdown.value = false
   showUpgradeLocationDropdown.value = false
 }
 
@@ -349,10 +349,6 @@ function fillForm()
   form.seats = props.model?.seats ?? ''
   form.features = props.model?.features ?? ''
 
-  selectedUpgradeTypes.value = form.upgradeType
-    ? form.upgradeType.split(',').map(v => v.trim())
-    : []
-
   selectedUpgradeLocations.value = form.upgradeLocation
     ? form.upgradeLocation.split(',').map(v => v.trim())
     : []  
@@ -361,18 +357,12 @@ function fillForm()
     ? form.features.split(',').map(v => v.trim())
     : []
 
-  showUpgradeDropdown.value = false
   showUpgradeLocationDropdown.value = false
 }
 
 function handleEsc(e)
 {
   if (e.key !== 'Escape') {
-    return
-  }
-
-  if (showUpgradeDropdown.value) {
-    showUpgradeDropdown.value = false
     return
   }
 
@@ -395,14 +385,6 @@ function handleDocumentClick(e)
 
   if (!(target instanceof Node)) {
     return
-  }
-
-  if (
-    showUpgradeDropdown.value &&
-    upgradeTypeBoxRef.value &&
-    !upgradeTypeBoxRef.value.contains(target)
-  ) {
-    showUpgradeDropdown.value = false
   }
 
   if (
