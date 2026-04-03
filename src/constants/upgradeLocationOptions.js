@@ -5,6 +5,7 @@ export const upgradeLocationOptions = [
   "나이트클럽",
   "벙커",
   "베니즈 오리지널 모터웍스",
+  "보석 사무소",
   "봉제 공장",
   "사무소",
   "시설",
