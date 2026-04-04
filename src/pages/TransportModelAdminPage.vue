@@ -9,17 +9,33 @@
               class="flex items-center justify-between gap-3 px-3 py-2
                     bg-neutral-900/30 border-b border-neutral-700 overflow-hidden"
             >
-              <div class="flex items-center gap-2 min-w-0 flex-[0_1_360px]">
-                <input
-                  v-model="keyword"
-                  type="text"
-                  placeholder="제조사 또는 모델명 검색"
-                  class="h-8 min-w-0 flex-1 px-3 rounded-md
-                        bg-neutral-800/60 border border-neutral-600
-                        text-[13px] text-neutral-100 placeholder-neutral-400
-                        outline-none"
-                  @keyup.enter="applySearch"
-                />
+              <div class="flex items-center gap-2 min-w-0">
+                <div class="relative">
+                  <input
+                    v-model="keyword"
+                    type="text"
+                    placeholder="제조사 / 모델명 검색"
+                    class="h-8 w-[280px] pr-9 pl-3 rounded-md
+                          bg-neutral-800/60 border border-neutral-600
+                          text-[13px] text-neutral-100 placeholder-neutral-400
+                          outline-none"
+                    @keyup.enter="applySearch"
+                  />
+
+                  <button
+                    v-if="keyword.trim()"
+                    type="button"
+                    class="absolute right-2 top-1/2 -translate-y-1/2
+                          h-6 w-6 flex items-center justify-center
+                          rounded-md
+                          text-neutral-400 hover:text-neutral-200
+                          hover:bg-neutral-700/60
+                          transition"
+                    @click="clearKeyword"
+                  >
+                    <X class="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
                 <button
                   type="button"
@@ -85,7 +101,7 @@
                     <th class="px-3 py-2 text-left w-[200px] border-b border-r border-neutral-700">모델명</th>
                     <th class="px-3 py-2 text-left w-[140px] border-b border-r border-neutral-700">분류</th>
                     <th class="px-3 py-2 text-left w-[150px] border-b border-r border-neutral-700">개조유형</th>
-                    <th class="px-3 py-2 text-left w-[250px] border-b border-r border-neutral-700">개조위치</th>
+                    <th class="px-3 py-2 text-left w-[280px] border-b border-r border-neutral-700">개조위치</th>
                     <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">랩타임</th>
                     <th class="px-3 py-2 text-left w-[110px] border-b border-r border-neutral-700">최고속도</th>
                     <th class="px-3 py-2 text-left w-[120px] border-b border-r border-neutral-700">가격</th>
@@ -95,7 +111,7 @@
                     <th class="px-3 py-2 text-left w-[70px] border-b border-r border-neutral-700">기어</th>
                     <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">구동방식</th>
                     <th class="px-3 py-2 text-left w-[70px] border-b border-r border-neutral-700">좌석</th>
-                    <th class="px-3 py-2 text-left w-[680px] border-b border-r border-neutral-700">특징</th>
+                    <th class="px-3 py-2 text-left w-[650px] border-b border-r border-neutral-700">특징</th>
                   </tr>
                 </thead>
 
@@ -128,7 +144,7 @@
                         class="px-3 py-2 text-left border-b border-neutral-700 truncate"
                         :title="row.upgradeLocation"
                       >
-                        {{ displayValue(row.upgradeLocation) }}
+                        {{ displayUpgradeLocation(row.upgradeLocation) }}
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
@@ -240,7 +256,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { Plus } from 'lucide-vue-next'
+import { Plus, X } from 'lucide-vue-next'
 import { http } from '@/api/http'
 import TransportModelModal from '@/components/TransportModelModal.vue'
 
@@ -336,6 +352,11 @@ function applySearch()
 {
   page.value = 1
   load()
+}
+
+function clearKeyword()
+{
+  keyword.value = ''
 }
 
 function openAdd()
@@ -450,13 +471,13 @@ function openDelete()
 
 function handleDocumentClick(event)
 {
-  if (!selectedRow.value) {
-    return
-  }
-
   const target = event.target
 
   if (!(target instanceof Node)) {
+    return
+  }
+
+  if (!selectedRow.value) {
     return
   }
 
@@ -510,6 +531,15 @@ function displayValue(value)
 {
   if (value === null || value === undefined || value === '') {
     return '-'
+  }
+
+  return value
+}
+
+function displayUpgradeLocation(value)
+{
+  if (value === null || value === undefined || value === '') {
+    return '개조불가'
   }
 
   return value
