@@ -7,10 +7,11 @@ export function formatNumber(n)
   return num.toLocaleString()
 }
 
-export function formatDate(yyyyMmDd)
+export function formatDate(date)
 {
-  if (!yyyyMmDd) {
+  if (!date) {
     return '-'
   }
-  return String(yyyyMmDd)
+
+  return String(date).replace('T', ' ').substring(0, 16)
 }
