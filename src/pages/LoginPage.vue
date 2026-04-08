@@ -23,6 +23,7 @@
               <input
                 v-model="loginId"
                 type="text"
+                autocomplete="username"
                 placeholder="아이디 입력"
                 class="w-full h-10 px-3 rounded-md
                        bg-neutral-800/60 border border-neutral-600
@@ -40,6 +41,7 @@
               <input
                 v-model="password"
                 type="password"
+                autocomplete="current-password"
                 placeholder="비밀번호 입력"
                 class="w-full h-10 px-3 rounded-md
                        bg-neutral-800/60 border border-neutral-600
