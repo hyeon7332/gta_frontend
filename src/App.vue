@@ -60,7 +60,20 @@
         </div>
 
         <!-- right -->
-        <div v-if="isLoggedIn" class="ml-auto flex items-center">
+        <div v-if="isLoggedIn" class="ml-auto flex items-center gap-3 text-neutral-200 text-base">
+          <!-- 사용자 표시 -->
+          <div class="flex items-center gap-1 font-medium">
+            <template v-if="userRole === 'ADMIN'">
+              <span class="text-yellow-400 font-semibold">관리자</span>
+            </template>
+
+            <template v-else>
+              <span class="opacity-80">{{ nickname }}</span>
+              <span class="text-neutral-400">님</span>
+            </template>
+          </div>
+
+          <!-- 로그아웃 -->
           <button
             type="button"
             class="h-9 px-3 flex items-center gap-1.5 rounded-md
@@ -74,6 +87,7 @@
             <span>로그아웃</span>
           </button>
         </div>
+
       </div>
     </header>
 
@@ -93,11 +107,13 @@ const router = useRouter()
 const route = useRoute()
 const isLoggedIn = ref(!!localStorage.getItem('accessToken'))
 const userRole = ref(localStorage.getItem('userRole'))
+const nickname = ref(localStorage.getItem('nickname'))
 
 function updateAuthState()
 {
   isLoggedIn.value = !!localStorage.getItem('accessToken')
   userRole.value = localStorage.getItem('userRole')
+  nickname.value = localStorage.getItem('nickname')
 }
 
 function goHome()

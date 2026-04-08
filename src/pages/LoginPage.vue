@@ -137,6 +137,7 @@ async function handleLogin()
     localStorage.setItem('accessToken', token)
     localStorage.setItem('userId', String(data.userId))
     localStorage.setItem('userRole', data.role)
+    localStorage.setItem('nickname', data.nickname)
 
     window.dispatchEvent(new Event('auth-changed'))
 

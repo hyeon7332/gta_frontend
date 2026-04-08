@@ -907,7 +907,6 @@ async function loadGarages()
     garageList.value = list.map((x) => ({
       garageId: x.garageId ?? x.id ?? x.garage_id,
       garageName: x.garageName ?? x.name ?? x.garage ?? x.garage_name ?? '-',
-      type: x.type ?? x.garageType ?? '',
       slotCount: Number(x.slotCount ?? x.slot_count ?? x.totalSlots ?? x.capacity ?? 0)
     }))
   } catch (err) {
