@@ -213,11 +213,8 @@
 
   <teleport to="body">
     <div v-if="showDeleteConfirm" class="fixed inset-0 z-[60] flex items-center justify-center">
-
       <div class="absolute inset-0 bg-black/50"></div>
-
       <div class="relative w-[360px] bg-neutral-100 rounded-xl p-6 shadow-xl">
-
         <div class="text-lg font-semibold mb-3">
           삭제 확인
         </div>
@@ -227,7 +224,6 @@
         </div>
 
         <div class="flex justify-end gap-2">
-
           <button
             type="button"
             class="h-8 px-3 rounded-md border border-neutral-400 bg-neutral-200 text-sm"
@@ -243,11 +239,8 @@
           >
             삭제
           </button>
-
         </div>
-
       </div>
-
     </div>
   </teleport>
 </template>

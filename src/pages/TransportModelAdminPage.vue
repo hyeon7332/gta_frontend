@@ -7,7 +7,7 @@
             <!-- toolbar -->
             <div
               class="flex items-center justify-between gap-3 px-3 py-2
-                    bg-neutral-900/30 border-b border-neutral-700 overflow-hidden"
+                    bg-neutral-900/30 border-b border-neutral-700"
             >
               <div class="flex items-center gap-2 min-w-0">
                 <div class="relative">
@@ -47,6 +47,36 @@
                 >
                   검색
                 </button>
+
+                <div class="relative ml-2">
+                  <button
+                    class="h-8 min-w-[90px] px-3 flex items-center gap-1
+                          text-[13px] text-neutral-300 font-semibold
+                          hover:text-white transition cursor-pointer"
+                    @click="showSortDropdown = !showSortDropdown"
+                  >
+                    {{ sortLabel }}
+                    <Triangle class="w-3 h-3 rotate-180 fill-neutral-400" />
+                  </button>
+
+                  <div
+                    v-if="showSortDropdown"
+                    class="absolute left-0 top-full mt-2 z-30
+                          w-[180px]
+                          bg-neutral-900 border border-neutral-600
+                          rounded-md shadow-lg"
+                  >
+                    <button
+                      v-for="(label, key) in sortLabelMap"
+                      :key="key"
+                      class="w-full text-left px-3 py-2 text-[13px]
+                            text-neutral-200 hover:bg-neutral-800"
+                      @click="selectSort(key)"
+                    >
+                      {{ label }}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div class="flex items-center gap-2 shrink-0 ml-3">
@@ -256,17 +286,19 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { Plus, X } from 'lucide-vue-next'
+import { Plus, X, Triangle } from 'lucide-vue-next'
 import { http } from '@/api/http'
 import TransportModelModal from '@/components/TransportModelModal.vue'
 
 const rows = ref([])
 const keyword = ref('')
+const sort = ref('default')
 const showAdd = ref(false)
 const showEdit = ref(false)
 const editTarget = ref(null)
 const selectedRow = ref(null)
 const listCardRef = ref(null)
+const showSortDropdown = ref(false)
 
 const page = ref(1)
 const size = ref(15)
@@ -293,6 +325,35 @@ const pageNumbers = computed(() => {
   return pages
 })
 
+const sortLabelMap = {
+  default: '기본',
+  manufacturer_asc: '제조사순 ↑',
+  manufacturer_desc: '제조사순 ↓',
+  name_asc: '모델명순 ↑',
+  name_desc: '모델명순 ↓',
+  category_asc: '분류순 ↑',
+  category_desc: '분류순 ↓',
+  lapTime_asc: '랩타임순 ↑',
+  lapTime_desc: '랩타임순 ↓',
+  topSpeed_asc: '최고속도순 ↑',
+  topSpeed_desc: '최고속도순 ↓',
+  price_asc: '가격순 ↑',
+  price_desc: '가격순 ↓',
+  releaseDate_desc: '출시일순 ↓',
+  releaseDate_asc: '출시일순 ↑'
+}
+
+const sortLabel = computed(() => {
+  return sortLabelMap[sort.value] || '기본'
+})
+
+function selectSort(value)
+{
+  sort.value = value
+  showSortDropdown.value = false
+  applySearch()
+}
+
 async function load()
 {
   try {
@@ -300,7 +361,8 @@ async function load()
       params: {
         keyword: keyword.value,
         page: page.value,
-        size: size.value
+        size: size.value,
+        sort: sort.value
       }
     })
 
