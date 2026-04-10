@@ -42,22 +42,27 @@
                   class="absolute left-0 top-full z-50 mt-1 w-full max-h-[260px] overflow-auto
                          rounded-md border border-neutral-300 bg-white shadow-lg"
                 >
-
                   <button
                     v-for="t in filteredTransportList"
                     :key="t.modelId"
                     type="button"
-                    class="w-full text-left px-3 py-2 text-[13px]
-                           hover:bg-neutral-100"
+                    class="w-full flex items-center justify-between px-3 py-2 text-[13px]
+                          hover:bg-neutral-100"
                     @click="selectTransport(t)"
                   >
-                    {{ t.manufacturer }} {{ t.name }} {{ getUpgradeTypeDisplayText(t.upgradeType) }}
+                    <span class="truncate">
+                      {{ getTransportDisplayText(t) }}
+                    </span>
+
+                    <span
+                      v-if="isPegasusTransport(t)"
+                      class="ml-2 shrink-0 text-[11px] text-amber-600"
+                    >
+                      보관 불가
+                    </span>
                   </button>
-
                 </div>
-
               </div>
-
             </template>
 
             <!-- 수정 모드 -->
@@ -97,7 +102,9 @@
                 type="text"
                 placeholder="차고를 검색/선택하세요"
                 class="w-full h-10 px-3 rounded-md border border-neutral-300 bg-white text-sm
+                      disabled:bg-neutral-100 disabled:text-neutral-400 disabled:cursor-not-allowed
                       focus:outline-none"
+                :disabled="isGarageDisabled"
                 @click="openGarageDropdown"
                 @input="onGarageInput"
                 @keydown.esc.stop="closeGarageDropdown"
@@ -300,8 +307,37 @@ const showDeleteConfirm = ref(false)
 watch(() => props.open, async (v) => {
 
   if (v) {
-
     if (isEditMode.value) {
+
+      if (props.initialRow?.storageType === 'PEGASUS') {
+        selectedTransport.value = props.initialRow
+        transportDisplay.value = getTransportDisplayText(props.initialRow)
+
+        const currentDecal = props.initialRow?.decal
+        decal.value = currentDecal && currentDecal !== '-'
+          ? String(currentDecal).trim()
+          : ''
+
+        selectedGarage.value = null
+        selectedGarageId.value = ''
+        garageText.value = '페가수스'
+        garageQuery.value = ''
+
+        slotNo.value = ''
+        slotNoText.value = '-'
+        slotQuery.value = ''
+        currentSlotNo.value = null
+        occupiedSlotList.value = []
+
+        showTransportDropdown.value = false
+        showGarageDropdown.value = false
+        showSlotDropdown.value = false
+        showDeleteConfirm.value = false
+
+        document.addEventListener('keydown', onDocKeyDown)
+        document.addEventListener('mousedown', onDocMouseDownCapture, true)
+        return
+      }
 
       const currentDecal = props.initialRow?.decal
       decal.value = currentDecal && currentDecal !== '-'
@@ -437,7 +473,7 @@ const filteredTransportList = computed(() => {
 
   return props.transportList.filter((t) => {
 
-    const name = `${t.manufacturer} ${t.name} ${getUpgradeTypeDisplayText(t.upgradeType)}`.toLowerCase()
+    const name = getTransportDisplayText(t).toLowerCase()
 
     return name.includes(kw)
   })
@@ -463,8 +499,28 @@ const filteredGarageList = computed(() => {
   })
 })
 
+const isPegasusSelected = computed(() => {
+  return isPegasusTransport(selectedTransport.value)
+})
+
 const isSlotEnabled = computed(() => {
+  if (isEditMode.value && props.initialRow?.storageType === 'PEGASUS') {
+    return false
+  }
+
+  if (isPegasusSelected.value) {
+    return false
+  }
+
   return !!selectedGarage.value
+})
+
+const isGarageDisabled = computed(() => {
+  if (!isEditMode.value) {
+    return isPegasusSelected.value
+  }
+
+  return props.initialRow?.storageType === 'PEGASUS'
 })
 
 const slotOptions = computed(() => {
@@ -527,11 +583,68 @@ function getUpgradeTypeDisplayText(upgradeType)
   return labels.join(' / ')
 }
 
+function getTransportDisplayText(t)
+{
+  const manufacturer = String(t?.manufacturer || '').trim()
+  const name = String(t?.name || '').trim()
+  const upgradeTypeText = getUpgradeTypeDisplayText(t?.upgradeType)
+
+  const baseText = manufacturer === '미분류'
+    ? `${name}`
+    : `${manufacturer} ${name}`
+
+  return `${baseText} ${upgradeTypeText}`.trim()
+}
+
+function isPegasusTransport(t)
+{
+  const features = String(t?.features || '').trim()
+
+  if (features === '') {
+    return false
+  }
+
+  return features
+    .split(',')
+    .map((v) => {
+      return v.trim()
+    })
+    .includes('페가수스')
+}
+
 function selectTransport(t)
 {
   selectedTransport.value = t
-  transportDisplay.value = `${t.manufacturer} ${t.name} ${getUpgradeTypeDisplayText(t.upgradeType)}`
+  transportDisplay.value = getTransportDisplayText(t)
   showTransportDropdown.value = false
+
+  if (isPegasusTransport(t)) {
+    selectedGarage.value = null
+    selectedGarageId.value = ''
+    garageText.value = '페가수스'
+    garageQuery.value = ''
+
+    slotNo.value = ''
+    slotNoText.value = '-'
+    slotQuery.value = ''
+    currentSlotNo.value = null
+    occupiedSlotList.value = []
+
+    showGarageDropdown.value = false
+    showSlotDropdown.value = false
+    return
+  }
+
+  garageText.value = ''
+  garageQuery.value = ''
+  selectedGarage.value = null
+  selectedGarageId.value = ''
+
+  slotNo.value = ''
+  slotNoText.value = ''
+  slotQuery.value = ''
+  currentSlotNo.value = null
+  occupiedSlotList.value = []
 }
 
 function handleSubmit()
@@ -547,21 +660,28 @@ function handleSubmit()
     const hasGarage = !!selectedGarageId.value
     const hasSlot = !!slotNo.value
 
-    if (hasGarage && !hasSlot) {
-      alert('차고를 선택한 경우 슬롯은 필수입니다.')
-      return
+    if (!isPegasusSelected.value) {
+      if (hasGarage && !hasSlot) {
+        alert('차고를 선택한 경우 슬롯은 필수입니다.')
+        return
+      }
+
+      if (!hasGarage && hasSlot) {
+        alert('차고를 선택하지 않으면 슬롯을 선택할 수 없습니다.')
+        return
+      }
     }
 
-    if (!hasGarage && hasSlot) {
-      alert('차고를 선택하지 않으면 슬롯을 선택할 수 없습니다.')
-      return
-    }
+    const storageType = isPegasusSelected.value
+      ? 'PEGASUS'
+      : (selectedGarageId.value ? 'GARAGE' : 'UNASSIGNED')
 
     emit('update', {
       ownedId: ownedId,
       decal: String(decal.value || '').trim(),
-      garageId: hasGarage ? selectedGarageId.value : null,
-      slotNo: hasSlot ? Number(slotNo.value) : null
+      storageType: storageType,
+      garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
+      slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null
     })
 
     return
@@ -586,21 +706,28 @@ function handleSubmit()
   const hasGarage = !!selectedGarageId.value
   const hasSlot = !!slotNo.value
 
-  if (hasGarage && !hasSlot) {
-    alert('차고를 선택한 경우 슬롯은 필수입니다.')
-    return
+  if (!isPegasusSelected.value) {
+    if (hasGarage && !hasSlot) {
+      alert('차고를 선택한 경우 슬롯은 필수입니다.')
+      return
+    }
+
+    if (!hasGarage && hasSlot) {
+      alert('차고를 선택하지 않으면 슬롯을 선택할 수 없습니다.')
+      return
+    }
   }
 
-  if (!hasGarage && hasSlot) {
-    alert('차고를 선택하지 않으면 슬롯을 선택할 수 없습니다.')
-    return
-  }
+  const storageType = isPegasusSelected.value
+    ? 'PEGASUS'
+    : (selectedGarageId.value ? 'GARAGE' : 'UNASSIGNED')
 
   emit('created', {
     modelId: Number(modelId),
     decal: String(decal.value || '').trim(),
-    garageId: hasGarage ? selectedGarageId.value : null,
-    slotNo: hasSlot ? Number(slotNo.value) : null
+    storageType: storageType,
+    garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
+    slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null
   })
 }
 
@@ -748,6 +875,10 @@ async function loadOccupiedSlots(garageId)
 
 function openGarageDropdown()
 {
+  if (isGarageDisabled.value) {
+    return
+  }
+
   showTransportDropdown.value = false
   showSlotDropdown.value = false
 
@@ -769,6 +900,10 @@ function closeGarageDropdown()
 
 function onGarageInput(e)
 {
+  if (isGarageDisabled.value) {
+    return
+  }
+  
   const value = String(e?.target?.value || '')
 
   garageText.value = value

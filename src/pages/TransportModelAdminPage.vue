@@ -48,35 +48,17 @@
                   검색
                 </button>
 
-                <div class="relative ml-2">
-                  <button
-                    class="h-8 min-w-[90px] px-3 flex items-center gap-1
-                          text-[13px] text-neutral-300 font-semibold
-                          hover:text-white transition cursor-pointer"
-                    @click="showSortDropdown = !showSortDropdown"
-                  >
-                    {{ sortLabel }}
-                    <Triangle class="w-3 h-3 rotate-180 fill-neutral-400" />
-                  </button>
-
-                  <div
-                    v-if="showSortDropdown"
-                    class="absolute left-0 top-full mt-2 z-30
-                          w-[180px]
-                          bg-neutral-900 border border-neutral-600
-                          rounded-md shadow-lg"
-                  >
-                    <button
-                      v-for="(label, key) in sortLabelMap"
-                      :key="key"
-                      class="w-full text-left px-3 py-2 text-[13px]
-                            text-neutral-200 hover:bg-neutral-800"
-                      @click="selectSort(key)"
-                    >
-                      {{ label }}
-                    </button>
-                  </div>
-                </div>
+                <button
+                  type="button"
+                  class="h-8 w-8 shrink-0 flex items-center justify-center rounded-md
+                        bg-neutral-800/60 border border-neutral-600
+                        text-neutral-300 hover:text-white
+                        hover:bg-neutral-700 active:bg-neutral-600 transition"
+                  title="검색/정렬 초기화"
+                  @click="resetFilters"
+                >
+                  <RotateCcw class="w-4 h-4" />
+                </button>
               </div>
 
               <div class="flex items-center gap-2 shrink-0 ml-3">
@@ -127,15 +109,86 @@
               <table class="w-full text-sm text-neutral-200 border-separate border-spacing-0 table-fixed">
                 <thead class="bg-neutral-800">
                   <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap bg-neutral-900/30">
-                    <th class="px-3 py-2 text-left w-[160px] border-b border-r border-neutral-700">제조사</th>
-                    <th class="px-3 py-2 text-left w-[200px] border-b border-r border-neutral-700">모델명</th>
-                    <th class="px-3 py-2 text-left w-[140px] border-b border-r border-neutral-700">분류</th>
+                    <th class="px-3 py-2 text-left w-[160px] border-b border-r border-neutral-700">
+                      <button
+                        type="button"
+                        class="flex items-center gap-1 font-medium hover:text-white transition"
+                        @click="toggleSort('manufacturer')"
+                      >
+                        제조사
+                        <span class="text-[11px] text-neutral-400">{{ getSortMark('manufacturer') }}</span>
+                      </button>
+                    </th>
+
+                    <th class="px-3 py-2 text-left w-[200px] border-b border-r border-neutral-700">
+                      <button
+                        type="button"
+                        class="flex items-center gap-1 font-medium hover:text-white transition"
+                        @click="toggleSort('name')"
+                      >
+                        모델명
+                        <span class="text-[11px] text-neutral-400">{{ getSortMark('name') }}</span>
+                      </button>
+                    </th>
+
+                    <th class="px-3 py-2 text-left w-[140px] border-b border-r border-neutral-700">
+                      <button
+                        type="button"
+                        class="flex items-center gap-1 font-medium hover:text-white transition"
+                        @click="toggleSort('category')"
+                      >
+                        분류
+                        <span class="text-[11px] text-neutral-400">{{ getSortMark('category') }}</span>
+                      </button>
+                    </th>
+
                     <th class="px-3 py-2 text-left w-[150px] border-b border-r border-neutral-700">개조유형</th>
                     <th class="px-3 py-2 text-left w-[280px] border-b border-r border-neutral-700">개조위치</th>
-                    <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">랩타임</th>
-                    <th class="px-3 py-2 text-left w-[110px] border-b border-r border-neutral-700">최고속도</th>
-                    <th class="px-3 py-2 text-left w-[120px] border-b border-r border-neutral-700">가격</th>
-                    <th class="px-3 py-2 text-left w-[110px] border-b border-r border-neutral-700">출시일</th>
+
+                    <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">
+                      <button
+                        type="button"
+                        class="flex items-center gap-1 font-medium hover:text-white transition"
+                        @click="toggleSort('lapTime')"
+                      >
+                        랩타임
+                        <span class="text-[11px] text-neutral-400">{{ getSortMark('lapTime') }}</span>
+                      </button>
+                    </th>
+
+                    <th class="px-3 py-2 text-left w-[110px] border-b border-r border-neutral-700">
+                      <button
+                        type="button"
+                        class="flex items-center gap-1 font-medium hover:text-white transition"
+                        @click="toggleSort('topSpeed')"
+                      >
+                        최고속도
+                        <span class="text-[11px] text-neutral-400">{{ getSortMark('topSpeed') }}</span>
+                      </button>
+                    </th>
+
+                    <th class="px-3 py-2 text-left w-[120px] border-b border-r border-neutral-700">
+                      <button
+                        type="button"
+                        class="flex items-center gap-1 font-medium hover:text-white transition"
+                        @click="toggleSort('price')"
+                      >
+                        가격
+                        <span class="text-[11px] text-neutral-400">{{ getSortMark('price') }}</span>
+                      </button>
+                    </th>
+
+                    <th class="px-3 py-2 text-left w-[110px] border-b border-r border-neutral-700">
+                      <button
+                        type="button"
+                        class="flex items-center gap-1 font-medium hover:text-white transition"
+                        @click="toggleSort('releaseDate')"
+                      >
+                        출시일
+                        <span class="text-[11px] text-neutral-400">{{ getSortMark('releaseDate') }}</span>
+                      </button>
+                    </th>
+
                     <th class="px-3 py-2 text-left w-[250px] border-b border-r border-neutral-700">획득처</th>
                     <th class="px-3 py-2 text-left w-[110px] border-b border-r border-neutral-700">무게</th>
                     <th class="px-3 py-2 text-left w-[70px] border-b border-r border-neutral-700">기어</th>
@@ -174,7 +227,7 @@
                         class="px-3 py-2 text-left border-b border-neutral-700 truncate"
                         :title="row.upgradeLocation"
                       >
-                        {{ displayUpgradeLocation(row.upgradeLocation) }}
+                        {{ displayValue(row.upgradeLocation) }}
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
@@ -286,7 +339,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { Plus, X, Triangle } from 'lucide-vue-next'
+import { Plus, X, RotateCcw } from 'lucide-vue-next'
 import { http } from '@/api/http'
 import TransportModelModal from '@/components/TransportModelModal.vue'
 
@@ -298,7 +351,6 @@ const showEdit = ref(false)
 const editTarget = ref(null)
 const selectedRow = ref(null)
 const listCardRef = ref(null)
-const showSortDropdown = ref(false)
 
 const page = ref(1)
 const size = ref(15)
@@ -324,35 +376,6 @@ const pageNumbers = computed(() => {
 
   return pages
 })
-
-const sortLabelMap = {
-  default: '기본',
-  manufacturer_asc: '제조사순 ↑',
-  manufacturer_desc: '제조사순 ↓',
-  name_asc: '모델명순 ↑',
-  name_desc: '모델명순 ↓',
-  category_asc: '분류순 ↑',
-  category_desc: '분류순 ↓',
-  lapTime_asc: '랩타임순 ↑',
-  lapTime_desc: '랩타임순 ↓',
-  topSpeed_asc: '최고속도순 ↑',
-  topSpeed_desc: '최고속도순 ↓',
-  price_asc: '가격순 ↑',
-  price_desc: '가격순 ↓',
-  releaseDate_desc: '출시일순 ↓',
-  releaseDate_asc: '출시일순 ↑'
-}
-
-const sortLabel = computed(() => {
-  return sortLabelMap[sort.value] || '기본'
-})
-
-function selectSort(value)
-{
-  sort.value = value
-  showSortDropdown.value = false
-  applySearch()
-}
 
 async function load()
 {
@@ -416,9 +439,63 @@ function applySearch()
   load()
 }
 
+function resetFilters()
+{
+  keyword.value = ''
+  sort.value = 'default'
+  page.value = 1
+  load()
+}
+
+function toggleSort(field)
+{
+  const currentState = getSortState(field)
+
+  if (currentState === 'none') {
+    sort.value = `${field}_asc`
+  } else if (currentState === 'asc') {
+    sort.value = `${field}_desc`
+  } else {
+    sort.value = 'default'
+  }
+
+  page.value = 1
+  load()
+}
+
+function getSortState(field)
+{
+  if (sort.value === `${field}_asc`) {
+    return 'asc'
+  }
+
+  if (sort.value === `${field}_desc`) {
+    return 'desc'
+  }
+
+  return 'none'
+}
+
+function getSortMark(field)
+{
+  const state = getSortState(field)
+
+  if (state === 'asc') {
+    return '▲'
+  }
+
+  if (state === 'desc') {
+    return '▼'
+  }
+
+  return ''
+}
+
 function clearKeyword()
 {
   keyword.value = ''
+  page.value = 1
+  load()
 }
 
 function openAdd()
@@ -593,15 +670,6 @@ function displayValue(value)
 {
   if (value === null || value === undefined || value === '') {
     return '-'
-  }
-
-  return value
-}
-
-function displayUpgradeLocation(value)
-{
-  if (value === null || value === undefined || value === '') {
-    return '개조불가'
   }
 
   return value

@@ -17,6 +17,7 @@ export const manufacturerOptions = [
   "마이바츠",
   "매머드",
   "맥스웰",
+  "미분류",
   "바피드",
   "버킹엄",
   "벌카",

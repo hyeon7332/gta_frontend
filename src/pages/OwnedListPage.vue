@@ -165,7 +165,7 @@
                     </template>
                     
                     <!-- 미배치 row -->
-                    <template v-else-if="row && row.type === 'unassigned'">
+                    <template v-else-if="row && (row.type === 'unassigned' || row.type === 'pegasus')">
                       <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">-</td>
                       <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
                       <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">
@@ -248,8 +248,22 @@
                 </span>
                 칸 사용중
               </div>
-            </div>
 
+              <div class="flex items-center gap-4 text-[13px] text-neutral-400">
+                <div>
+                  미배치 
+                  <span class="text-white font-semibold">
+                    {{ unassignedCount }}
+                  </span>
+                </div>
+                <div>
+                  페가수스 
+                  <span class="text-white font-semibold">
+                    {{ pegasusCount }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -296,6 +310,10 @@ const selectedGarageIds = ref([])
 const showGarageFilterDropdown = ref(false)
 const garageFilterRef = ref(null)
 
+watch(selectedGarageIds, () => {
+  activeRowKey.value = ''
+})
+
 const upgradeTypeDisplayMap = {
   'HSW': 'HSW',
   '드리프트': 'Drift',
@@ -337,11 +355,11 @@ function toggleGarageFilter(garageId)
   const targetId = String(garageId)
   const exists = selectedGarageIds.value.includes(targetId)
 
-  if (targetId === 'unassigned') {
+  if (targetId === 'unassigned' || targetId === 'pegasus') {
     if (exists) {
       selectedGarageIds.value = []
     } else {
-      selectedGarageIds.value = ['unassigned']
+      selectedGarageIds.value = [targetId]
     }
     return
   }
@@ -352,7 +370,7 @@ function toggleGarageFilter(garageId)
     })
   } else {
     selectedGarageIds.value = selectedGarageIds.value.filter((id) => {
-      return id !== 'unassigned'
+      return id !== 'unassigned' && id !== 'pegasus'
     })
     selectedGarageIds.value = [...selectedGarageIds.value, targetId]
   }
@@ -433,8 +451,7 @@ function handleSlotDoubleClick(row)
 
   highlightRow(row)
 
-  // 미배치 차량 → 수정 모달
-  if (row.type === 'unassigned') {
+  if (row.type === 'unassigned' || row.type === 'pegasus') {
     openEdit(row)
     return
   }
@@ -571,6 +588,10 @@ function getRowHighlightKey(row)
 
   if (row.type === 'unassigned') {
     return `unassigned-${row.id}`
+  }
+
+  if (row.type === 'pegasus') {
+    return `pegasus-${row.id}`
   }
 
   return ''
@@ -759,12 +780,33 @@ const filteredSlotRows = computed(() => {
 })
 
 const unassignedRows = computed(() => {
-  return rows.value.filter((row) => {
-    return !row.garageId
-  }).map((row) => ({
-    ...row,
-    type: 'unassigned'
-  }))
+  return rows.value
+    .filter((row) => {
+      return row.storageType === 'UNASSIGNED' || (!row.storageType && !row.garageId)
+    })
+    .map((row) => ({
+      ...row,
+      type: 'unassigned'
+    }))
+})
+
+const unassignedCount = computed(() => {
+  return unassignedRows.value.length
+})
+
+const pegasusCount = computed(() => {
+  return pegasusRows.value.length
+})
+
+const pegasusRows = computed(() => {
+  return rows.value
+    .filter((row) => {
+      return row.storageType === 'PEGASUS'
+    })
+    .map((row) => ({
+      ...row,
+      type: 'pegasus'
+    }))
 })
 
 const unassignedDisplayRows = computed(() => {
@@ -782,13 +824,30 @@ const unassignedDisplayRows = computed(() => {
   ]
 })
 
+const pegasusDisplayRows = computed(() => {
+  if (pegasusRows.value.length === 0) {
+    return []
+  }
+
+  return [
+    {
+      id: 'pegasus-header',
+      type: 'garageHeader',
+      garage: '페가수스'
+    },
+    ...pegasusRows.value
+  ]
+})
+
 const displayRows = computed(() => {
-  // 미배치 선택된 경우
   if (selectedGarageIds.value.includes('unassigned')) {
     return unassignedDisplayRows.value
   }
 
-  // 기존 슬롯 로직
+  if (selectedGarageIds.value.includes('pegasus')) {
+    return pegasusDisplayRows.value
+  }
+
   const minRows = 15
   const emptyCount = Math.max(0, minRows - filteredSlotRows.value.length)
 
@@ -802,6 +861,7 @@ const garageFilterOptions = computed(() => {
   return [
     { garageId: 'all', garageName: '전체' },
     { garageId: 'unassigned', garageName: '미배치' },
+    { garageId: 'pegasus', garageName: '페가수스' },
     ...garageList.value.map((garage) => ({
       garageId: String(garage.garageId),
       garageName: garage.garageName
@@ -863,8 +923,9 @@ async function load()
     rows.value = list.map((x) => ({
       id: x.id ?? x.ownedTransportId ?? x.ownedId ?? x.transportId,
       garageId: x.garageId ?? x.garage_id ?? null,
-      garage: (x.garage ?? x.storage ?? x.garageName ?? x.garage_name ?? '-') || '-',
-      slot: Number(x.slot ?? x.slotNo ?? x.slot_no ?? 0),
+      garage: x.garageName ?? x.garage_name ?? x.garage ?? x.storage ?? '-',
+      slot: x.slot ?? x.slotNo ?? x.slot_no ?? null,
+      storageType: x.storageType ?? x.storage_type ?? '',
 
       manufacturer: x.manufacturer ?? x.maker ?? x.brand ?? x.manufacturerName ?? '-',
       name: x.name ?? x.modelName ?? x.transportName ?? '-',
