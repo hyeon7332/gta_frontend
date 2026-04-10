@@ -27,15 +27,22 @@
             <template v-if="!isEditMode">
 
               <div class="relative min-w-0" ref="transportWrapRef">
-
                 <input
                   :value="transportDisplay"
-                  type="text"
-                  class="w-full h-10 px-3 rounded-md border border-neutral-300 bg-white text-sm"
+                  class="w-full h-10 px-3 pr-8 rounded-md border border-neutral-300 bg-white text-sm"
                   placeholder="이동수단 검색"
                   @click="openTransportDropdown"
                   @input="onTransportInput"
                 />
+
+                <button
+                  v-if="transportDisplay"
+                  type="button"
+                  @click.stop="clearTransport"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-black"
+                >
+                  <X class="w-4 h-4" />
+                </button>
 
                 <div
                   v-if="showTransportDropdown"
@@ -101,7 +108,7 @@
                 :value="garageText"
                 type="text"
                 placeholder="차고를 검색/선택하세요"
-                class="w-full h-10 px-3 rounded-md border border-neutral-300 bg-white text-sm
+                class="w-full h-10 px-3 pr-8 rounded-md border border-neutral-300 bg-white text-sm
                       disabled:bg-neutral-100 disabled:text-neutral-400 disabled:cursor-not-allowed
                       focus:outline-none"
                 :disabled="isGarageDisabled"
@@ -109,6 +116,15 @@
                 @input="onGarageInput"
                 @keydown.esc.stop="closeGarageDropdown"
               />
+
+              <button
+                v-if="garageText && !isGarageDisabled"
+                type="button"
+                @click.stop="clearGarage"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-black"
+              >
+                <X class="w-4 h-4" />
+              </button>
 
               <div
                 v-if="showGarageDropdown"
@@ -254,6 +270,7 @@
 
 <script setup>
 import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
+import { X } from 'lucide-vue-next'
 import { http } from '@/api/http'
 
 const props = defineProps({
@@ -635,6 +652,13 @@ function selectTransport(t)
     return
   }
 
+  const hasPresetGarage = !!selectedGarageId.value
+  const hasPresetSlot = !!slotNo.value
+
+  if (hasPresetGarage || hasPresetSlot) {
+    return
+  }
+
   garageText.value = ''
   garageQuery.value = ''
   selectedGarage.value = null
@@ -967,6 +991,26 @@ function selectSlot(no)
   slotNo.value = String(no)
   slotNoText.value = String(no)
   closeSlotDropdown()
+}
+
+function clearTransport()
+{
+  selectedTransport.value = null
+  transportDisplay.value = ''
+}
+
+function clearGarage()
+{
+  selectedGarage.value = null
+  selectedGarageId.value = ''
+  garageText.value = ''
+  garageQuery.value = ''
+
+  slotNo.value = ''
+  slotNoText.value = ''
+  slotQuery.value = ''
+  currentSlotNo.value = null
+  occupiedSlotList.value = []
 }
 
 onUnmounted(() => {
