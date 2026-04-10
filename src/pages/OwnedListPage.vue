@@ -694,6 +694,7 @@ async function handleDrop(row)
     if (row.isEmpty) {
       await http.patch(`/owned-transports/${source.ownedId}`, {
         decal: source.decal,
+        storageType: 'GARAGE',
         garageId: targetGarageId,
         slotNo: targetSlotNo
       })
