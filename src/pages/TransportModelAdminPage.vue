@@ -599,13 +599,46 @@ function handleRowDblClick(row)
   openEdit()
 }
 
-function openDelete()
+async function openDelete()
 {
   if (!selectedRow.value) {
     return
   }
 
-  console.log('삭제 대상:', selectedRow.value)
+  if (Number(selectedRow.value.ownedCount ?? 0) > 0) {
+    alert('차고 리스트에 등록된 이동수단은 삭제할 수 없습니다.')
+    return
+  }
+
+  const targetId = selectedRow.value.id ?? selectedRow.value.transportModelId ?? selectedRow.value.modelId
+
+  if (!targetId) {
+    alert('삭제할 모델 ID를 찾을 수 없습니다.')
+    return
+  }
+
+  const targetName = `${selectedRow.value.manufacturer ?? ''} ${selectedRow.value.name ?? ''}`.trim()
+  const confirmed = window.confirm(`[${targetName}] 모델을 삭제하시겠습니까?`)
+
+  if (!confirmed) {
+    return
+  }
+
+  try {
+    await http.delete(`/transport-models/${targetId}`)
+
+    alert('삭제 완료')
+    selectedRow.value = null
+
+    if (rows.value.length === 1 && page.value > 1) {
+      page.value = page.value - 1
+    }
+
+    await load()
+  } catch (err) {
+    console.error('이동수단 모델 삭제 실패:', err)
+    alert('삭제 실패')
+  }
 }
 
 function handleDocumentClick(event)

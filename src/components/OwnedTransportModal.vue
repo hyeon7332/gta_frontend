@@ -361,16 +361,15 @@ watch(() => props.open, async (v) => {
         ? String(currentDecal).trim()
         : ''
 
-      const g = props.initialRow?.garage
-      const s = props.initialRow?.slot
+      const currentGarageId = props.initialRow?.garageId ?? null
+      const currentSlot = (props.initialRow?.slot && props.initialRow?.slot !== '-')
+        ? Number(props.initialRow.slot)
+        : null
 
-      const garageName = (g && g !== '-') ? String(g) : ''
-      const currentSlot = (s && s !== '-') ? Number(s) : null
-
-      const matched = garageName
+      const matched = currentGarageId
         ? (Array.isArray(props.garageList)
             ? props.garageList.find((garage) => {
-                return String(garage?.garageName || '').trim() === garageName.trim()
+                return Number(garage?.garageId) === Number(currentGarageId)
               })
             : null)
         : null
@@ -869,6 +868,8 @@ async function loadOccupiedSlots(garageId)
     return
   }
 
+  const requestedGarageId = Number(garageId)
+
   try {
     const res = await http.get(`/garages/${garageId}/occupied-slots`)
     const data = res.data
@@ -880,6 +881,10 @@ async function loadOccupiedSlots(garageId)
       (Array.isArray(data?.data) && data.data) ||
       (Array.isArray(data) && data) ||
       []
+
+    if (Number(selectedGarageId.value) !== requestedGarageId) {
+      return
+    }
 
     occupiedSlotList.value = list
       .map((v) => {
@@ -893,6 +898,11 @@ async function loadOccupiedSlots(garageId)
       })
   } catch (err) {
     console.error('점유 슬롯 조회 실패:', err)
+
+    if (Number(selectedGarageId.value) !== requestedGarageId) {
+      return
+    }
+
     occupiedSlotList.value = []
   }
 }

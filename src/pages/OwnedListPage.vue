@@ -541,6 +541,7 @@ async function handleUpdate(payload)
   try {
     await http.patch(`/owned-transports/${payload.ownedId}`, {
       decal: payload.decal,
+      storageType: payload.storageType,
       garageId: payload.garageId,
       slotNo: payload.slotNo
     })
@@ -919,7 +920,7 @@ async function load()
 {
   try {
     const res = await http.get('/owned-transports')
-    const list = Array.isArray(res.data) ? res.data : []
+    const list = extractList(res.data)
 
     rows.value = list.map((x) => ({
       id: x.id ?? x.ownedTransportId ?? x.ownedId ?? x.transportId,
