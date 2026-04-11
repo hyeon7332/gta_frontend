@@ -142,8 +142,8 @@
                       </button>
                     </th>
 
-                    <th class="px-3 py-2 text-left w-[150px] border-b border-r border-neutral-700">개조유형</th>
-                    <th class="px-3 py-2 text-left w-[280px] border-b border-r border-neutral-700">개조위치</th>
+                    <th class="px-3 py-2 text-left w-[130px] border-b border-r border-neutral-700">개조유형</th>
+                    <th class="px-3 py-2 text-left w-[320px] border-b border-r border-neutral-700">개조위치</th>
 
                     <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">
                       <button
@@ -194,7 +194,7 @@
                     <th class="px-3 py-2 text-left w-[70px] border-b border-r border-neutral-700">기어</th>
                     <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">구동방식</th>
                     <th class="px-3 py-2 text-left w-[70px] border-b border-r border-neutral-700">좌석</th>
-                    <th class="px-3 py-2 text-left w-[650px] border-b border-r border-neutral-700">특징</th>
+                    <th class="px-3 py-2 text-left w-[600px] border-b border-r border-neutral-700">특징</th>
                   </tr>
                 </thead>
 
