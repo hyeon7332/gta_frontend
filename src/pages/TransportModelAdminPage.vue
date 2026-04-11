@@ -235,7 +235,7 @@
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
-                        {{ row.topSpeed ? row.topSpeed + ' km/h' : '-' }}
+                        {{ row.topSpeed ? Number(row.topSpeed).toFixed(2) + ' km/h' : '-' }}
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
