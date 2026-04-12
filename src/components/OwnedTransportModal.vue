@@ -86,18 +86,6 @@
 
           </div>
 
-          <!-- 상징 -->
-          <div>
-            <div class="text-xs text-neutral-700 mb-1">상징</div>
-
-            <input
-              v-model="decal"
-              type="text"
-              class="w-full h-10 px-3 rounded-md border border-neutral-300 bg-white text-sm"
-            />
-
-          </div>
-
           <!-- 차고 -->
           <div>
             <div class="text-xs text-neutral-700 mb-1">차고</div>
@@ -294,7 +282,6 @@ const selectedTransport = ref(null)
 const transportDisplay = ref('')
 const showTransportDropdown = ref(false)
 
-const decal = ref('')
 const selectedGarageId = ref('')
 const slotNo = ref('')
 
@@ -330,11 +317,6 @@ watch(() => props.open, async (v) => {
         selectedTransport.value = props.initialRow
         transportDisplay.value = getTransportDisplayText(props.initialRow)
 
-        const currentDecal = props.initialRow?.decal
-        decal.value = currentDecal && currentDecal !== '-'
-          ? String(currentDecal).trim()
-          : ''
-
         selectedGarage.value = null
         selectedGarageId.value = ''
         garageText.value = '페가수스'
@@ -355,11 +337,6 @@ watch(() => props.open, async (v) => {
         document.addEventListener('mousedown', onDocMouseDownCapture, true)
         return
       }
-
-      const currentDecal = props.initialRow?.decal
-      decal.value = currentDecal && currentDecal !== '-'
-        ? String(currentDecal).trim()
-        : ''
 
       const currentGarageId = props.initialRow?.garageId ?? null
       const currentSlot = (props.initialRow?.slot && props.initialRow?.slot !== '-')
@@ -408,8 +385,6 @@ watch(() => props.open, async (v) => {
 
       selectedTransport.value = null
       transportDisplay.value = ''
-
-      decal.value = ''
 
       selectedGarage.value = null
       selectedGarageId.value = ''
@@ -701,7 +676,6 @@ function handleSubmit()
 
     emit('update', {
       ownedId: ownedId,
-      decal: String(decal.value || '').trim(),
       storageType: storageType,
       garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
       slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null
@@ -747,7 +721,6 @@ function handleSubmit()
 
   emit('created', {
     modelId: Number(modelId),
-    decal: String(decal.value || '').trim(),
     storageType: storageType,
     garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
     slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null

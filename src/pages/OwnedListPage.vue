@@ -122,7 +122,6 @@
                   <col class="w-[15%]" />  <!-- 제조사 -->
                   <col class="w-[32%]" />  <!-- 모델명 -->
                   <col class="w-[15%]" />  <!-- 분류 -->
-                  <col class="w-[32%]" />  <!-- 상징 -->
                 </colgroup>
                 <thead>
                   <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap">
@@ -130,7 +129,6 @@
                     <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">제조사</th>
                     <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">모델명</th>
                     <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">분류</th>
-                    <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">상징</th>
                   </tr>
                 </thead>
 
@@ -155,7 +153,7 @@
                   >
                     <!-- 차고 헤더 -->
                     <template v-if="row && row.type === 'garageHeader'">
-                      <td colspan="5"
+                      <td colspan="4"
                           class="h-[40px] px-3 py-2
                                 bg-neutral-700/40
                                 border-b border-neutral-600
@@ -182,9 +180,6 @@
                         </div>
                       </td>
                       <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">{{ row.category }}</td>
-                      <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">
-                        {{ row.decal || '-' }}
-                      </td>
                     </template>
 
                     <!-- 일반 슬롯 row -->
@@ -207,13 +202,10 @@
                         </div>
                       </td>
                       <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.category }}</td>
-                      <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">
-                        {{ row.decal || '-' }}
-                      </td>
                     </template>
 
                     <template v-else>
-                      <td colspan="5" class="h-[40px]"></td>
+                      <td colspan="4" class="h-[40px]"></td>
                     </template>
                   </tr>
                 </tbody>
@@ -540,7 +532,6 @@ async function handleUpdate(payload)
 {
   try {
     await http.patch(`/owned-transports/${payload.ownedId}`, {
-      decal: payload.decal,
       storageType: payload.storageType,
       garageId: payload.garageId,
       slotNo: payload.slotNo
@@ -631,8 +622,7 @@ function handleDragStart(row)
   draggingRow.value = {
     ownedId: row.id,
     garageId: row.garageId,
-    slotNo: row.slot,
-    decal: row.decal ?? ''
+    slotNo: row.slot
   }
 }
 
@@ -694,7 +684,6 @@ async function handleDrop(row)
     // 1) 빈 슬롯으로 이동
     if (row.isEmpty) {
       await http.patch(`/owned-transports/${source.ownedId}`, {
-        decal: source.decal,
         storageType: 'GARAGE',
         garageId: targetGarageId,
         slotNo: targetSlotNo
@@ -761,7 +750,6 @@ const slotRows = computed(() => {
           manufacturer: '-',
           name: '-',
           category: '-',
-          decal: '-',
           isEmpty: true
         })
       }
@@ -933,7 +921,6 @@ async function load()
       name: x.name ?? x.modelName ?? x.transportName ?? '-',
       upgradeType: x.upgradeType ?? x.upgrade_type ?? '',
       category: x.category ?? x.transportCategory ?? x.className ?? x.class ?? '-',
-      decal: x.decal ?? '',
       price: x.price ?? x.priceNumber ?? x.cost ?? null,
       releaseDate: x.releaseDate ?? x.release_date ?? '-'
     }))
