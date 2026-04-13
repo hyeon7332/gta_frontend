@@ -151,11 +151,6 @@
           </div>
 
           <div>
-            <label class="block mb-1 text-sm text-neutral-300">기어 수</label>
-            <input v-model="form.driveGears" type="number" class="input-style" />
-          </div>
-
-          <div>
             <label class="block mb-1 text-sm text-neutral-300">구동 방식</label>
             <select v-model="form.driveTrain" class="input-style">
               <option value="">선택하세요</option>
@@ -263,7 +258,6 @@ const form = reactive({
   releaseDate: '',
   source: '',
   weight: '',
-  driveGears: '',
   driveTrain: '',
   seats: '',
   features: ''
@@ -321,7 +315,6 @@ function resetForm()
   form.releaseDate = ''
   form.source = ''
   form.weight = ''
-  form.driveGears = ''
   form.driveTrain = ''
   form.seats = ''
   form.features = ''
@@ -344,7 +337,6 @@ function fillForm()
   form.releaseDate = props.model?.releaseDate ?? ''
   form.source = props.model?.source ?? ''
   form.weight = props.model?.weight ?? ''
-  form.driveGears = props.model?.driveGears ?? ''
   form.driveTrain = props.model?.driveTrain ?? ''
   form.seats = props.model?.seats ?? ''
   form.features = props.model?.features ?? ''
@@ -432,7 +424,6 @@ async function handleSave()
       releaseDate: form.releaseDate === '' ? null : form.releaseDate,
       source: form.source,
       weight: form.weight === '' ? null : Number(form.weight),
-      driveGears: form.driveGears === '' ? null : Number(form.driveGears),
       driveTrain: form.driveTrain,
       seats: form.seats === '' ? null : Number(form.seats),
 
