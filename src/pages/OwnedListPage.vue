@@ -24,7 +24,7 @@
                   @click="showGarageFilterDropdown = !showGarageFilterDropdown"
                 >
                   <span class="truncate">{{ selectedGarageFilterLabel }}</span>
-                  <span class="text-[11px] text-neutral-400">▼</span>
+                  <ChevronDown class="w-4 h-4 text-neutral-400" />
                 </button>
 
                 <button
@@ -277,7 +277,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { http } from '@/api/http'
-import { Plus, RotateCcw  } from 'lucide-vue-next'
+import { Plus, RotateCcw, ChevronDown } from 'lucide-vue-next'
 import OwnedTransportModal from '@/components/OwnedTransportModal.vue'
 
 // list state

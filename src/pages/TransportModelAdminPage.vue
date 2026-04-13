@@ -104,6 +104,320 @@
               </div>
             </div>
 
+            <!-- filter bar -->
+            <div
+              class="flex flex-wrap items-center gap-2 px-3 py-2
+                    bg-neutral-900/20 border-b border-neutral-700"
+            >
+              <!-- 제조사 -->
+              <div class="relative" ref="manufacturerDropdownRef">
+                <button
+                  type="button"
+                  class="h-8 w-[250px] px-3 rounded-md flex items-center justify-between
+                        bg-neutral-800/60 border border-neutral-600
+                        text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
+                  @click="toggleManufacturerDropdown"
+                >
+                  <span class="truncate">{{ manufacturerFilterLabel }}</span>
+                  <ChevronDown class="w-4 h-4 text-neutral-400" />
+                </button>
+
+                <div
+                  v-if="showManufacturerDropdown"
+                  class="absolute left-0 top-10 z-20 w-[250px] max-h-[260px] overflow-auto
+                        rounded-md border border-neutral-600 bg-neutral-800 shadow-lg p-1"
+                >
+                  <button
+                    type="button"
+                    class="w-full flex items-center justify-between px-2 py-2 rounded
+                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                    @click="selectManufacturer('')"
+                  >
+                    <span>전체</span>
+                    <span
+                      v-if="manufacturerFilter === ''"
+                      class="text-[11px] text-neutral-400"
+                    >
+                      선택됨
+                    </span>
+                  </button>
+
+                  <div class="mx-2 border-t border-neutral-700"></div>
+
+                  <button
+                    v-for="item in manufacturerOptions"
+                    :key="item"
+                    type="button"
+                    class="w-full flex items-center justify-between px-2 py-2 rounded
+                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                    @click="selectManufacturer(item)"
+                  >
+                    <span class="truncate">{{ item }}</span>
+                    <span
+                      v-if="manufacturerFilter === item"
+                      class="text-[11px] text-neutral-400"
+                    >
+                      선택됨
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 분류 -->
+              <div class="relative" ref="categoryDropdownRef">
+                <button
+                  type="button"
+                  class="h-8 w-[250px] px-3 rounded-md flex items-center justify-between
+                        bg-neutral-800/60 border border-neutral-600
+                        text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
+                  @click="toggleCategoryDropdown"
+                >
+                  <span class="truncate">{{ categoryFilterLabel }}</span>
+                  <ChevronDown class="w-4 h-4 text-neutral-400" />
+                </button>
+
+                <div
+                  v-if="showCategoryDropdown"
+                  class="absolute left-0 top-10 z-20 w-[250px] max-h-[260px] overflow-auto
+                        rounded-md border border-neutral-600 bg-neutral-800 shadow-lg p-1"
+                >
+                  <button
+                    type="button"
+                    class="w-full flex items-center justify-between px-2 py-2 rounded
+                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                    @click="selectCategory('')"
+                  >
+                    <span>전체</span>
+                    <span
+                      v-if="categoryFilter === ''"
+                      class="text-[11px] text-neutral-400"
+                    >
+                      선택됨
+                    </span>
+                  </button>
+
+                  <div class="mx-2 border-t border-neutral-700"></div>
+
+                  <button
+                    v-for="item in categoryOptions"
+                    :key="item"
+                    type="button"
+                    class="w-full flex items-center justify-between px-2 py-2 rounded
+                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                    @click="selectCategory(item)"
+                  >
+                    <span class="truncate">{{ item }}</span>
+                    <span
+                      v-if="categoryFilter === item"
+                      class="text-[11px] text-neutral-400"
+                    >
+                      선택됨
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 개조유형 -->
+              <div class="relative" ref="upgradeTypeDropdownRef">
+                <button
+                  type="button"
+                  class="h-8 w-[250px] px-3 rounded-md flex items-center justify-between
+                        bg-neutral-800/60 border border-neutral-600
+                        text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
+                  @click="toggleUpgradeTypeDropdown"
+                >
+                  <span class="truncate">{{ upgradeTypeFilterLabel }}</span>
+                  <ChevronDown class="w-4 h-4 text-neutral-400" />
+                </button>
+
+                <div
+                  v-if="showUpgradeTypeDropdown"
+                  class="absolute left-0 top-10 z-20 w-[250px] max-h-[260px] overflow-auto
+                        rounded-md border border-neutral-600 bg-neutral-800 shadow-lg p-1"
+                >
+                  <button
+                    type="button"
+                    class="w-full flex items-center justify-between px-2 py-2 rounded
+                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                    @click="selectUpgradeType('')"
+                  >
+                    <span>전체</span>
+                    <span
+                      v-if="upgradeTypeFilter === ''"
+                      class="text-[11px] text-neutral-400"
+                    >
+                      선택됨
+                    </span>
+                  </button>
+
+                  <div class="mx-2 border-t border-neutral-700"></div>
+
+                  <button
+                    v-for="item in upgradeTypeOptionsList"
+                    :key="item"
+                    type="button"
+                    class="w-full flex items-center justify-between px-2 py-2 rounded
+                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                    @click="selectUpgradeType(item)"
+                  >
+                    <span class="truncate">{{ item }}</span>
+                    <span
+                      v-if="upgradeTypeFilter === item"
+                      class="text-[11px] text-neutral-400"
+                    >
+                      선택됨
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 개조위치 -->
+              <div class="relative" ref="upgradeLocationDropdownRef">
+                <button
+                  type="button"
+                  class="h-8 w-[250px] px-3 rounded-md flex items-center justify-between
+                        bg-neutral-800/60 border border-neutral-600
+                        text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
+                  @click="toggleUpgradeLocationDropdown"
+                >
+                  <span class="truncate">{{ getMultiFilterLabel('개조위치', upgradeLocationFilters) }}</span>
+                  <ChevronDown class="w-4 h-4 text-neutral-400" />
+                </button>
+
+                <div
+                  v-if="showUpgradeLocationDropdown"
+                  class="absolute left-0 top-10 z-20 w-[250px] max-h-[260px] overflow-auto
+                        rounded-md border border-neutral-600 bg-neutral-800 shadow-lg p-1"
+                >
+                  <button
+                    type="button"
+                    class="w-full flex items-center justify-between px-2 py-2 rounded
+                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                    @click="clearMultiFilter('upgradeLocation')"
+                  >
+                    <span>전체</span>
+                  </button>
+
+                  <div class="mx-2 border-t border-neutral-700"></div>
+
+                  <label
+                    v-for="item in upgradeLocationOptions"
+                    :key="item"
+                    class="flex items-center gap-2 px-2 py-2 rounded cursor-pointer
+                          text-[13px] text-neutral-200 hover:bg-neutral-700/70"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="item"
+                      :checked="upgradeLocationFilters.includes(item)"
+                      @change="toggleMultiFilter('upgradeLocation', item)"
+                    />
+                    <span class="truncate">{{ item }}</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 획득처 -->
+              <div class="relative" ref="sourceDropdownRef">
+                <button
+                  type="button"
+                  class="h-8 w-[250px] px-3 rounded-md flex items-center justify-between
+                        bg-neutral-800/60 border border-neutral-600
+                        text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
+                  @click="toggleSourceDropdown"
+                >
+                  <span class="truncate">{{ sourceFilterLabel }}</span>
+                  <ChevronDown class="w-4 h-4 text-neutral-400" />
+                </button>
+
+                <div
+                  v-if="showSourceDropdown"
+                  class="absolute left-0 top-10 z-20 w-[250px] max-h-[260px] overflow-auto
+                        rounded-md border border-neutral-600 bg-neutral-800 shadow-lg p-1"
+                >
+                  <button
+                    type="button"
+                    class="w-full flex items-center justify-between px-2 py-2 rounded
+                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                    @click="selectSource('')"
+                  >
+                    <span>전체</span>
+                    <span
+                      v-if="sourceFilter === ''"
+                      class="text-[11px] text-neutral-400"
+                    >
+                      선택됨
+                    </span>
+                  </button>
+
+                  <div class="mx-2 border-t border-neutral-700"></div>
+
+                  <button
+                    v-for="item in sourceOptionsList"
+                    :key="item"
+                    type="button"
+                    class="w-full flex items-center justify-between px-2 py-2 rounded
+                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                    @click="selectSource(item)"
+                  >
+                    <span class="truncate">{{ item }}</span>
+                    <span
+                      v-if="sourceFilter === item"
+                      class="text-[11px] text-neutral-400"
+                    >
+                      선택됨
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 특징 -->
+              <div class="relative" ref="featureDropdownRef">
+                <button
+                  type="button"
+                  class="h-8 w-[250px] px-3 rounded-md flex items-center justify-between
+                        bg-neutral-800/60 border border-neutral-600
+                        text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
+                  @click="toggleFeatureDropdown"
+                >
+                  <span class="truncate">{{ getMultiFilterLabel('특징', featureFilters) }}</span>
+                  <ChevronDown class="w-4 h-4 text-neutral-400" />
+                </button>
+
+                <div
+                  v-if="showFeatureDropdown"
+                  class="absolute left-0 top-10 z-20 w-[250px] max-h-[260px] overflow-auto
+                        rounded-md border border-neutral-600 bg-neutral-800 shadow-lg p-1"
+                >
+                  <button
+                    type="button"
+                    class="w-full flex items-center justify-between px-2 py-2 rounded
+                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                    @click="clearMultiFilter('feature')"
+                  >
+                    <span>전체</span>
+                  </button>
+
+                  <div class="mx-2 border-t border-neutral-700"></div>
+
+                  <label
+                    v-for="item in featureOptions"
+                    :key="item"
+                    class="flex items-center gap-2 px-2 py-2 rounded cursor-pointer
+                          text-[13px] text-neutral-200 hover:bg-neutral-700/70"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="item"
+                      :checked="featureFilters.includes(item)"
+                      @change="toggleMultiFilter('feature', item)"
+                    />
+                    <span class="truncate">{{ item }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <!-- table -->
             <div class="mt-2 sm:mt-3 w-full overflow-auto max-h-[calc(100dvh-230px)]">
               <table class="w-full text-sm text-neutral-200 border-separate border-spacing-0 table-fixed">
@@ -333,9 +647,15 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { Plus, X, RotateCcw } from 'lucide-vue-next'
+import { Plus, X, RotateCcw, ChevronDown } from 'lucide-vue-next'
 import { http } from '@/api/http'
 import TransportModelModal from '@/components/TransportModelModal.vue'
+import { manufacturerOptions as manufacturerOptionItems } from '@/constants/manufacturerOptions'
+import { transportCategoryOptions as categoryOptionItems } from '@/constants/transportCategoryOptions'
+import { upgradeTypeOptions as upgradeTypeOptionItems } from '@/constants/upgradeTypeOptions'
+import { transportSourceOptions as sourceOptionItems } from '@/constants/transportSourceOptions'
+import { featureOptions as featureOptionItems } from '@/constants/featureOptions'
+import { upgradeLocationOptions as upgradeLocationOptionItems } from '@/constants/upgradeLocationOptions'
 
 const rows = ref([])
 const keyword = ref('')
@@ -345,6 +665,37 @@ const showEdit = ref(false)
 const editTarget = ref(null)
 const selectedRow = ref(null)
 const listCardRef = ref(null)
+
+const manufacturerFilter = ref('')
+const categoryFilter = ref('')
+const upgradeTypeFilter = ref('')
+const sourceFilter = ref('')
+
+const upgradeLocationFilters = ref([])
+const featureFilters = ref([])
+
+const showUpgradeLocationDropdown = ref(false)
+const showFeatureDropdown = ref(false)
+
+const upgradeLocationDropdownRef = ref(null)
+const featureDropdownRef = ref(null)
+
+const upgradeLocationOptions = ref(upgradeLocationOptionItems)
+const featureOptions = ref(featureOptionItems)
+const manufacturerOptions = ref(manufacturerOptionItems)
+const categoryOptions = ref(categoryOptionItems)
+const upgradeTypeOptionsList = ref(upgradeTypeOptionItems)
+const sourceOptionsList = ref(sourceOptionItems)
+
+const showManufacturerDropdown = ref(false)
+const showCategoryDropdown = ref(false)
+const showUpgradeTypeDropdown = ref(false)
+const showSourceDropdown = ref(false)
+
+const manufacturerDropdownRef = ref(null)
+const categoryDropdownRef = ref(null)
+const upgradeTypeDropdownRef = ref(null)
+const sourceDropdownRef = ref(null)
 
 const page = ref(1)
 const size = ref(15)
@@ -371,12 +722,34 @@ const pageNumbers = computed(() => {
   return pages
 })
 
+const manufacturerFilterLabel = computed(() => {
+  return manufacturerFilter.value || '제조사'
+})
+
+const categoryFilterLabel = computed(() => {
+  return categoryFilter.value || '분류'
+})
+
+const upgradeTypeFilterLabel = computed(() => {
+  return upgradeTypeFilter.value || '개조유형'
+})
+
+const sourceFilterLabel = computed(() => {
+  return sourceFilter.value || '획득처'
+})
+
 async function load()
 {
   try {
     const res = await http.get('/transport-models', {
       params: {
         keyword: keyword.value,
+        manufacturer: manufacturerFilter.value,
+        category: categoryFilter.value,
+        upgradeType: upgradeTypeFilter.value,
+        source: sourceFilter.value,
+        upgradeLocations: upgradeLocationFilters.value,
+        features: featureFilters.value,
         page: page.value,
         size: size.value,
         sort: sort.value
@@ -437,6 +810,18 @@ function resetFilters()
 {
   keyword.value = ''
   sort.value = 'default'
+
+  manufacturerFilter.value = ''
+  categoryFilter.value = ''
+  upgradeTypeFilter.value = ''
+  sourceFilter.value = ''
+  upgradeLocationFilters.value = []
+  featureFilters.value = []
+
+  closeSingleFilterDropdowns()
+  showUpgradeLocationDropdown.value = false
+  showFeatureDropdown.value = false
+
   page.value = 1
   load()
 }
@@ -490,6 +875,142 @@ function clearKeyword()
   keyword.value = ''
   page.value = 1
   load()
+}
+
+function applyFilterChange()
+{
+  page.value = 1
+  load()
+}
+
+function closeSingleFilterDropdowns()
+{
+  showManufacturerDropdown.value = false
+  showCategoryDropdown.value = false
+  showUpgradeTypeDropdown.value = false
+  showSourceDropdown.value = false
+}
+
+function toggleManufacturerDropdown()
+{
+  const next = !showManufacturerDropdown.value
+  closeSingleFilterDropdowns()
+  showUpgradeLocationDropdown.value = false
+  showFeatureDropdown.value = false
+  showManufacturerDropdown.value = next
+}
+
+function toggleCategoryDropdown()
+{
+  const next = !showCategoryDropdown.value
+  closeSingleFilterDropdowns()
+  showUpgradeLocationDropdown.value = false
+  showFeatureDropdown.value = false
+  showCategoryDropdown.value = next
+}
+
+function toggleUpgradeTypeDropdown()
+{
+  const next = !showUpgradeTypeDropdown.value
+  closeSingleFilterDropdowns()
+  showUpgradeLocationDropdown.value = false
+  showFeatureDropdown.value = false
+  showUpgradeTypeDropdown.value = next
+}
+
+function toggleSourceDropdown()
+{
+  const next = !showSourceDropdown.value
+  closeSingleFilterDropdowns()
+  showUpgradeLocationDropdown.value = false
+  showFeatureDropdown.value = false
+  showSourceDropdown.value = next
+}
+
+function selectManufacturer(value)
+{
+  manufacturerFilter.value = value
+  showManufacturerDropdown.value = false
+  applyFilterChange()
+}
+
+function selectCategory(value)
+{
+  categoryFilter.value = value
+  showCategoryDropdown.value = false
+  applyFilterChange()
+}
+
+function selectUpgradeType(value)
+{
+  upgradeTypeFilter.value = value
+  showUpgradeTypeDropdown.value = false
+  applyFilterChange()
+}
+
+function selectSource(value)
+{
+  sourceFilter.value = value
+  showSourceDropdown.value = false
+  applyFilterChange()
+}
+
+function clearMultiFilter(type)
+{
+  if (type === 'upgradeLocation') {
+    upgradeLocationFilters.value = []
+    showUpgradeLocationDropdown.value = false
+  } else {
+    featureFilters.value = []
+    showFeatureDropdown.value = false
+  }
+
+  applyFilterChange()
+}
+
+function toggleUpgradeLocationDropdown()
+{
+  const next = !showUpgradeLocationDropdown.value
+  closeSingleFilterDropdowns()
+  showFeatureDropdown.value = false
+  showUpgradeLocationDropdown.value = next
+}
+
+function toggleFeatureDropdown()
+{
+  const next = !showFeatureDropdown.value
+  closeSingleFilterDropdowns()
+  showUpgradeLocationDropdown.value = false
+  showFeatureDropdown.value = next
+}
+
+function toggleMultiFilter(type, value)
+{
+  const target = type === 'upgradeLocation' ? upgradeLocationFilters : featureFilters
+  const current = [...target.value]
+  const index = current.indexOf(value)
+
+  if (index > -1) {
+    current.splice(index, 1)
+  } else {
+    current.push(value)
+  }
+
+  target.value = current
+  applyFilterChange()
+}
+
+function getMultiFilterLabel(label, values)
+{
+  if (!values || values.length === 0) {
+    return label
+  }
+
+  if (values.length === 1) {
+    return values[0]
+  }
+
+  return `${label} ${values.length}개`
 }
 
 function openAdd()
@@ -643,12 +1164,32 @@ function handleDocumentClick(event)
     return
   }
 
-  if (!selectedRow.value) {
-    return
+  if (selectedRow.value && listCardRef.value && !listCardRef.value.contains(target)) {
+    selectedRow.value = null
   }
 
-  if (listCardRef.value && !listCardRef.value.contains(target)) {
-    selectedRow.value = null
+  if (upgradeLocationDropdownRef.value && !upgradeLocationDropdownRef.value.contains(target)) {
+    showUpgradeLocationDropdown.value = false
+  }
+
+  if (featureDropdownRef.value && !featureDropdownRef.value.contains(target)) {
+    showFeatureDropdown.value = false
+  }
+
+  if (manufacturerDropdownRef.value && !manufacturerDropdownRef.value.contains(target)) {
+    showManufacturerDropdown.value = false
+  }
+
+  if (categoryDropdownRef.value && !categoryDropdownRef.value.contains(target)) {
+    showCategoryDropdown.value = false
+  }
+
+  if (upgradeTypeDropdownRef.value && !upgradeTypeDropdownRef.value.contains(target)) {
+    showUpgradeTypeDropdown.value = false
+  }
+
+  if (sourceDropdownRef.value && !sourceDropdownRef.value.contains(target)) {
+    showSourceDropdown.value = false
   }
 }
 
