@@ -143,7 +143,7 @@
                     </th>
 
                     <th class="px-3 py-2 text-left w-[130px] border-b border-r border-neutral-700">개조유형</th>
-                    <th class="px-3 py-2 text-left w-[350px] border-b border-r border-neutral-700">개조위치</th>
+                    <th class="px-3 py-2 text-left w-[400px] border-b border-r border-neutral-700">개조위치</th>
 
                     <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">
                       <button
@@ -189,11 +189,11 @@
                       </button>
                     </th>
 
-                    <th class="px-3 py-2 text-left w-[250px] border-b border-r border-neutral-700">획득처</th>
-                    <th class="px-3 py-2 text-left w-[110px] border-b border-r border-neutral-700">무게</th>
+                    <th class="px-3 py-2 text-left w-[240px] border-b border-r border-neutral-700">획득처</th>
+                    <th class="px-3 py-2 text-left w-[100px] border-b border-r border-neutral-700">무게</th>
                     <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">구동방식</th>
-                    <th class="px-3 py-2 text-left w-[70px] border-b border-r border-neutral-700">좌석</th>
-                    <th class="px-3 py-2 text-left w-[580px] border-b border-r border-neutral-700">특징</th>
+                    <th class="px-3 py-2 text-left w-[60px] border-b border-r border-neutral-700">좌석</th>
+                    <th class="px-3 py-2 text-left w-[550px] border-b border-r border-neutral-700">특징</th>
                   </tr>
                 </thead>
 
