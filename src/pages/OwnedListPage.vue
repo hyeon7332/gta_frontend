@@ -162,6 +162,13 @@
                         @click="toggleGarageCollapsed(row.garageId)"
                       >
                         <div class="flex items-center w-full">
+                          <span
+                            class="text-[11px] text-neutral-400 mr-2 shrink-0"
+                          >
+                            {{ collapsedGarageIds.has(row.garageId) ? '▶' : '▼' }}
+                          </span>
+
+                          <!-- 이름 + 설명 -->
                           <div class="flex items-center gap-2 min-w-0">
                             <span class="truncate">
                               {{ row.alias ? row.alias : row.garage }}
@@ -175,7 +182,7 @@
                             </span>
                           </div>
 
-                          <!-- 오른쪽 설정 버튼 -->
+                          <!-- 설정 버튼 -->
                           <div class="ml-auto">
                             <button
                               type="button"
