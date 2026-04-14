@@ -37,7 +37,7 @@
                         hover:bg-neutral-700
                         active:bg-neutral-600
                         transition"
-                  @click="selectedGarageIds = []"
+                  @click="resetFilters"
                 >
                   <RotateCcw class="w-4 h-4" />
                 </button>
@@ -153,12 +153,39 @@
                   >
                     <!-- 차고 헤더 -->
                     <template v-if="row && row.type === 'garageHeader'">
-                      <td colspan="4"
-                          class="h-[40px] px-3 py-2
-                                bg-neutral-700/40
-                                border-b border-neutral-600
-                                text-[13px] font-semibold text-neutral-300 align-middle">
-                        {{ row.garage }}
+                      <td
+                        colspan="4"
+                        class="h-[40px] px-3 py-2
+                              bg-neutral-700/40
+                              border-b border-neutral-600
+                              text-[13px] font-semibold text-neutral-300 align-middle cursor-pointer"
+                        @click="toggleGarageCollapsed(row.garageId)"
+                      >
+                        <div class="flex items-center w-full">
+                          <div class="flex items-center gap-2 min-w-0">
+                            <span class="truncate">
+                              {{ row.alias ? row.alias : row.garage }}
+                            </span>
+
+                            <span
+                              v-if="row.description"
+                              class="text-[11px] text-neutral-400 ml-2"
+                            >
+                              {{ row.description }}
+                            </span>
+                          </div>
+
+                          <!-- 오른쪽 설정 버튼 -->
+                          <div class="ml-auto">
+                            <button
+                              type="button"
+                              class="p-1 rounded hover:bg-neutral-600/40 transition"
+                              @click.stop="openGarageSetting(row)"
+                            >
+                              <Settings class="w-4 h-4 text-neutral-400 hover:text-white" />
+                            </button>
+                          </div>
+                        </div>
                       </td>
                     </template>
                     
@@ -185,7 +212,18 @@
                     <!-- 일반 슬롯 row -->
                     <template v-else-if="row">
                       <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap align-middle', getRowHighlightClass(row)]">
-                        {{ row.slot }}
+                        <div class="flex items-center">
+                          <span class="inline-block w-[18px] text-right text-neutral-100 font-medium tabular-nums">
+                            {{ row.slot }}
+                          </span>
+
+                          <span
+                            v-if="getOfficeSectionLabel(row)"
+                            class="ml-2 text-[10px] text-neutral-500"
+                          >
+                            {{ getOfficeSectionLabel(row) }}
+                          </span>
+                        </div>
                       </td>
                       <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
                       <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 align-middle', getRowHighlightClass(row)]">
@@ -272,13 +310,20 @@
     @update="handleUpdate"
     @delete="handleDelete"
   />
+
+  <GarageSettingModal
+    v-model:open="showGarageSettingModal"
+    :garage="selectedGarageSettingRow"
+    @save="handleGarageSettingSave"
+  />
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { http } from '@/api/http'
-import { Plus, RotateCcw, ChevronDown } from 'lucide-vue-next'
+import { Plus, RotateCcw, ChevronDown, Settings } from 'lucide-vue-next'
 import OwnedTransportModal from '@/components/OwnedTransportModal.vue'
+import GarageSettingModal from '@/components/GarageSettingModal.vue'
 
 // list state
 const rows = ref([])
@@ -301,6 +346,11 @@ let activeRowTimer = null
 const selectedGarageIds = ref([])
 const showGarageFilterDropdown = ref(false)
 const garageFilterRef = ref(null)
+
+const collapsedGarageIds = ref(new Set())
+
+const showGarageSettingModal = ref(false)
+const selectedGarageSettingRow = ref(null)
 
 watch(selectedGarageIds, () => {
   activeRowKey.value = ''
@@ -366,6 +416,25 @@ function toggleGarageFilter(garageId)
     })
     selectedGarageIds.value = [...selectedGarageIds.value, targetId]
   }
+}
+
+function resetFilters()
+{
+  selectedGarageIds.value = []
+  collapsedGarageIds.value = new Set()
+}
+
+function toggleGarageCollapsed(garageId)
+{
+  const next = new Set(collapsedGarageIds.value)
+
+  if (next.has(garageId)) {
+    next.delete(garageId)
+  } else {
+    next.add(garageId)
+  }
+
+  collapsedGarageIds.value = next
 }
 
 function getUpgradeTypeDisplayText(upgradeType)
@@ -723,8 +792,15 @@ const slotRows = computed(() => {
       id: `garage-header-${garageId}`,
       type: 'garageHeader',
       garageId,
-      garage: garageName
+      garage: garageName,
+      alias: garage.alias ?? null,
+      description: garage.description ?? null,
+      collapsedYn: garage.collapsedYn ?? 'N'
     })
+
+    if (collapsedGarageIds.value.has(garageId)) {
+      return
+    }
 
     for (let slotNo = 1; slotNo <= slotCount; slotNo++) {
       const found = rows.value.find((row) => {
@@ -957,11 +1033,159 @@ async function loadGarages()
     garageList.value = list.map((x) => ({
       garageId: x.garageId ?? x.id ?? x.garage_id,
       garageName: x.garageName ?? x.name ?? x.garage ?? x.garage_name ?? '-',
-      slotCount: Number(x.slotCount ?? x.slot_count ?? x.totalSlots ?? x.capacity ?? 0)
+      slotCount: Number(x.slotCount ?? x.slot_count ?? x.totalSlots ?? x.capacity ?? 0),
+
+      alias: x.alias ?? null,
+      description: x.description ?? null,
+      collapsedYn: x.collapsedYn ?? x.collapsed_yn ?? 'N'
     }))
+
+    const initialCollapsedIds = garageList.value
+      .filter((garage) => {
+        return garage.collapsedYn === 'Y'
+      })
+      .map((garage) => {
+        return garage.garageId
+      })
+
+    collapsedGarageIds.value = new Set(initialCollapsedIds)
   } catch (err) {
     console.error('차고 목록 조회 실패:', err)
     garageList.value = []
+  }
+}
+
+function isOfficeGarage(garageName)
+{
+  if (!garageName) {
+    return false
+  }
+
+  return garageName.includes('오피스 차고')
+}
+
+function extractOfficeGarageNumber(garageName)
+{
+  if (!garageName) {
+    return null
+  }
+
+  const match = garageName.match(/오피스\s*차고\s*(\d+)/)
+
+  if (!match) {
+    return null
+  }
+
+  return Number(match[1])
+}
+
+function formatOfficeGarageSlot(garageName, slotNo)
+{
+  const officeNo = extractOfficeGarageNumber(garageName)
+  const slot = Number(slotNo)
+
+  if (!officeNo || !slot) {
+    return String(slotNo ?? '-')
+  }
+
+  let section = ''
+
+  if (slot >= 1 && slot <= 6) {
+    section = 'A'
+  } else if (slot >= 7 && slot <= 13) {
+    section = 'B'
+  } else if (slot >= 14 && slot <= 20) {
+    section = 'C'
+  } else {
+    return String(slotNo)
+  }
+
+  return `${officeNo}${section}-${slot}`
+}
+
+function getDisplaySlot(row)
+{
+  if (!row || row.type !== 'slot') {
+    return '-'
+  }
+
+  if (row.isEmpty && !row.garage) {
+    return String(row.slot ?? '-')
+  }
+
+  if (isOfficeGarage(row.garage)) {
+    return formatOfficeGarageSlot(row.garage, row.slot)
+  }
+
+  return String(row.slot ?? '-')
+}
+
+function getOfficeSectionLabel(row)
+{
+  if (!row || row.type !== 'slot') {
+    return ''
+  }
+
+  if (!isOfficeGarage(row.garage)) {
+    return ''
+  }
+
+  const officeNo = extractOfficeGarageNumber(row.garage)
+  const slot = Number(row.slot)
+
+  if (!officeNo || !slot) {
+    return ''
+  }
+
+  if (slot >= 1 && slot <= 6) {
+    return `${officeNo}A`
+  }
+
+  if (slot >= 7 && slot <= 13) {
+    return `${officeNo}B`
+  }
+
+  if (slot >= 14 && slot <= 20) {
+    return `${officeNo}C`
+  }
+
+  return ''
+}
+
+function openGarageSetting(row)
+{
+  if (!row) {
+    return
+  }
+
+  selectedGarageSettingRow.value = {
+    garageId: row.garageId,
+    garage: row.garage,
+    garageName: row.garage,
+    alias: row.alias ?? '',
+    description: row.description ?? ''
+  }
+
+  showGarageSettingModal.value = true
+}
+
+async function handleGarageSettingSave(payload)
+{
+  try {
+    await http.put(`/garages/${payload.garageId}/setting`, {
+      alias: payload.alias,
+      description: payload.description
+    })
+
+    showGarageSettingModal.value = false
+    selectedGarageSettingRow.value = null
+
+    showToast('차고 설정 저장 완료')
+
+    await loadGarages()
+  } catch (err) {
+    console.error('차고 설정 저장 실패:', err)
+    showToast('차고 설정 저장 실패')
   }
 }
 
