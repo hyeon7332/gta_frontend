@@ -42,6 +42,19 @@
                   <RotateCcw class="w-4 h-4" />
                 </button>
 
+                <button
+                  type="button"
+                  class="h-8 px-2 flex items-center gap-1
+                        rounded-md
+                        text-[12px] text-neutral-300
+                        hover:bg-neutral-700/40
+                        transition"
+                  @click="toggleAllGaragesCollapsed"
+                >
+                  <ChevronsUpDown class="w-4 h-4" />
+                  <span>{{ allGarageCollapsed ? '펼침' : '접힘' }}</span>
+                </button>
+
                 <div
                   v-if="showGarageFilterDropdown"
                   class="absolute left-0 top-full mt-2 z-30
@@ -85,17 +98,11 @@
               </div>
 
               <!-- toast -->
-              <div
-                v-if="toast.open"
-                class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2
-                       px-4 py-1.5 rounded-md border
-                       bg-neutral-900 border-neutral-700
-                       text-neutral-200 text-sm
-                       shadow-lg flex items-center gap-2 pointer-events-none"
-              >
-                <span class="inline-block w-2 h-2 rounded-full bg-green-400"></span>
-                <span>{{ toast.text }}</span>
-              </div>
+              <Toast
+                :open="toast.open"
+                :text="toast.text"
+                :type="toast.type"
+              />
 
               <button
                 type="button"
@@ -159,10 +166,11 @@
                               bg-neutral-700/40
                               border-b border-neutral-600
                               text-[13px] font-semibold text-neutral-300 align-middle cursor-pointer"
-                        @click="toggleGarageCollapsed(row.garageId)"
+                        @click="row.garageId ? toggleGarageCollapsed(row.garageId) : null"
                       >
                         <div class="flex items-center w-full">
                           <span
+                            v-if="row.garageId"
                             class="text-[11px] text-neutral-400 mr-2 shrink-0"
                           >
                             {{ collapsedGarageIds.has(row.garageId) ? '▶' : '▼' }}
@@ -183,7 +191,7 @@
                           </div>
 
                           <!-- 설정 버튼 -->
-                          <div class="ml-auto">
+                          <div v-if="row.garageId" class="ml-auto">
                             <button
                               type="button"
                               class="p-1 rounded hover:bg-neutral-600/40 transition"
@@ -198,22 +206,16 @@
                     
                     <!-- 미배치 row -->
                     <template v-else-if="row && (row.type === 'unassigned' || row.type === 'pegasus')">
-                      <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">-</td>
-                      <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
-                      <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">
+                      <td :class="[tdBaseClass, getRowHighlightClass(row)]">-</td>
+                      <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
+                      <td :class="[tdBaseClass, getRowHighlightClass(row)]">
                         <div class="flex items-baseline gap-1.5 min-w-0">
                           <span class="truncate">
-                            {{ row.name }}
-                          </span>
-                          <span
-                            v-if="getUpgradeTypeDisplayText(row.upgradeType)"
-                            class="text-[10px] text-neutral-400 shrink-0"
-                          >
-                            {{ getUpgradeTypeDisplayText(row.upgradeType) }}
+                            {{ getModelDisplay(row) }}
                           </span>
                         </div>
                       </td>
-                      <td :class="['px-3 py-2 border-b border-neutral-700', getRowHighlightClass(row)]">{{ row.category }}</td>
+                      <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.category }}</td>
                     </template>
 
                     <!-- 일반 슬롯 row -->
@@ -236,13 +238,7 @@
                       <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 align-middle', getRowHighlightClass(row)]">
                         <div class="flex items-baseline gap-1.5 min-w-0">
                           <span class="truncate">
-                            {{ row.name }}
-                          </span>
-                          <span
-                            v-if="getUpgradeTypeDisplayText(row.upgradeType)"
-                            class="text-[10px] text-neutral-400 shrink-0"
-                          >
-                            {{ getUpgradeTypeDisplayText(row.upgradeType) }}
+                            {{ getModelDisplay(row) }}
                           </span>
                         </div>
                       </td>
@@ -328,41 +324,87 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { http } from '@/api/http'
-import { Plus, RotateCcw, ChevronDown, Settings } from 'lucide-vue-next'
+import { Plus, RotateCcw, ChevronDown, Settings, ChevronsUpDown } from 'lucide-vue-next'
 import OwnedTransportModal from '@/components/OwnedTransportModal.vue'
 import GarageSettingModal from '@/components/GarageSettingModal.vue'
+import Toast from '@/components/Toast.vue'
+import {
+  extractList,
+  normalizeOwnedTransport,
+  normalizeGarage,
+  normalizeTransportModel
+} from '@/utils/transportDataMapper'
 
-// list state
+// 보유 이동수단 목록 데이터
 const rows = ref([])
 
+// 현재 드래그 중인 행 정보
 const draggingRow = ref(null)
+
+// 드롭 처리 중 여부
 const dropLoading = ref(false)
+
+// 현재 드롭 대상 슬롯 키
 const activeDropSlotKey = ref('')
 
-// options for modal
+// 모달에서 사용할 이동수단 옵션 목록
 const transportList = ref([])
+
+// 화면에 표시할 차고 목록
 const garageList = ref([])
 
+// 보유 이동수단 모달 표시 여부
 const showModal = ref(false)
+
+// 보유 이동수단 모달 모드
 const modalMode = ref('create') // create | edit
+
+// 수정 대상 행 데이터
 const editTarget = ref(null)
 
+// 현재 하이라이트된 행 키
 const activeRowKey = ref('')
-let activeRowTimer = null
 
+// 선택된 차고 필터 목록
 const selectedGarageIds = ref([])
+
+// 차고 필터 드롭다운 표시 여부
 const showGarageFilterDropdown = ref(false)
+
+// 차고 필터 영역 DOM 참조
 const garageFilterRef = ref(null)
 
+// 접힌 차고 ID 집합
 const collapsedGarageIds = ref(new Set())
 
+// 차고 설정 모달 표시 여부
 const showGarageSettingModal = ref(false)
+
+// 설정 중인 차고 데이터
 const selectedGarageSettingRow = ref(null)
 
+// 테이블 셀 기본 스타일
+const tdBaseClass = 'px-3 py-2 border-b border-neutral-700'
+
+// 토스트 상태 및 타입
+const toast = ref({ open: false, text: '', type: 'success' })
+
+// 토스트 자동 닫힘 타이머
+let toastTimer = null
+
+// 차고 필터 변경 시 행 하이라이트 초기화
 watch(selectedGarageIds, () => {
   activeRowKey.value = ''
 })
 
+// 모달 닫힘 시 행 하이라이트 초기화
+watch(showModal, (isOpen) => {
+  if (!isOpen) {
+    activeRowKey.value = ''
+  }
+})
+
+// 개조타입 표시명 매핑
 const upgradeTypeDisplayMap = {
   'HSW': 'HSW',
   '드리프트': 'Drift',
@@ -370,18 +412,248 @@ const upgradeTypeDisplayMap = {
   '베니즈 커스텀': "Benny's"
 }
 
-function extractList(data)
-{
-  return (
-    (Array.isArray(data?.items) && data.items) ||
-    (Array.isArray(data?.list) && data.list) ||
-    (Array.isArray(data?.content) && data.content) ||
-    (Array.isArray(data?.data) && data.data) ||
-    (Array.isArray(data) && data) ||
-    []
-  )
-}
+// 모든 일반 차고가 접혀있는지 여부
+const allGarageCollapsed = computed(() => {
+  const garageIds = garageList.value
+    .map((garage) => {
+      return garage.garageId
+    })
+    .filter((garageId) => {
+      return garageId !== null && garageId !== undefined
+    })
 
+  if (garageIds.length === 0) {
+    return false
+  }
+
+  return garageIds.every((garageId) => {
+    return collapsedGarageIds.value.has(garageId)
+  })
+})
+
+// 차고ID-슬롯번호 기준으로 보유 이동수단을 빠르게 찾기 위한 lookup 맵
+const slotRowMap = computed(() => {
+  const map = new Map()
+
+  rows.value.forEach((row) => {
+    if (!row.garageId || !row.slot) {
+      return
+    }
+
+    const key = `${row.garageId}-${row.slot}`
+    map.set(key, row)
+  })
+
+  return map
+})
+
+// 차고 목록을 기반으로 화면에 표시할 슬롯 구조 생성
+const slotRows = computed(() => {
+  const result = []
+
+  garageList.value.forEach((garage) => {
+    const garageId = garage.garageId
+    const garageName = garage.garageName
+    const slotCount = Number(garage.slotCount ?? 0)
+
+    result.push({
+      id: `garage-header-${garageId}`,
+      type: 'garageHeader',
+      garageId,
+      garage: garageName,
+      alias: garage.alias ?? null,
+      description: garage.description ?? null
+    })
+
+    if (collapsedGarageIds.value.has(garageId)) {
+      return
+    }
+
+    for (let slotNo = 1; slotNo <= slotCount; slotNo++) {
+      const slotKey = `${garageId}-${slotNo}`
+      const found = slotRowMap.value.get(slotKey)
+
+      if (found) {
+        result.push({
+          ...found,
+          type: 'slot',
+          garageId,
+          garage: garageName,
+          slot: slotNo,
+          isEmpty: false
+        })
+      } else {
+        result.push({
+          id: `empty-${garageId}-${slotNo}`,
+          type: 'slot',
+          garageId,
+          garage: garageName,
+          slot: slotNo,
+          manufacturer: '-',
+          name: '-',
+          category: '-',
+          isEmpty: true
+        })
+      }
+    }
+  })
+
+  return result
+})
+
+// 차고 필터 적용 후 슬롯 행 목록
+const filteredSlotRows = computed(() => {
+  if (selectedGarageIds.value.length === 0) {
+    return slotRows.value
+  }
+
+  return slotRows.value.filter((row) => {
+    return selectedGarageIds.value.includes(String(row.garageId))
+  })
+})
+
+// 미배치 행 목록
+const unassignedRows = computed(() => {
+  return rows.value
+    .filter((row) => {
+      return row.storageType === 'UNASSIGNED' || (!row.storageType && !row.garageId)
+    })
+    .map((row) => ({
+      ...row,
+      type: 'unassigned'
+    }))
+})
+
+// 미배치 건수
+const unassignedCount = computed(() => {
+  return unassignedRows.value.length
+})
+
+// 페가수스 행 목록
+const pegasusRows = computed(() => {
+  return rows.value
+    .filter((row) => {
+      return row.storageType === 'PEGASUS'
+    })
+    .map((row) => ({
+      ...row,
+      type: 'pegasus'
+    }))
+})
+
+// 페가수스 건수
+const pegasusCount = computed(() => {
+  return pegasusRows.value.length
+})
+
+// 미배치 표시용 행 목록
+const unassignedDisplayRows = computed(() => {
+  if (unassignedRows.value.length === 0) {
+    return []
+  }
+
+  return [
+    {
+      id: 'unassigned-header',
+      type: 'garageHeader',
+      garage: '미배치'
+    },
+    ...unassignedRows.value
+  ]
+})
+
+// 페가수스 표시용 행 목록
+const pegasusDisplayRows = computed(() => {
+  if (pegasusRows.value.length === 0) {
+    return []
+  }
+
+  return [
+    {
+      id: 'pegasus-header',
+      type: 'garageHeader',
+      garage: '페가수스'
+    },
+    ...pegasusRows.value
+  ]
+})
+
+// 테이블에 최종 표시할 행 목록
+const displayRows = computed(() => {
+  if (selectedGarageIds.value.includes('unassigned')) {
+    return unassignedDisplayRows.value
+  }
+
+  if (selectedGarageIds.value.includes('pegasus')) {
+    return pegasusDisplayRows.value
+  }
+
+  const minRows = 15
+  const emptyCount = Math.max(0, minRows - filteredSlotRows.value.length)
+
+  return [
+    ...filteredSlotRows.value,
+    ...Array.from({ length: emptyCount }, () => null)
+  ]
+})
+
+// 차고 필터 드롭다운 옵션 목록
+const garageFilterOptions = computed(() => {
+  return [
+    { garageId: 'all', garageName: '전체' },
+    { garageId: 'unassigned', garageName: '미배치' },
+    { garageId: 'pegasus', garageName: '페가수스' },
+    ...garageList.value.map((garage) => ({
+      garageId: String(garage.garageId),
+      garageName: garage.alias ? garage.alias : garage.garageName
+    }))
+  ]
+})
+
+// 선택된 차고 필터 라벨
+const selectedGarageFilterLabel = computed(() => {
+  if (selectedGarageIds.value.length === 0) {
+    return '전체'
+  }
+
+  const selectedOptions = garageFilterOptions.value.filter((garage) => {
+    return garage.garageId !== 'all' && selectedGarageIds.value.includes(String(garage.garageId))
+  })
+
+  if (selectedOptions.length === 0) {
+    return '전체'
+  }
+
+  if (selectedOptions.length === 1) {
+    return selectedOptions[0].garageName
+  }
+
+  return `${selectedOptions[0].garageName} 외 ${selectedOptions.length - 1}`
+})
+
+// 전체 슬롯 수
+const totalSlotCount = computed(() => {
+  return garageList.value.reduce((sum, garage) => {
+    return sum + Number(garage.slotCount ?? 0)
+  }, 0)
+})
+
+// 사용 중인 슬롯 수
+const usedSlotCount = computed(() => {
+  const occupiedSlotKeys = new Set()
+
+  rows.value.forEach((row) => {
+    if (!row.garageId || !row.slot) {
+      return
+    }
+
+    occupiedSlotKeys.add(`${row.garageId}-${row.slot}`)
+  })
+
+  return occupiedSlotKeys.size
+})
+
+// 외부 클릭 시 차고 필터 드롭다운 닫기
 function handleClickOutside(e)
 {
   if (!showGarageFilterDropdown.value) {
@@ -399,6 +671,7 @@ function handleClickOutside(e)
   }
 }
 
+// 차고 필터 항목 선택/해제 처리
 function toggleGarageFilter(garageId)
 {
   const targetId = String(garageId)
@@ -425,12 +698,14 @@ function toggleGarageFilter(garageId)
   }
 }
 
+// 차고 필터와 접힘 상태 초기화
 function resetFilters()
 {
   selectedGarageIds.value = []
   collapsedGarageIds.value = new Set()
 }
 
+// 특정 차고 접힘 상태 토글
 function toggleGarageCollapsed(garageId)
 {
   const next = new Set(collapsedGarageIds.value)
@@ -444,6 +719,30 @@ function toggleGarageCollapsed(garageId)
   collapsedGarageIds.value = next
 }
 
+// 모든 차고 접힘/펼침 토글
+function toggleAllGaragesCollapsed()
+{
+  const garageIds = garageList.value
+    .map((garage) => {
+      return garage.garageId
+    })
+    .filter((garageId) => {
+      return garageId !== null && garageId !== undefined
+    })
+
+  if (garageIds.length === 0) {
+    return
+  }
+
+  if (allGarageCollapsed.value) {
+    collapsedGarageIds.value = new Set()
+    return
+  }
+
+  collapsedGarageIds.value = new Set(garageIds)
+}
+
+// 개조타입 표시 텍스트 생성
 function getUpgradeTypeDisplayText(upgradeType)
 {
   if (!upgradeType || upgradeType.trim() === '') {
@@ -472,6 +771,19 @@ function getUpgradeTypeDisplayText(upgradeType)
   return labels.join(' / ')
 }
 
+// 모델명 + 개조타입 표시 텍스트 생성
+function getModelDisplay(row)
+{
+  const upgrade = getUpgradeTypeDisplayText(row.upgradeType)
+
+  if (!upgrade) {
+    return row.name
+  }
+
+  return `${row.name} (${upgrade})`
+}
+
+// 등록 모달 열기
 function openCreateModal()
 {
   modalMode.value = 'create'
@@ -479,6 +791,7 @@ function openCreateModal()
   showModal.value = true
 }
 
+// 수정 모달 열기
 function openEdit(row)
 {
   if (!row) {
@@ -490,12 +803,7 @@ function openEdit(row)
   showModal.value = true
 }
 
-watch(showModal, (isOpen) => {
-  if (!isOpen) {
-    activeRowKey.value = ''
-  }
-})
-
+// 행 하이라이트 적용
 function highlightRow(row)
 {
   const key = getRowHighlightKey(row)
@@ -507,6 +815,7 @@ function highlightRow(row)
   activeRowKey.value = key
 }
 
+// 슬롯 더블클릭 동작 처리
 function handleSlotDoubleClick(row)
 {
   if (!row) {
@@ -544,97 +853,19 @@ function handleSlotDoubleClick(row)
   openEdit(row)
 }
 
-// toast
-const toast = ref({ open: false, text: '' })
-let toastTimer = null
-
-function showToast(text)
-{
-  toast.value = { open: true, text }
-
-  if (toastTimer) {
-    clearTimeout(toastTimer)
-  }
-
-  toastTimer = setTimeout(() => {
-    toast.value.open = false
-  }, 3000)
-}
-
-onUnmounted(() =>
-{
-  if (toastTimer) {
-    clearTimeout(toastTimer)
-    toastTimer = null
-  }
-})
-
-async function handleCreated(payload)
-{
-  try {
-    await http.post('/owned-transports', payload)
-
-    showModal.value = false
-    editTarget.value = null
-    activeRowKey.value = ''
-
-    showToast('등록 완료')
-
-    await load()
-
-  } catch (err) {
-    console.error('등록 실패:', err)
-    showToast('등록 실패')
-  }
-}
-
-async function handleDelete(id)
-{
-  try {
-    await http.delete(`/owned-transports/${id}`)
-    showToast('삭제 완료')
-    showModal.value = false
-    editTarget.value = null
-    activeRowKey.value = ''
-
-    await load()
-  } catch (err) {
-    console.error('삭제 실패:', err)
-    showToast('삭제 실패')
-  }
-}
-
-async function handleUpdate(payload)
-{
-  try {
-    await http.patch(`/owned-transports/${payload.ownedId}`, {
-      storageType: payload.storageType,
-      garageId: payload.garageId,
-      slotNo: payload.slotNo
-    })
-
-    showToast('수정 완료')
-    showModal.value = false
-    editTarget.value = null
-    activeRowKey.value = ''
-
-    await load()
-  } catch (err) {
-    console.error('수정 실패:', err)
-    showToast('수정 실패')
-  }
-}
-
+// 행이 드래그 가능한지 여부
 function canDragRow(row)
 {
   return !!row && row.type === 'slot' && !row.isEmpty
 }
 
+// 행이 드롭 가능한지 여부
 function canDropToRow(row)
 {
   return !!row && row.type === 'slot'
 }
 
+// 차고ID-슬롯번호 조합 키 생성
 function getSlotKey(row)
 {
   if (!row) {
@@ -644,6 +875,7 @@ function getSlotKey(row)
   return `${row.garageId}-${row.slot}`
 }
 
+// 행 하이라이트 키 생성
 function getRowHighlightKey(row)
 {
   if (!row) {
@@ -665,6 +897,7 @@ function getRowHighlightKey(row)
   return ''
 }
 
+// 행 하이라이트 클래스 반환
 function getRowHighlightClass(row)
 {
   return getRowHighlightKey(row) === activeRowKey.value
@@ -672,6 +905,7 @@ function getRowHighlightClass(row)
     : ''
 }
 
+// 현재 드롭 대상 여부 판단
 function isDropTarget(row)
 {
   if (!draggingRow.value) {
@@ -689,6 +923,7 @@ function isDropTarget(row)
   return activeDropSlotKey.value === getSlotKey(row)
 }
 
+// 드래그 시작 처리
 function handleDragStart(row)
 {
   if (!canDragRow(row)) {
@@ -702,12 +937,14 @@ function handleDragStart(row)
   }
 }
 
+// 드래그 종료 처리
 function handleDragEnd()
 {
   draggingRow.value = null
   activeDropSlotKey.value = ''
 }
 
+// 드래그 오버 처리
 function handleDragOver(e, row)
 {
   if (dropLoading.value) {
@@ -727,341 +964,7 @@ function handleDragOver(e, row)
   e.preventDefault()
 }
 
-async function handleDrop(row)
-{
-  if (dropLoading.value) {
-    return
-  }
-
-  if (!draggingRow.value) {
-    return
-  }
-
-  if (!canDropToRow(row)) {
-    return
-  }
-
-  const source = draggingRow.value
-  const targetGarageId = row.garageId
-  const targetSlotNo = row.slot
-
-  if (
-    Number(source.garageId) === Number(targetGarageId) &&
-    Number(source.slotNo) === Number(targetSlotNo)
-  ) {
-    draggingRow.value = null
-    activeDropSlotKey.value = ''
-    return
-  }
-
-  try {
-    dropLoading.value = true
-
-    // 1) 빈 슬롯으로 이동
-    if (row.isEmpty) {
-      await http.patch(`/owned-transports/${source.ownedId}`, {
-        storageType: 'GARAGE',
-        garageId: targetGarageId,
-        slotNo: targetSlotNo
-      })
-
-      showToast('슬롯 이동 완료')
-    } else {
-      // 2) 차량 있는 슬롯과 자리 교체
-      await http.patch('/owned-transports/swap', {
-        sourceOwnedId: source.ownedId,
-        targetOwnedId: row.id
-      })
-
-      showToast('슬롯 교체 완료')
-    }
-
-    await load()
-  } catch (err) {
-    console.error('슬롯 처리 실패:', err)
-    showToast('슬롯 처리 실패')
-  } finally {
-    draggingRow.value = null
-    activeDropSlotKey.value = ''
-    dropLoading.value = false
-  }
-}
-
-const slotRows = computed(() => {
-  const result = []
-
-  garageList.value.forEach((garage) => {
-    const garageId = garage.garageId
-    const garageName = garage.garageName
-    const slotCount = Number(garage.slotCount ?? 0)
-
-    result.push({
-      id: `garage-header-${garageId}`,
-      type: 'garageHeader',
-      garageId,
-      garage: garageName,
-      alias: garage.alias ?? null,
-      description: garage.description ?? null,
-      collapsedYn: garage.collapsedYn ?? 'N'
-    })
-
-    if (collapsedGarageIds.value.has(garageId)) {
-      return
-    }
-
-    for (let slotNo = 1; slotNo <= slotCount; slotNo++) {
-      const found = rows.value.find((row) => {
-        return Number(row.garageId) === Number(garageId) && Number(row.slot) === slotNo
-      })
-
-      if (found) {
-        result.push({
-          ...found,
-          type: 'slot',
-          garageId,
-          garage: garageName,
-          slot: slotNo,
-          isEmpty: false
-        })
-      } else {
-        result.push({
-          id: `empty-${garageId}-${slotNo}`,
-          type: 'slot',
-          garageId,
-          garage: garageName,
-          slot: slotNo,
-          manufacturer: '-',
-          name: '-',
-          category: '-',
-          isEmpty: true
-        })
-      }
-    }
-  })
-
-  return result
-})
-
-const filteredSlotRows = computed(() => {
-  if (selectedGarageIds.value.length === 0) {
-    return slotRows.value
-  }
-
-  return slotRows.value.filter((row) => {
-    return selectedGarageIds.value.includes(String(row.garageId))
-  })
-})
-
-const unassignedRows = computed(() => {
-  return rows.value
-    .filter((row) => {
-      return row.storageType === 'UNASSIGNED' || (!row.storageType && !row.garageId)
-    })
-    .map((row) => ({
-      ...row,
-      type: 'unassigned'
-    }))
-})
-
-const unassignedCount = computed(() => {
-  return unassignedRows.value.length
-})
-
-const pegasusCount = computed(() => {
-  return pegasusRows.value.length
-})
-
-const pegasusRows = computed(() => {
-  return rows.value
-    .filter((row) => {
-      return row.storageType === 'PEGASUS'
-    })
-    .map((row) => ({
-      ...row,
-      type: 'pegasus'
-    }))
-})
-
-const unassignedDisplayRows = computed(() => {
-  if (unassignedRows.value.length === 0) {
-    return []
-  }
-
-  return [
-    {
-      id: 'unassigned-header',
-      type: 'garageHeader',
-      garage: '미배치'
-    },
-    ...unassignedRows.value
-  ]
-})
-
-const pegasusDisplayRows = computed(() => {
-  if (pegasusRows.value.length === 0) {
-    return []
-  }
-
-  return [
-    {
-      id: 'pegasus-header',
-      type: 'garageHeader',
-      garage: '페가수스'
-    },
-    ...pegasusRows.value
-  ]
-})
-
-const displayRows = computed(() => {
-  if (selectedGarageIds.value.includes('unassigned')) {
-    return unassignedDisplayRows.value
-  }
-
-  if (selectedGarageIds.value.includes('pegasus')) {
-    return pegasusDisplayRows.value
-  }
-
-  const minRows = 15
-  const emptyCount = Math.max(0, minRows - filteredSlotRows.value.length)
-
-  return [
-    ...filteredSlotRows.value,
-    ...Array.from({ length: emptyCount }, () => null)
-  ]
-})
-
-const garageFilterOptions = computed(() => {
-  return [
-    { garageId: 'all', garageName: '전체' },
-    { garageId: 'unassigned', garageName: '미배치' },
-    { garageId: 'pegasus', garageName: '페가수스' },
-    ...garageList.value.map((garage) => ({
-      garageId: String(garage.garageId),
-      garageName: garage.garageName
-    }))
-  ]
-})
-
-const selectedGarageFilterLabel = computed(() => {
-  if (selectedGarageIds.value.length === 0) {
-    return '전체'
-  }
-
-  const selectedOptions = garageFilterOptions.value.filter((garage) => {
-    return garage.garageId !== 'all' && selectedGarageIds.value.includes(String(garage.garageId))
-  })
-
-  if (selectedOptions.length === 0) {
-    return '전체'
-  }
-
-  if (selectedOptions.length === 1) {
-    return selectedOptions[0].garageName
-  }
-
-  return `${selectedOptions[0].garageName} 외 ${selectedOptions.length - 1}`
-})
-
-const totalSlotCount = computed(() => {
-  return garageList.value.reduce((sum, garage) => {
-    return sum + Number(garage.slotCount ?? 0)
-  }, 0)
-})
-
-const usedSlotCount = computed(() => {
-  const occupiedSlotKeys = new Set()
-
-  rows.value.forEach((row) => {
-    if (!row.garageId || !row.slot) {
-      return
-    }
-
-    occupiedSlotKeys.add(`${row.garageId}-${row.slot}`)
-  })
-
-  return occupiedSlotKeys.size
-})
-
-const garageFooterText = computed(() => {
-  return `총 ${totalSlotCount.value}칸 중 ${usedSlotCount.value}칸 사용중`
-})
-
-// api: list
-async function load()
-{
-  try {
-    const res = await http.get('/owned-transports')
-    const list = extractList(res.data)
-
-    rows.value = list.map((x) => ({
-      id: x.id ?? x.ownedTransportId ?? x.ownedId ?? x.transportId,
-      garageId: x.garageId ?? x.garage_id ?? null,
-      garage: x.garageName ?? x.garage_name ?? x.garage ?? x.storage ?? '-',
-      slot: x.slot ?? x.slotNo ?? x.slot_no ?? null,
-      storageType: x.storageType ?? x.storage_type ?? '',
-
-      manufacturer: x.manufacturer ?? x.maker ?? x.brand ?? x.manufacturerName ?? '-',
-      name: x.name ?? x.modelName ?? x.transportName ?? '-',
-      upgradeType: x.upgradeType ?? x.upgrade_type ?? '',
-      category: x.category ?? x.transportCategory ?? x.className ?? x.class ?? '-',
-      price: x.price ?? x.priceNumber ?? x.cost ?? null,
-      releaseDate: x.releaseDate ?? x.release_date ?? '-'
-    }))
-
-  } catch (err) {
-    console.error('목록 조회 실패:', err)
-    rows.value = []
-  }
-}
-
-// api: transports (options)
-async function loadTransportModels()
-{
-  try {
-    const res = await http.get('/transport-models/options')
-    const data = res.data
-    const list = extractList(data)
-
-    transportList.value = list
-  } catch (err) {
-    console.error('이동수단 목록 조회 실패:', err)
-    transportList.value = []
-  }
-}
-
-// api: garages (options)
-async function loadGarages()
-{
-  try {
-    const res = await http.get('/garages')
-    const data = res.data
-    const list = extractList(data)
-
-    garageList.value = list.map((x) => ({
-      garageId: x.garageId ?? x.id ?? x.garage_id,
-      garageName: x.garageName ?? x.name ?? x.garage ?? x.garage_name ?? '-',
-      slotCount: Number(x.slotCount ?? x.slot_count ?? x.totalSlots ?? x.capacity ?? 0),
-
-      alias: x.alias ?? null,
-      description: x.description ?? null,
-      collapsedYn: x.collapsedYn ?? x.collapsed_yn ?? 'N'
-    }))
-
-    const initialCollapsedIds = garageList.value
-      .filter((garage) => {
-        return garage.collapsedYn === 'Y'
-      })
-      .map((garage) => {
-        return garage.garageId
-      })
-
-    collapsedGarageIds.value = new Set(initialCollapsedIds)
-  } catch (err) {
-    console.error('차고 목록 조회 실패:', err)
-    garageList.value = []
-  }
-}
-
+// 오피스 차고 여부 판단
 function isOfficeGarage(garageName)
 {
   if (!garageName) {
@@ -1071,6 +974,7 @@ function isOfficeGarage(garageName)
   return garageName.includes('오피스 차고')
 }
 
+// 오피스 차고 번호 추출
 function extractOfficeGarageNumber(garageName)
 {
   if (!garageName) {
@@ -1086,47 +990,7 @@ function extractOfficeGarageNumber(garageName)
   return Number(match[1])
 }
 
-function formatOfficeGarageSlot(garageName, slotNo)
-{
-  const officeNo = extractOfficeGarageNumber(garageName)
-  const slot = Number(slotNo)
-
-  if (!officeNo || !slot) {
-    return String(slotNo ?? '-')
-  }
-
-  let section = ''
-
-  if (slot >= 1 && slot <= 6) {
-    section = 'A'
-  } else if (slot >= 7 && slot <= 13) {
-    section = 'B'
-  } else if (slot >= 14 && slot <= 20) {
-    section = 'C'
-  } else {
-    return String(slotNo)
-  }
-
-  return `${officeNo}${section}-${slot}`
-}
-
-function getDisplaySlot(row)
-{
-  if (!row || row.type !== 'slot') {
-    return '-'
-  }
-
-  if (row.isEmpty && !row.garage) {
-    return String(row.slot ?? '-')
-  }
-
-  if (isOfficeGarage(row.garage)) {
-    return formatOfficeGarageSlot(row.garage, row.slot)
-  }
-
-  return String(row.slot ?? '-')
-}
-
+// 오피스 차고 구역 라벨 생성
 function getOfficeSectionLabel(row)
 {
   if (!row || row.type !== 'slot') {
@@ -1159,6 +1023,7 @@ function getOfficeSectionLabel(row)
   return ''
 }
 
+// 차고 설정 모달 열기
 function openGarageSetting(row)
 {
   if (!row) {
@@ -1176,6 +1041,195 @@ function openGarageSetting(row)
   showGarageSettingModal.value = true
 }
 
+// 토스트 메시지 표시 (성공/실패 타입 포함)
+function showToast(text, type = 'success')
+{
+  toast.value = { open: true, text, type }
+
+  if (toastTimer) {
+    clearTimeout(toastTimer)
+  }
+
+  toastTimer = setTimeout(() => {
+    toast.value.open = false
+  }, 3000)
+}
+
+// 보유 이동수단 목록 조회
+async function load()
+{
+  try {
+    const res = await http.get('/owned-transports')
+    const list = extractList(res.data)
+
+    rows.value = list.map((item) => {
+      return normalizeOwnedTransport(item)
+    })
+  } catch (err) {
+    handleLoadFail('목록 조회 실패:', rows, [], err)
+  }
+}
+
+// 차고 목록 조회
+async function loadGarages()
+{
+  try {
+    const res = await http.get('/garages')
+    const data = res.data
+    const list = extractList(data)
+
+    garageList.value = list.map((item) => {
+      return normalizeGarage(item)
+    })
+
+    const initialCollapsedIds = garageList.value
+      .filter((garage) => {
+        return garage.collapsedYn === 'Y'
+      })
+      .map((garage) => {
+        return garage.garageId
+      })
+
+    collapsedGarageIds.value = new Set(initialCollapsedIds)
+  } catch (err) {
+    handleLoadFail('차고 목록 조회 실패:', garageList, [], err)
+  }
+}
+
+// 이동수단 옵션 목록 조회
+async function loadTransportModels()
+{
+  try {
+    const res = await http.get('/transport-models/options')
+    const data = res.data
+    const list = extractList(data)
+
+    transportList.value = list.map((item) => {
+      return normalizeTransportModel(item)
+    })
+  } catch (err) {
+    handleLoadFail('이동수단 목록 조회 실패:', transportList, [], err)
+  }
+}
+
+// 조회 API 실패 시 에러 로그를 남기고 기본값으로 초기화
+function handleLoadFail(errorMessage, targetRef, fallbackValue, err)
+{
+  console.error(errorMessage, err)
+  targetRef.value = fallbackValue
+}
+
+// 드래그한 이동수단을 빈 슬롯으로 이동하거나 다른 이동수단과 자리 교체
+async function handleDrop(row)
+{
+  if (dropLoading.value) {
+    return
+  }
+
+  if (!draggingRow.value) {
+    return
+  }
+
+  if (!canDropToRow(row)) {
+    return
+  }
+
+  const source = draggingRow.value
+  const targetGarageId = row.garageId
+  const targetSlotNo = row.slot
+
+  if (
+    Number(source.garageId) === Number(targetGarageId) &&
+    Number(source.slotNo) === Number(targetSlotNo)
+  ) {
+    draggingRow.value = null
+    activeDropSlotKey.value = ''
+    return
+  }
+
+  try {
+    dropLoading.value = true
+
+    // 빈 슬롯이면 해당 슬롯으로 이동
+    if (row.isEmpty) {
+      await http.patch(`/owned-transports/${source.ownedId}`, {
+        storageType: 'GARAGE',
+        garageId: targetGarageId,
+        slotNo: targetSlotNo
+      })
+
+      showToast('슬롯 이동 완료')
+    } else {
+      // 이동수단이 있는 슬롯이면 두 이동수단의 자리를 교체
+      await http.patch('/owned-transports/swap', {
+        sourceOwnedId: source.ownedId,
+        targetOwnedId: row.id
+      })
+
+      showToast('슬롯 교체 완료')
+    }
+
+    await load()
+  } catch (err) {
+    handleWriteFail('슬롯 처리 실패', err)
+  } finally {
+    draggingRow.value = null      // 드래그 상태 초기화
+    activeDropSlotKey.value = ''  // 드롭 타겟 하이라이트 초기화
+    dropLoading.value = false     // 드롭 로딩 상태 초기화
+  }
+}
+
+// 보유 이동수단 등록 요청 처리
+async function handleCreated(payload)
+{
+  try {
+    await http.post('/owned-transports', payload)
+    await handleOwnedTransportSuccess('등록 완료')
+  } catch (err) {
+    handleWriteFail('등록 실패', err)
+  }
+}
+
+// 보유 이동수단 삭제 요청 처리
+async function handleDelete(id)
+{
+  try {
+    await http.delete(`/owned-transports/${id}`)
+    await handleOwnedTransportSuccess('삭제 완료')
+  } catch (err) {
+    handleWriteFail('삭제 실패', err)
+  }
+}
+
+// 보유 이동수단 수정 요청 처리
+async function handleUpdate(payload)
+{
+  try {
+    await http.patch(`/owned-transports/${payload.ownedId}`, {
+      storageType: payload.storageType,
+      garageId: payload.garageId,
+      slotNo: payload.slotNo
+    })
+
+    await handleOwnedTransportSuccess('수정 완료')
+  } catch (err) {
+    handleWriteFail('수정 실패', err)
+  }
+}
+
+// 등록/수정/삭제 성공 시 후처리
+async function handleOwnedTransportSuccess(successMessage)
+{
+  showModal.value = false     // 모달 닫기
+  editTarget.value = null     // 편집 대상 초기화
+  activeRowKey.value = ''     // 행 하이라이트 초기화
+
+  showToast(successMessage)   // 성공 토스트 표시
+
+  await load()                // 목록 새로고침
+}
+
+// 차고 설정 저장 요청 처리
 async function handleGarageSettingSave(payload)
 {
   try {
@@ -1184,19 +1238,31 @@ async function handleGarageSettingSave(payload)
       description: payload.description
     })
 
-    showGarageSettingModal.value = false
-    selectedGarageSettingRow.value = null
-
-    showToast('차고 설정 저장 완료')
-
-    await loadGarages()
+    await handleGarageSettingSuccess('차고 설정 저장 완료')
   } catch (err) {
-    console.error('차고 설정 저장 실패:', err)
-    showToast('차고 설정 저장 실패')
+    handleWriteFail('차고 설정 저장 실패', err)
   }
 }
 
-// init
+// 차고 설정 저장 성공 시 후처리
+async function handleGarageSettingSuccess(successMessage)
+{
+  showGarageSettingModal.value = false  
+  selectedGarageSettingRow.value = null   // 선택된 차고 설정 초기화
+
+  showToast(successMessage)
+
+  await loadGarages()                     // 차고 목록 새로고침
+}
+
+// 쓰기 작업 실패 시 에러 로그와 토스트 처리
+function handleWriteFail(errorMessage, err)
+{
+  console.error(errorMessage, err)
+  showToast(errorMessage, 'error')
+}
+
+// 초기 데이터 조회 및 이벤트 등록
 onMounted(() => {
   load()
   loadTransportModels()
@@ -1205,12 +1271,13 @@ onMounted(() => {
   document.addEventListener('mousedown', handleClickOutside)
 })
 
+// 컴포넌트 종료 시 이벤트 및 타이머 제거
 onUnmounted(() => {
   document.removeEventListener('mousedown', handleClickOutside)
-
-  if (activeRowTimer) {
-    clearTimeout(activeRowTimer)
-    activeRowTimer = null
+  
+  if (toastTimer) {
+    clearTimeout(toastTimer)
+    toastTimer = null
   }
 })
 </script>
