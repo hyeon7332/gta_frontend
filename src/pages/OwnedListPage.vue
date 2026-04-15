@@ -211,7 +211,13 @@
                       <td :class="[tdBaseClass, getRowHighlightClass(row)]">
                         <div class="flex items-baseline gap-1.5 min-w-0">
                           <span class="truncate">
-                            {{ getModelDisplay(row) }}
+                            {{ row.name }}
+                          </span>
+                          <span
+                            v-if="getUpgradeTypeDisplayText(row.upgradeType)"
+                            class="text-[10px] text-neutral-400 shrink-0"
+                          >
+                            {{ getUpgradeTypeDisplayText(row.upgradeType) }}
                           </span>
                         </div>
                       </td>
@@ -238,7 +244,13 @@
                       <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 align-middle', getRowHighlightClass(row)]">
                         <div class="flex items-baseline gap-1.5 min-w-0">
                           <span class="truncate">
-                            {{ getModelDisplay(row) }}
+                            {{ row.name }}
+                          </span>
+                          <span
+                            v-if="getUpgradeTypeDisplayText(row.upgradeType)"
+                            class="text-[10px] text-neutral-400 shrink-0"
+                          >
+                            {{ getUpgradeTypeDisplayText(row.upgradeType) }}
                           </span>
                         </div>
                       </td>
@@ -769,18 +781,6 @@ function getUpgradeTypeDisplayText(upgradeType)
   }
 
   return labels.join(' / ')
-}
-
-// 모델명 + 개조타입 표시 텍스트 생성
-function getModelDisplay(row)
-{
-  const upgrade = getUpgradeTypeDisplayText(row.upgradeType)
-
-  if (!upgrade) {
-    return row.name
-  }
-
-  return `${row.name} (${upgrade})`
 }
 
 // 등록 모달 열기

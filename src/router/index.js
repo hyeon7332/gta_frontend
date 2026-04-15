@@ -6,10 +6,12 @@ import SignupPage from '@/pages/SignupPage.vue'
 import PendingUsersPage from '@/pages/PendingUsersPage.vue'
 
 const routes = [
-  { 
-    path: '/', 
-    component: OwnedListPage,
-    meta: { requiresAuth: true }  //토큰 없으면 접근 차단
+  {
+    path: '/',
+    redirect: () => {
+      const token = localStorage.getItem('accessToken')
+      return token ? '/owned' : '/login'
+    }
   },
   { 
     path: '/owned', 
