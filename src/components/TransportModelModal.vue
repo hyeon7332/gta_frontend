@@ -120,7 +120,7 @@
                 type="number"
                 min="0"
                 class="input-style w-[90px]"
-                placeholder="분"
+                placeholder="min"
               />
 
               <span class="text-neutral-400">:</span>
@@ -131,7 +131,7 @@
                 min="0"
                 max="59"
                 class="input-style w-[90px]"
-                placeholder="초"
+                placeholder="sec"
               />
 
               <span class="text-neutral-400">:</span>
@@ -490,7 +490,7 @@ async function handleSave()
   const lapTimeMs = buildLapTimeMs()
 
   if (Number.isNaN(lapTimeMs)) {
-    alert('랩 타임은 분 / 초 / ms 형식에 맞게 입력하세요.')
+    alert('랩 타임은 min / sec / ms 형식으로 입력하세요.')
     return
   }
   
