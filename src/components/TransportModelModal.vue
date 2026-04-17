@@ -113,7 +113,38 @@
 
           <div>
             <label class="block mb-1 text-sm text-neutral-300">랩 타임</label>
-            <input v-model="form.lapTime" type="number" class="input-style" />
+
+            <div class="flex items-center gap-2">
+              <input
+                v-model="lapTimeMinutes"
+                type="number"
+                min="0"
+                class="input-style w-[90px]"
+                placeholder="분"
+              />
+
+              <span class="text-neutral-400">:</span>
+
+              <input
+                v-model="lapTimeSeconds"
+                type="number"
+                min="0"
+                max="59"
+                class="input-style w-[90px]"
+                placeholder="초"
+              />
+
+              <span class="text-neutral-400">:</span>
+
+              <input
+                v-model="lapTimeMillis"
+                type="number"
+                min="0"
+                max="999"
+                class="input-style w-[110px]"
+                placeholder="ms"
+              />
+            </div>
           </div>
 
           <div>
@@ -218,12 +249,14 @@
 import { reactive, watch, onMounted, onBeforeUnmount, ref, computed } from 'vue'
 import { http } from '@/api/http'
 import '@/assets/css/modal-form.css'
-import { manufacturerOptions } from '@/constants/manufacturerOptions'
-import { transportCategoryOptions } from '@/constants/transportCategoryOptions'
-import { upgradeTypeOptions } from '@/constants/upgradeTypeOptions'
-import { upgradeLocationOptions } from '@/constants/upgradeLocationOptions'
-import { transportSourceOptions } from '@/constants/transportSourceOptions'
-import { featureOptions } from '@/constants/featureOptions'
+import {
+  manufacturerOptions,
+  transportCategoryOptions,
+  transportSourceOptions,
+  upgradeLocationOptions,
+  upgradeTypeOptions,
+  featureOptions
+} from '@/constants/transportOptions'
 
 const props = defineProps({
   open: {
@@ -263,6 +296,10 @@ const form = reactive({
   features: ''
 })
 
+const lapTimeMinutes = ref('')
+const lapTimeSeconds = ref('')
+const lapTimeMillis = ref('')
+
 const showUpgradeLocationDropdown = ref(false)
 const selectedUpgradeLocations = ref([])
 const upgradeLocationBoxRef = ref(null)
@@ -279,6 +316,35 @@ const upgradeLocationLabel = computed(() => {
 
   return sorted.join(', ')
 })
+
+function buildLapTimeMs()
+{
+  if (
+    lapTimeMinutes.value === '' &&
+    lapTimeSeconds.value === '' &&
+    lapTimeMillis.value === ''
+  ) {
+    return null
+  }
+
+  const minutes = Number(lapTimeMinutes.value || 0)
+  const seconds = Number(lapTimeSeconds.value || 0)
+  const millis = Number(lapTimeMillis.value || 0)
+
+  if (!Number.isInteger(minutes) || minutes < 0) {
+    return NaN
+  }
+
+  if (!Number.isInteger(seconds) || seconds < 0 || seconds > 59) {
+    return NaN
+  }
+
+  if (!Number.isInteger(millis) || millis < 0 || millis > 999) {
+    return NaN
+  }
+
+  return (minutes * 60 * 1000) + (seconds * 1000) + millis
+}
 
 function toggleUpgradeLocation(location)
 {
@@ -322,6 +388,10 @@ function resetForm()
   selectedUpgradeLocations.value = []
   selectedFeatureOptions.value = []
   showUpgradeLocationDropdown.value = false
+
+  lapTimeMinutes.value = ''
+  lapTimeSeconds.value = ''
+  lapTimeMillis.value = ''
 }
 
 function fillForm()
@@ -340,6 +410,18 @@ function fillForm()
   form.driveTrain = props.model?.driveTrain ?? ''
   form.seats = props.model?.seats ?? ''
   form.features = props.model?.features ?? ''
+
+  if (form.lapTime === '' || form.lapTime === null || form.lapTime === undefined) {
+    lapTimeMinutes.value = ''
+    lapTimeSeconds.value = ''
+    lapTimeMillis.value = ''
+  } else {
+    const total = Number(form.lapTime)
+
+    lapTimeMinutes.value = String(Math.floor(total / 60000))
+    lapTimeSeconds.value = String(Math.floor((total % 60000) / 1000))
+    lapTimeMillis.value = String(total % 1000)
+  }
 
   selectedUpgradeLocations.value = form.upgradeLocation
     ? form.upgradeLocation.split(',').map(v => v.trim())
@@ -404,6 +486,13 @@ async function handleSave()
     alert('분류는 필수입니다.')
     return
   }
+
+  const lapTimeMs = buildLapTimeMs()
+
+  if (Number.isNaN(lapTimeMs)) {
+    alert('랩 타임은 분 / 초 / ms 형식에 맞게 입력하세요.')
+    return
+  }
   
   try {
     const payload = {
@@ -418,7 +507,7 @@ async function handleSave()
         })
         .join(', '),
 
-      lapTime: form.lapTime === '' ? null : Number(form.lapTime),
+      lapTime: lapTimeMs,
       topSpeed: form.topSpeed === '' ? null : Number(form.topSpeed),
       price: form.price === '' ? null : Number(form.price),
       releaseDate: form.releaseDate === '' ? null : form.releaseDate,

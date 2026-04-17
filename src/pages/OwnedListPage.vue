@@ -6,9 +6,9 @@
       <div class="bg-neutral-900/40 border border-neutral-700 rounded-lg shadow-lg overflow-hidden">
         <div class="p-2">
           <div class="border border-neutral-700 rounded-md overflow-hidden">
-            <!-- toolbar -->
+
+            <!-- toolbar: 차고 필터 / 초기화 / 전체 접힘 토글 -->
             <div class="relative flex items-center justify-between px-3 py-2 bg-neutral-900/30 border-b border-neutral-700">
-              
               <div ref="garageFilterRef" class="relative flex items-center gap-2 min-w-0">
                 <button
                   type="button"
@@ -26,7 +26,6 @@
                   <span class="truncate">{{ selectedGarageFilterLabel }}</span>
                   <ChevronDown class="w-4 h-4 text-neutral-400" />
                 </button>
-
                 <button
                   type="button"
                   class="h-8 w-8 flex items-center justify-center
@@ -41,7 +40,6 @@
                 >
                   <RotateCcw class="w-4 h-4" />
                 </button>
-
                 <button
                   type="button"
                   class="h-8 px-2 flex items-center gap-1
@@ -55,6 +53,7 @@
                   <span>{{ allGarageCollapsed ? '펼침' : '접힘' }}</span>
                 </button>
 
+                <!-- 차고 필터 드롭다운 -->
                 <div
                   v-if="showGarageFilterDropdown"
                   class="absolute left-0 top-full mt-2 z-30
@@ -79,7 +78,7 @@
 
                   <div class="mx-2 border-t border-neutral-700"></div>
 
-                  <!-- 미배치 + 차고 -->
+                  <!-- 특수 보관(미배치/페가수스) + 일반 차고 -->
                   <label
                     v-for="garage in garageFilterOptions.filter((item) => item.garageId !== 'all')"
                     :key="garage.garageId"
@@ -94,7 +93,6 @@
                     <span class="truncate">{{ garage.garageName }}</span>
                   </label>
                 </div>
-
               </div>
 
               <!-- toast -->
@@ -103,7 +101,6 @@
                 :text="toast.text"
                 :type="toast.type"
               />
-
               <button
                 type="button"
                 class="h-8 px-3 flex items-center gap-1
@@ -158,7 +155,7 @@
                     @dragover="handleDragOver($event, row)"
                     @drop="handleDrop(row)"
                   >
-                    <!-- 차고 헤더 -->
+                    <!-- 차고 헤더 행 -->
                     <template v-if="row && row.type === 'garageHeader'">
                       <td
                         colspan="4"
@@ -204,7 +201,7 @@
                       </td>
                     </template>
                     
-                    <!-- 미배치 row -->
+                    <!-- 특수 보관 행 (미배치 / 페가수스) -->
                     <template v-else-if="row && (row.type === 'unassigned' || row.type === 'pegasus')">
                       <td :class="[tdBaseClass, getRowHighlightClass(row)]">-</td>
                       <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
@@ -265,7 +262,7 @@
               </table>
             </div>
 
-            <!-- footer -->
+            <!-- footer: 슬롯 사용 통계 -->
             <div
               class="flex items-center justify-between px-3 py-2
                     bg-neutral-900/30 border-t border-neutral-700
@@ -315,6 +312,7 @@
     </div>
   </div>
 
+  <!-- 보유 이동수단 등록/수정 모달 -->
   <OwnedTransportModal
     v-model:open="showModal"
     :mode="modalMode"
@@ -326,6 +324,7 @@
     @delete="handleDelete"
   />
 
+  <!-- 차고 설정 모달 -->
   <GarageSettingModal
     v-model:open="showGarageSettingModal"
     :garage="selectedGarageSettingRow"

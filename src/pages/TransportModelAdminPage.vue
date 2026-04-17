@@ -650,12 +650,14 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Plus, X, RotateCcw, ChevronDown } from 'lucide-vue-next'
 import { http } from '@/api/http'
 import TransportModelModal from '@/components/TransportModelModal.vue'
-import { manufacturerOptions as manufacturerOptionItems } from '@/constants/manufacturerOptions'
-import { transportCategoryOptions as categoryOptionItems } from '@/constants/transportCategoryOptions'
-import { upgradeTypeOptions as upgradeTypeOptionItems } from '@/constants/upgradeTypeOptions'
-import { transportSourceOptions as sourceOptionItems } from '@/constants/transportSourceOptions'
-import { featureOptions as featureOptionItems } from '@/constants/featureOptions'
-import { upgradeLocationOptions as upgradeLocationOptionItems } from '@/constants/upgradeLocationOptions'
+import {
+  manufacturerOptions,
+  transportCategoryOptions,
+  transportSourceOptions,
+  upgradeLocationOptions,
+  upgradeTypeOptions,
+  featureOptions
+} from '@/constants/transportOptions'
 
 const rows = ref([])
 const keyword = ref('')
@@ -680,12 +682,9 @@ const showFeatureDropdown = ref(false)
 const upgradeLocationDropdownRef = ref(null)
 const featureDropdownRef = ref(null)
 
-const upgradeLocationOptions = ref(upgradeLocationOptionItems)
-const featureOptions = ref(featureOptionItems)
-const manufacturerOptions = ref(manufacturerOptionItems)
-const categoryOptions = ref(categoryOptionItems)
-const upgradeTypeOptionsList = ref(upgradeTypeOptionItems)
-const sourceOptionsList = ref(sourceOptionItems)
+const categoryOptions = transportCategoryOptions
+const upgradeTypeOptionsList = upgradeTypeOptions
+const sourceOptionsList = transportSourceOptions
 
 const showManufacturerDropdown = ref(false)
 const showCategoryDropdown = ref(false)
@@ -1209,7 +1208,7 @@ function formatLapTime(ms)
   const seconds = Math.floor((value % 60000) / 1000)
   const millis = value % 1000
 
-  return `${minutes}:${String(seconds).padStart(2, '0')}.${String(millis).padStart(3, '0')}`
+  return `${minutes}:${String(seconds).padStart(2, '0')}:${String(millis).padStart(3, '0')}`
 }
 
 function formatPrice(value)
