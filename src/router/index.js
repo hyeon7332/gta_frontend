@@ -8,10 +8,8 @@ import PendingUsersPage from '@/pages/PendingUsersPage.vue'
 const routes = [
   {
     path: '/',
-    redirect: () => {
-      const token = localStorage.getItem('accessToken')
-      return token ? '/owned' : '/login'
-    }
+    component: OwnedListPage,
+    meta: { requiresAuth: true }
   },
   { 
     path: '/owned', 
@@ -51,15 +49,15 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('accessToken') //현재 로그인 상태 판단 기준
 
+  // requiresAuth 체크
+  if (to.meta.requiresAuth && !token) { 
+    next('/login')
+    return
+  }
+  
   // 로그인한 상태로 /login 들어가는 것 방지
   if ((to.path === '/login' || to.path === '/signup') && token) {
     next('/')
-    return
-  }
-
-  //이동하려는 페이지가 requiresAuth인지 확인 후 토큰 없으면 강제로 /login 이동
-  if (to.meta.requiresAuth && !token) { 
-    next('/login')
     return
   }
 
