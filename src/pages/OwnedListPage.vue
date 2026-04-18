@@ -1070,9 +1070,11 @@ async function load()
 }
 
 // 차고 목록 조회
-async function loadGarages()
+async function loadGarages(preserveCollapsedState = false)
 {
   try {
+    const previousCollapsedIds = new Set(collapsedGarageIds.value)
+
     const res = await http.get('/garages')
     const data = res.data
     const list = extractList(data)
@@ -1080,6 +1082,25 @@ async function loadGarages()
     garageList.value = list.map((item) => {
       return normalizeGarage(item)
     })
+
+    if (preserveCollapsedState) {
+      const validGarageIds = new Set(
+        garageList.value
+          .map((garage) => {
+            return garage.garageId
+          })
+          .filter((garageId) => {
+            return garageId !== null && garageId !== undefined
+          })
+      )
+
+      collapsedGarageIds.value = new Set(
+        [...previousCollapsedIds].filter((garageId) => {
+          return validGarageIds.has(garageId)
+        })
+      )
+      return
+    }
 
     const initialCollapsedIds = garageList.value
       .filter((garage) => {
@@ -1246,12 +1267,12 @@ async function handleGarageSettingSave(payload)
 // 차고 설정 저장 성공 시 후처리
 async function handleGarageSettingSuccess(successMessage)
 {
-  showGarageSettingModal.value = false  
-  selectedGarageSettingRow.value = null   // 선택된 차고 설정 초기화
+  showGarageSettingModal.value = false    // 모달 닫기
+  selectedGarageSettingRow.value = null   // 설정 대상 초기화
 
   showToast(successMessage)
 
-  await loadGarages()                     // 차고 목록 새로고침
+  await loadGarages(true)                 // 차고 목록 새로고침 (접힘 상태 유지)
 }
 
 // 쓰기 작업 실패 시 에러 로그와 토스트 처리
