@@ -20,6 +20,7 @@ export function normalizeOwnedTransport(x)
     garage: x.garageName ?? x.garage_name ?? x.garage ?? x.storage ?? '-',
     slot: x.slot ?? x.slotNo ?? x.slot_no ?? null,
     storageType: x.storageType ?? x.storage_type ?? '',
+    remark: x.remark ?? x.memo ?? x.note ?? '',
 
     manufacturer: x.manufacturer ?? x.maker ?? x.brand ?? x.manufacturerName ?? '-',
     name: x.name ?? x.modelName ?? x.transportName ?? '-',

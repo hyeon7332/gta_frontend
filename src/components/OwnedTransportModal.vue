@@ -86,6 +86,18 @@
 
           </div>
 
+          <!-- 비고 -->
+          <div>
+            <div class="text-xs text-neutral-700 mb-1">비고</div>
+            <input
+              v-model="remark"
+              type="text"
+              maxlength="255"
+              class="w-full h-10 px-3 rounded-md border border-neutral-300 bg-white text-sm"
+              placeholder="비고 입력"
+            />
+          </div>
+
           <!-- 차고 -->
           <div>
             <div class="text-xs text-neutral-700 mb-1">차고</div>
@@ -305,6 +317,7 @@ const currentSlotNo = ref(null)
 
 const garageText = ref('')
 const slotNoText = ref('')
+const remark = ref('')
 
 const showDeleteConfirm = ref(false)
 
@@ -312,7 +325,7 @@ watch(() => props.open, async (v) => {
 
   if (v) {
     if (isEditMode.value) {
-
+      // 수정
       if (props.initialRow?.storageType === 'PEGASUS') {
         selectedTransport.value = props.initialRow
         transportDisplay.value = getTransportDisplayText(props.initialRow)
@@ -332,6 +345,8 @@ watch(() => props.open, async (v) => {
         showGarageDropdown.value = false
         showSlotDropdown.value = false
         showDeleteConfirm.value = false
+
+        remark.value = props.initialRow?.remark || ''
 
         document.addEventListener('keydown', onDocKeyDown)
         document.addEventListener('mousedown', onDocMouseDownCapture, true)
@@ -367,6 +382,8 @@ watch(() => props.open, async (v) => {
           currentSlotNo.value = null
         }
 
+        remark.value = props.initialRow?.remark || ''
+
         await loadOccupiedSlots(matched.garageId)
       } else {
         selectedGarage.value = null
@@ -379,8 +396,10 @@ watch(() => props.open, async (v) => {
         slotQuery.value = ''
         currentSlotNo.value = null
         occupiedSlotList.value = []
-      }
 
+        remark.value = props.initialRow?.remark || ''
+      }
+    // 등록
     } else {
 
       selectedTransport.value = null
@@ -396,6 +415,8 @@ watch(() => props.open, async (v) => {
       slotQuery.value = ''
       currentSlotNo.value = null
       occupiedSlotList.value = []
+
+      remark.value = ''
 
       const presetGarageId = props.initialRow?.garageId ?? null
       const presetSlotNo = props.initialRow?.slotNo ?? props.initialRow?.slot ?? null
@@ -678,7 +699,8 @@ function handleSubmit()
       ownedId: ownedId,
       storageType: storageType,
       garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
-      slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null
+      slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
+      remark: remark.value
     })
 
     return
@@ -723,7 +745,8 @@ function handleSubmit()
     modelId: Number(modelId),
     storageType: storageType,
     garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
-    slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null
+    slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
+    remark: remark.value
   })
 }
 

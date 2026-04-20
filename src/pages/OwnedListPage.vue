@@ -1,313 +1,381 @@
 <template>
   <!-- page background -->
-  <div class="min-h-[calc(100dvh-56px)] bg-neutral-700 flex justify-center">
-    <div class="w-full max-w-[1000px] px-4 pt-2 pb-4">
-      <!-- main panel -->
-      <div class="bg-neutral-900/40 border border-neutral-700 rounded-lg shadow-lg overflow-hidden">
-        <div class="p-2">
-          <div class="border border-neutral-700 rounded-md overflow-hidden">
-
-            <!-- toolbar: 차고 필터 / 초기화 / 전체 접힘 토글 -->
-            <div class="relative flex items-center justify-between px-3 py-2 bg-neutral-900/30 border-b border-neutral-700">
-              <div ref="garageFilterRef" class="relative flex items-center gap-2 min-w-0">
-                <button
-                  type="button"
-                  class="h-8 min-w-[180px] max-w-[260px] px-3
-                        flex items-center justify-between gap-2
-                        rounded-md
-                        bg-neutral-800/60
-                        border border-neutral-600
-                        text-[13px] text-neutral-200
-                        hover:bg-neutral-700
-                        active:bg-neutral-600
-                        transition"
-                  @click="showGarageFilterDropdown = !showGarageFilterDropdown"
-                >
-                  <span class="truncate">{{ selectedGarageFilterLabel }}</span>
-                  <ChevronDown class="w-4 h-4 text-neutral-400" />
-                </button>
-                <button
-                  type="button"
-                  class="h-8 w-8 flex items-center justify-center
-                        rounded-md
-                        bg-neutral-800/60
-                        border border-neutral-600
-                        text-neutral-200
-                        hover:bg-neutral-700
-                        active:bg-neutral-600
-                        transition"
-                  @click="resetFilters"
-                >
-                  <RotateCcw class="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  class="h-8 px-2 flex items-center gap-1
-                        rounded-md
-                        text-[12px] text-neutral-300
-                        hover:bg-neutral-700/40
-                        transition"
-                  @click="toggleAllGaragesCollapsed"
-                >
-                  <ChevronsUpDown class="w-4 h-4" />
-                  <span>{{ allGarageCollapsed ? '펼침' : '접힘' }}</span>
-                </button>
-
-                <!-- 차고 필터 드롭다운 -->
-                <div
-                  v-if="showGarageFilterDropdown"
-                  class="absolute left-0 top-full mt-2 z-30
-                        w-[260px] max-h-[280px] overflow-y-auto
-                        rounded-md border border-neutral-600
-                        bg-neutral-900 shadow-lg"
-                >
-                  <!-- 전체 -->
+  <div class="min-h-[calc(100dvh-56px)] bg-neutral-700">
+    <div
+      class="w-full px-4 pt-2 pb-4 transition-all duration-300"
+      :class="showDetailPanel ? 'max-w-[1400px] mx-auto' : 'max-w-[1000px] mx-auto'"
+    >
+      <div
+        class="flex items-start gap-4 transition-all duration-300"
+        :class="showDetailPanel ? 'justify-start' : 'justify-center'"
+      >
+        <div class="w-[1000px] shrink-0">
+          <!-- main panel -->
+          <div class="bg-neutral-900/40 border border-neutral-700 rounded-lg shadow-lg overflow-hidden">
+            <div class="p-2">
+              <div class="border border-neutral-700 rounded-md overflow-hidden">
+  
+                <!-- toolbar: 차고 필터 / 초기화 / 전체 접힘 토글 -->
+                <div class="relative flex items-center justify-between px-3 py-2 bg-neutral-900/30 border-b border-neutral-700">
+                  <div ref="garageFilterRef" class="relative flex items-center gap-2 min-w-0">
+                    <button
+                      type="button"
+                      class="h-8 min-w-[180px] max-w-[260px] px-3
+                            flex items-center justify-between gap-2
+                            rounded-md
+                            bg-neutral-800/60
+                            border border-neutral-600
+                            text-[13px] text-neutral-200
+                            hover:bg-neutral-700
+                            active:bg-neutral-600
+                            transition"
+                      @click="showGarageFilterDropdown = !showGarageFilterDropdown"
+                    >
+                      <span class="truncate">{{ selectedGarageFilterLabel }}</span>
+                      <ChevronDown class="w-4 h-4 text-neutral-400" />
+                    </button>
+                    <button
+                      type="button"
+                      class="h-8 w-8 flex items-center justify-center
+                            rounded-md
+                            bg-neutral-800/60
+                            border border-neutral-600
+                            text-neutral-200
+                            hover:bg-neutral-700
+                            active:bg-neutral-600
+                            transition"
+                      @click="resetFilters"
+                    >
+                      <RotateCcw class="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      class="h-8 px-2 flex items-center gap-1
+                            rounded-md
+                            text-[12px] text-neutral-300
+                            hover:bg-neutral-700/40
+                            transition"
+                      @click="toggleAllGaragesCollapsed"
+                    >
+                      <ChevronsUpDown class="w-4 h-4" />
+                      <span>{{ allGarageCollapsed ? '펼침' : '접힘' }}</span>
+                    </button>
+  
+                    <!-- 차고 필터 드롭다운 -->
+                    <div
+                      v-if="showGarageFilterDropdown"
+                      class="absolute left-0 top-full mt-2 z-30
+                            w-[260px] max-h-[280px] overflow-y-auto
+                            rounded-md border border-neutral-600
+                            bg-neutral-900 shadow-lg"
+                    >
+                      <!-- 전체 -->
+                      <button
+                        type="button"
+                        class="w-full flex items-center justify-between px-3 py-2 text-[13px] text-neutral-200 hover:bg-neutral-800 transition"
+                        @click="selectedGarageIds = []"
+                      >
+                        <span>전체</span>
+                        <span
+                          v-if="selectedGarageIds.length === 0"
+                          class="text-[11px] text-neutral-400"
+                        >
+                          선택됨
+                        </span>
+                      </button>
+  
+                      <div class="mx-2 border-t border-neutral-700"></div>
+  
+                      <!-- 특수 보관(미배치/페가수스) + 일반 차고 -->
+                      <label
+                        v-for="garage in garageFilterOptions.filter((item) => item.garageId !== 'all')"
+                        :key="garage.garageId"
+                        class="flex items-center gap-2 px-3 py-2 text-[13px] text-neutral-200 hover:bg-neutral-800 cursor-pointer"
+                      >
+                        <input
+                          :checked="selectedGarageIds.includes(String(garage.garageId))"
+                          type="checkbox"
+                          class="h-4 w-4"
+                          @change="toggleGarageFilter(garage.garageId)"
+                        />
+                        <span class="truncate">{{ garage.garageName }}</span>
+                      </label>
+                    </div>
+                  </div>
+  
+                  <!-- toast -->
+                  <Toast
+                    :open="toast.open"
+                    :text="toast.text"
+                    :type="toast.type"
+                  />
                   <button
                     type="button"
-                    class="w-full flex items-center justify-between px-3 py-2 text-[13px] text-neutral-200 hover:bg-neutral-800 transition"
-                    @click="selectedGarageIds = []"
+                    class="h-8 px-3 flex items-center gap-1
+                          rounded-md
+                          bg-neutral-800/60
+                          border border-neutral-600
+                          text-[13px] text-neutral-200
+                          hover:bg-neutral-700
+                          active:bg-neutral-600
+                          transition"
+                    @click="openCreateModal"
                   >
-                    <span>전체</span>
-                    <span
-                      v-if="selectedGarageIds.length === 0"
-                      class="text-[11px] text-neutral-400"
-                    >
-                      선택됨
-                    </span>
+                    <Plus class="w-4 h-4" />
+                    <span>추가</span>
                   </button>
-
-                  <div class="mx-2 border-t border-neutral-700"></div>
-
-                  <!-- 특수 보관(미배치/페가수스) + 일반 차고 -->
-                  <label
-                    v-for="garage in garageFilterOptions.filter((item) => item.garageId !== 'all')"
-                    :key="garage.garageId"
-                    class="flex items-center gap-2 px-3 py-2 text-[13px] text-neutral-200 hover:bg-neutral-800 cursor-pointer"
-                  >
-                    <input
-                      :checked="selectedGarageIds.includes(String(garage.garageId))"
-                      type="checkbox"
-                      class="h-4 w-4"
-                      @change="toggleGarageFilter(garage.garageId)"
-                    />
-                    <span class="truncate">{{ garage.garageName }}</span>
-                  </label>
                 </div>
-              </div>
-
-              <!-- toast -->
-              <Toast
-                :open="toast.open"
-                :text="toast.text"
-                :type="toast.type"
-              />
-              <button
-                type="button"
-                class="h-8 px-3 flex items-center gap-1
-                       rounded-md
-                       bg-neutral-800/60
-                       border border-neutral-600
-                       text-[13px] text-neutral-200
-                       hover:bg-neutral-700
-                       active:bg-neutral-600
-                       transition"
-                @click="openCreateModal"
-              >
-                <Plus class="w-4 h-4" />
-                <span>추가</span>
-              </button>
-            </div>
-
-            <!-- table -->
-            <div class="overflow-y-auto overflow-x-hidden h-[641px]">
-              <table class="w-full table-fixed border-separate border-spacing-0">
-                <colgroup>
-                  <col class="w-[6%]" />   <!-- 슬롯 -->
-                  <col class="w-[15%]" />  <!-- 제조사 -->
-                  <col class="w-[32%]" />  <!-- 모델명 -->
-                  <col class="w-[15%]" />  <!-- 분류 -->
-                </colgroup>
-                <thead>
-                  <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap">
-                    <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">슬롯</th>
-                    <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">제조사</th>
-                    <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">모델명</th>
-                    <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">분류</th>
-                  </tr>
-                </thead>
-
-                <tbody class="text-[13px] text-neutral-200 border-b border-neutral-700">
-                  <tr
-                    v-for="(row, index) in displayRows"
-                    :key="row ? row.id : `empty-${index}`"
-                    :draggable="canDragRow(row)"
-                    :class="[
-                      'h-[40px]',
-                      row && row.type === 'slot' && !row.isEmpty ? 'hover:bg-neutral-700/40 transition cursor-pointer' : '',
-                      row && row.type === 'slot' && row.isEmpty ? 'text-neutral-500' : '',
-                      draggingRow && row && row.type === 'slot' && row.isEmpty ? 'hover:bg-neutral-700/20' : '',
-                      isDropTarget(row) ? 'bg-green-900/20' : '',
-                      draggingRow && row && draggingRow.ownedId === row.id ? 'opacity-50' : ''
-                    ]"
-                    @dblclick="handleSlotDoubleClick(row)"
-                    @dragstart="handleDragStart(row)"
-                    @dragend="handleDragEnd"
-                    @dragover="handleDragOver($event, row)"
-                    @drop="handleDrop(row)"
-                  >
-                    <!-- 차고 헤더 행 -->
-                    <template v-if="row && row.type === 'garageHeader'">
-                      <td
-                        colspan="4"
-                        class="h-[40px] px-3 py-2
-                              bg-neutral-700/40
-                              border-b border-neutral-600
-                              text-[13px] font-semibold text-neutral-300 align-middle cursor-pointer"
-                        @click="row.garageId ? toggleGarageCollapsed(row.garageId) : null"
+  
+                <!-- table -->
+                <div class="overflow-y-auto overflow-x-hidden h-[641px]">
+                  <table class="w-full table-fixed border-separate border-spacing-0">
+                    <colgroup>
+                      <col class="w-[6%]" />   <!-- 슬롯 -->
+                      <col class="w-[16%]" />  <!-- 제조사 -->
+                      <col class="w-[32%]" />  <!-- 모델명 -->
+                      <col class="w-[16%]" />  <!-- 분류 -->
+                      <col class="w-[30%]" />  <!-- 비고 -->
+                    </colgroup>
+                    <thead>
+                      <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap">
+                        <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">슬롯</th>
+                        <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">제조사</th>
+                        <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">모델명</th>
+                        <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">분류</th>
+                        <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-neutral-700">비고</th>
+                      </tr>
+                    </thead>
+  
+                    <tbody class="text-[13px] text-neutral-200 border-b border-neutral-700">
+                      <tr
+                        v-for="(row, index) in displayRows"
+                        :key="row ? row.id : `empty-${index}`"
+                        :draggable="canDragRow(row)"
+                        :class="[
+                          'h-[40px]',
+                          row && row.type === 'slot' && !row.isEmpty ? 'hover:bg-neutral-700/40 transition cursor-pointer' : '',
+                          row && row.type === 'slot' && row.isEmpty ? 'text-neutral-500' : '',
+                          draggingRow && row && row.type === 'slot' && row.isEmpty ? 'hover:bg-neutral-700/20' : '',
+                          isDropTarget(row) ? 'bg-green-900/20' : '',
+                          draggingRow && row && draggingRow.ownedId === row.id ? 'opacity-50' : ''
+                        ]"
+                        @click="handleRowClick(row)"
+                        @dblclick="handleSlotDoubleClick(row)"
+                        @dragstart="handleDragStart(row)"
+                        @dragend="handleDragEnd"
+                        @dragover="handleDragOver($event, row)"
+                        @drop="handleDrop(row)"
                       >
-                        <div class="flex items-center w-full">
-                          <span
-                            v-if="row.garageId"
-                            class="text-[11px] text-neutral-400 mr-2 shrink-0"
+                        <!-- 차고 헤더 행 -->
+                        <template v-if="row && row.type === 'garageHeader'">
+                          <td
+                            colspan="5"
+                            class="h-[40px] px-3 py-2
+                                  bg-neutral-700/40
+                                  border-b border-neutral-600
+                                  text-[13px] font-semibold text-neutral-300 align-middle cursor-pointer"
+                            @click="row.garageId ? toggleGarageCollapsed(row.garageId) : null"
                           >
-                            {{ collapsedGarageIds.has(row.garageId) ? '▶' : '▼' }}
-                          </span>
+                            <div class="flex items-center w-full">
+                              <span
+                                v-if="row.garageId"
+                                class="text-[11px] text-neutral-400 mr-2 shrink-0"
+                              >
+                                {{ collapsedGarageIds.has(row.garageId) ? '▶' : '▼' }}
+                              </span>
+  
+                              <!-- 이름 + 설명 -->
+                              <div class="flex items-center gap-2 min-w-0">
+                                <span class="truncate">
+                                  {{ row.alias ? row.alias : row.garage }}
+                                </span>
+  
+                                <span
+                                  v-if="row.description"
+                                  class="text-[11px] text-neutral-400 ml-2"
+                                >
+                                  {{ row.description }}
+                                </span>
+                              </div>
+  
+                              <!-- 설정 버튼 -->
+                              <div v-if="row.garageId" class="ml-auto">
+                                <button
+                                  type="button"
+                                  class="p-1 rounded hover:bg-neutral-600/40 transition"
+                                  @click.stop="openGarageSetting(row)"
+                                >
+                                  <Settings class="w-4 h-4 text-neutral-400 hover:text-white" />
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+                        </template>
+                        
+                        <!-- 특수 보관 행 (미배치 / 페가수스) -->
+                        <template v-else-if="row && (row.type === 'unassigned' || row.type === 'pegasus')">
+                          <td :class="[tdBaseClass, getRowHighlightClass(row)]">-</td>
+                          <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
+                          <td :class="[tdBaseClass, getRowHighlightClass(row)]">
+                            <div class="flex items-baseline gap-1.5 min-w-0">
+                              <span class="truncate">
+                                {{ row.name }}
+                              </span>
+                              <span
+                                v-if="getUpgradeTypeDisplayText(row.upgradeType)"
+                                class="text-[10px] text-neutral-400 shrink-0"
+                              >
+                                {{ getUpgradeTypeDisplayText(row.upgradeType) }}
+                              </span>
+                            </div>
+                          </td>
+                          <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.category }}</td>
+                          <td :class="[tdBaseClass, getRowHighlightClass(row)]">
+                            <div class="flex items-center justify-between gap-2 min-w-0">
+                              <span class="block truncate">
+                                {{ row.remark || '-' }}
+                              </span>
 
-                          <!-- 이름 + 설명 -->
-                          <div class="flex items-center gap-2 min-w-0">
-                            <span class="truncate">
-                              {{ row.alias ? row.alias : row.garage }}
-                            </span>
+                              <button
+                                type="button"
+                                class="shrink-0 p-1 rounded hover:bg-neutral-600/40 transition"
+                                @click.stop="openEdit(row)"
+                              >
+                                <SquarePen class="w-4 h-4 text-neutral-400 hover:text-white" />
+                              </button>
+                            </div>
+                          </td>
+                        </template>
+  
+                        <!-- 일반 슬롯 row -->
+                        <template v-else-if="row">
+                          <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap align-middle', getRowHighlightClass(row)]">
+                            <div class="flex items-center">
+                              <span class="inline-block w-[18px] text-right text-neutral-100 font-medium tabular-nums">
+                                {{ row.slot }}
+                              </span>
+  
+                              <span
+                                v-if="getOfficeSectionLabel(row)"
+                                class="ml-2 text-[10px] text-neutral-500"
+                              >
+                                {{ getOfficeSectionLabel(row) }}
+                              </span>
+                            </div>
+                          </td>
+                          <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
+                          <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 align-middle', getRowHighlightClass(row)]">
+                            <div class="flex items-baseline gap-1.5 min-w-0">
+                              <span class="truncate">
+                                {{ row.name }}
+                              </span>
+                              <span
+                                v-if="getUpgradeTypeDisplayText(row.upgradeType)"
+                                class="text-[10px] text-neutral-400 shrink-0"
+                              >
+                                {{ getUpgradeTypeDisplayText(row.upgradeType) }}
+                              </span>
+                            </div>
+                          </td>
+                          <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.category }}</td>
+                          <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 align-middle', getRowHighlightClass(row)]">
+                            <div class="flex items-center justify-between gap-2 min-w-0">
+                              <span class="block truncate">
+                                {{ row.remark || '-' }}
+                              </span>
 
-                            <span
-                              v-if="row.description"
-                              class="text-[11px] text-neutral-400 ml-2"
-                            >
-                              {{ row.description }}
-                            </span>
-                          </div>
-
-                          <!-- 설정 버튼 -->
-                          <div v-if="row.garageId" class="ml-auto">
-                            <button
-                              type="button"
-                              class="p-1 rounded hover:bg-neutral-600/40 transition"
-                              @click.stop="openGarageSetting(row)"
-                            >
-                              <Settings class="w-4 h-4 text-neutral-400 hover:text-white" />
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-                    </template>
-                    
-                    <!-- 특수 보관 행 (미배치 / 페가수스) -->
-                    <template v-else-if="row && (row.type === 'unassigned' || row.type === 'pegasus')">
-                      <td :class="[tdBaseClass, getRowHighlightClass(row)]">-</td>
-                      <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
-                      <td :class="[tdBaseClass, getRowHighlightClass(row)]">
-                        <div class="flex items-baseline gap-1.5 min-w-0">
-                          <span class="truncate">
-                            {{ row.name }}
-                          </span>
-                          <span
-                            v-if="getUpgradeTypeDisplayText(row.upgradeType)"
-                            class="text-[10px] text-neutral-400 shrink-0"
-                          >
-                            {{ getUpgradeTypeDisplayText(row.upgradeType) }}
-                          </span>
-                        </div>
-                      </td>
-                      <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.category }}</td>
-                    </template>
-
-                    <!-- 일반 슬롯 row -->
-                    <template v-else-if="row">
-                      <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap align-middle', getRowHighlightClass(row)]">
-                        <div class="flex items-center">
-                          <span class="inline-block w-[18px] text-right text-neutral-100 font-medium tabular-nums">
-                            {{ row.slot }}
-                          </span>
-
-                          <span
-                            v-if="getOfficeSectionLabel(row)"
-                            class="ml-2 text-[10px] text-neutral-500"
-                          >
-                            {{ getOfficeSectionLabel(row) }}
-                          </span>
-                        </div>
-                      </td>
-                      <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
-                      <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 align-middle', getRowHighlightClass(row)]">
-                        <div class="flex items-baseline gap-1.5 min-w-0">
-                          <span class="truncate">
-                            {{ row.name }}
-                          </span>
-                          <span
-                            v-if="getUpgradeTypeDisplayText(row.upgradeType)"
-                            class="text-[10px] text-neutral-400 shrink-0"
-                          >
-                            {{ getUpgradeTypeDisplayText(row.upgradeType) }}
-                          </span>
-                        </div>
-                      </td>
-                      <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.category }}</td>
-                    </template>
-
-                    <template v-else>
-                      <td colspan="4" class="h-[40px]"></td>
-                    </template>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <!-- footer: 슬롯 사용 통계 -->
-            <div
-              class="flex items-center justify-between px-3 py-2
-                    bg-neutral-900/30 border-t border-neutral-700
-                    text-[13px] text-neutral-300"
-            >
-              <div class="tabular-nums">
-                총 
-                <span class="font-semibold text-white">
-                  {{ totalSlotCount }}
-                </span>
-                칸 중
-                <span
-                  class="font-semibold"
-                  :class="
-                    totalSlotCount === 0
-                      ? 'text-neutral-400'
-                      : usedSlotCount / totalSlotCount > 0.8
-                      ? 'text-red-400'
-                      : usedSlotCount / totalSlotCount > 0.5
-                      ? 'text-yellow-400'
-                      : 'text-green-400'
-                  "
-                >
-                  {{ usedSlotCount }}
-                </span>
-                칸 사용중
-              </div>
-
-              <div class="flex items-center gap-4 text-[13px] text-neutral-400">
-                <div>
-                  미배치 
-                  <span class="text-white font-semibold">
-                    {{ unassignedCount }}
-                  </span>
+                              <button
+                                v-if="!row.isEmpty"
+                                type="button"
+                                class="shrink-0 p-1 rounded hover:bg-neutral-600/40 transition"
+                                @click.stop="openEdit(row)"
+                              >
+                                <SquarePen class="w-4 h-4 text-neutral-400 hover:text-white" />
+                              </button>
+                            </div>
+                          </td>
+                        </template>
+  
+                        <template v-else>
+                          <td colspan="5" class="h-[40px]"></td>
+                        </template>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
-                <div>
-                  페가수스 
-                  <span class="text-white font-semibold">
-                    {{ pegasusCount }}
-                  </span>
+  
+                <!-- footer: 슬롯 사용 통계 -->
+                <div
+                  class="flex items-center justify-between px-3 py-2
+                        bg-neutral-900/30 border-t border-neutral-700
+                        text-[13px] text-neutral-300"
+                >
+                  <div class="tabular-nums">
+                    총 
+                    <span class="font-semibold text-white">
+                      {{ totalSlotCount }}
+                    </span>
+                    칸 중
+                    <span
+                      class="font-semibold"
+                      :class="
+                        totalSlotCount === 0
+                          ? 'text-neutral-400'
+                          : usedSlotCount / totalSlotCount > 0.8
+                          ? 'text-red-400'
+                          : usedSlotCount / totalSlotCount > 0.5
+                          ? 'text-yellow-400'
+                          : 'text-green-400'
+                      "
+                    >
+                      {{ usedSlotCount }}
+                    </span>
+                    칸 사용중
+                  </div>
+  
+                  <div class="flex items-center gap-4 text-[13px] text-neutral-400">
+                    <!-- 미배치 빠른 필터 -->
+                    <div
+                      class="flex items-center gap-1 cursor-pointer px-2 py-1 rounded transition"
+                      :class="isActiveSpecialFilter('unassigned')
+                        ? 'bg-neutral-700/60 text-white'
+                        : 'hover:bg-neutral-700/40'"
+                      @click="applySpecialFilter('unassigned')"
+                    >
+                      <span>미배치</span>
+                      <span class="font-semibold text-white">
+                        {{ unassignedCount }}
+                      </span>
+                    </div>
+
+                    <!-- 페가수스 빠른 필터 -->
+                    <div
+                      class="flex items-center gap-1 cursor-pointer px-2 py-1 rounded transition"
+                      :class="isActiveSpecialFilter('pegasus')
+                        ? 'bg-neutral-700/60 text-white'
+                        : 'hover:bg-neutral-700/40'"
+                      @click="applySpecialFilter('pegasus')"
+                    >
+                      <span>페가수스</span>
+                      <span class="font-semibold text-white">
+                        {{ pegasusCount }}
+                      </span>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- 우측 상세 패널 -->
+        <OwnedTransportDetailPanel
+          v-if="showDetailPanel"
+          :row="selectedDetailRow"
+          @close="closeDetailPanel"
+        />
+
       </div>
     </div>
   </div>
@@ -335,10 +403,11 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { http } from '@/api/http'
-import { Plus, RotateCcw, ChevronDown, Settings, ChevronsUpDown } from 'lucide-vue-next'
+import { Plus, RotateCcw, ChevronDown, Settings, ChevronsUpDown, SquarePen } from 'lucide-vue-next'
 import OwnedTransportModal from '@/components/OwnedTransportModal.vue'
 import GarageSettingModal from '@/components/GarageSettingModal.vue'
 import Toast from '@/components/Toast.vue'
+import OwnedTransportDetailPanel from '@/components/OwnedTransportDetailPanel.vue'
 import {
   extractList,
   normalizeOwnedTransport,
@@ -372,6 +441,12 @@ const modalMode = ref('create') // create | edit
 
 // 수정 대상 행 데이터
 const editTarget = ref(null)
+
+// 우측 상세 패널 표시 여부
+const showDetailPanel = ref(false)
+
+// 상세 패널에 표시할 선택 행 데이터
+const selectedDetailRow = ref(null)
 
 // 현재 하이라이트된 행 키
 const activeRowKey = ref('')
@@ -782,6 +857,14 @@ function getUpgradeTypeDisplayText(upgradeType)
   return labels.join(' / ')
 }
 
+// 우측 상세 패널 닫기
+function closeDetailPanel()
+{
+  showDetailPanel.value = false
+  selectedDetailRow.value = null
+  activeRowKey.value = ''
+}
+
 // 등록 모달 열기
 function openCreateModal()
 {
@@ -825,31 +908,47 @@ function handleSlotDoubleClick(row)
     return
   }
 
-  highlightRow(row)
-
-  if (row.type === 'unassigned' || row.type === 'pegasus') {
-    openEdit(row)
-    return
-  }
-
   // 일반 슬롯만 아래 정책 적용
   if (row.type !== 'slot') {
     return
   }
 
-  // 빈 슬롯 → 추가 모달
-  if (row.isEmpty) {
-    modalMode.value = 'create'
-    editTarget.value = {
-      garageId: row.garageId,
-      slotNo: row.slot
-    }
-    showModal.value = true
+  // 빈 슬롯만 등록 모달 허용
+  if (!row.isEmpty) {
     return
   }
 
-  // 차량 있는 슬롯 → 수정 모달
-  openEdit(row)
+  modalMode.value = 'create'
+  editTarget.value = {
+    garageId: row.garageId,
+    slotNo: row.slot
+  }
+  showModal.value = true
+}
+
+// 행 단일 클릭 시 상세 패널 열기
+function handleRowClick(row)
+{
+  if (!row) {
+    return
+  }
+
+  if (row.type === 'garageHeader') {
+    return
+  }
+
+  // 하이라이트 직접 처리
+  activeRowKey.value = getRowHighlightKey(row)
+
+  // 빈 슬롯은 상세 패널 안 열기
+  if (row.type === 'slot' && row.isEmpty) {
+    selectedDetailRow.value = null
+    showDetailPanel.value = false
+    return
+  }
+
+  selectedDetailRow.value = row
+  showDetailPanel.value = true
 }
 
 // 행이 드래그 가능한지 여부
@@ -1228,7 +1327,8 @@ async function handleUpdate(payload)
     await http.patch(`/owned-transports/${payload.ownedId}`, {
       storageType: payload.storageType,
       garageId: payload.garageId,
-      slotNo: payload.slotNo
+      slotNo: payload.slotNo,
+      remark: payload.remark
     })
 
     await handleOwnedTransportSuccess('수정 완료')
@@ -1280,6 +1380,27 @@ function handleWriteFail(errorMessage, err)
 {
   console.error(errorMessage, err)
   showToast(errorMessage, 'error')
+}
+
+// 풋터 미배치/페가수스 빠른 필터 적용
+function applySpecialFilter(type)
+{
+  if (type === 'unassigned') {
+    selectedGarageIds.value = ['unassigned']
+    return
+  }
+
+  if (type === 'pegasus') {
+    selectedGarageIds.value = ['pegasus']
+    return
+  }
+}
+
+// 현재 선택된 특수 필터인지 여부
+function isActiveSpecialFilter(type)
+{
+  return selectedGarageIds.value.length === 1 &&
+         selectedGarageIds.value.includes(type)
 }
 
 // 초기 데이터 조회 및 이벤트 등록
