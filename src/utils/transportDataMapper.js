@@ -25,6 +25,7 @@ export function normalizeOwnedTransport(x)
     manufacturer: x.manufacturer ?? x.maker ?? x.brand ?? x.manufacturerName ?? '-',
     name: x.name ?? x.modelName ?? x.transportName ?? '-',
     upgradeType: x.upgradeType ?? x.upgrade_type ?? '',
+    upgradeLocation: x.upgradeLocation ?? x.upgrade_location ?? '',
     category: x.category ?? x.transportCategory ?? x.className ?? x.class ?? '-',
     price: x.price ?? x.priceNumber ?? x.cost ?? null,
     releaseDate: x.releaseDate ?? x.release_date ?? '-'

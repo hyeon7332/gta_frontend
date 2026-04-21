@@ -223,7 +223,7 @@
                               </span>
                               <span
                                 v-if="getUpgradeTypeDisplayText(row.upgradeType)"
-                                class="text-[10px] text-neutral-400 shrink-0"
+                                class="upgrade-badge shrink-0"
                               >
                                 {{ getUpgradeTypeDisplayText(row.upgradeType) }}
                               </span>
@@ -271,7 +271,7 @@
                               </span>
                               <span
                                 v-if="getUpgradeTypeDisplayText(row.upgradeType)"
-                                class="text-[10px] text-neutral-400 shrink-0"
+                                class="upgrade-badge shrink-0"
                               >
                                 {{ getUpgradeTypeDisplayText(row.upgradeType) }}
                               </span>
@@ -540,6 +540,7 @@ const slotRows = computed(() => {
   garageList.value.forEach((garage) => {
     const garageId = garage.garageId
     const garageName = garage.garageName
+    const displayGarageName = garage.alias ? garage.alias : garage.garageName
     const slotCount = Number(garage.slotCount ?? 0)
 
     result.push({
@@ -564,8 +565,10 @@ const slotRows = computed(() => {
           ...found,
           type: 'slot',
           garageId,
-          garage: garageName,
+          garage: displayGarageName,
+          alias: garage.alias ?? found.alias ?? null,
           slot: slotNo,
+          upgradeLocation: found.upgradeLocation ?? '',
           isEmpty: false
         })
       } else {
@@ -573,7 +576,8 @@ const slotRows = computed(() => {
           id: `empty-${garageId}-${slotNo}`,
           type: 'slot',
           garageId,
-          garage: garageName,
+          garage: displayGarageName,
+          alias: garage.alias ?? null,
           slot: slotNo,
           manufacturer: '-',
           name: '-',
@@ -844,6 +848,10 @@ function getUpgradeTypeDisplayText(upgradeType)
       return item !== ''
     })
     .map((item) => {
+      if (item === '일반') {
+        return ''
+      }
+
       return upgradeTypeDisplayMap[item] ?? ''
     })
     .filter((item) => {
@@ -936,6 +944,9 @@ function handleRowClick(row)
   if (row.type === 'garageHeader') {
     return
   }
+
+  // 상세패널에 들어가는 row 확인용
+  console.log('selected detail row', row)
 
   // 하이라이트 직접 처리
   activeRowKey.value = getRowHighlightKey(row)
@@ -1422,3 +1433,9 @@ onUnmounted(() => {
   }
 })
 </script>
+<style scoped>
+.upgrade-badge {
+  @apply px-2 py-[2px] rounded-md text-[11px] font-medium
+         bg-neutral-700/60 text-neutral-200;
+}
+</style>

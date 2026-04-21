@@ -3,10 +3,27 @@
     class="w-[500px] shrink-0 rounded-lg border border-neutral-700 bg-neutral-900/40 shadow-lg overflow-hidden"
   >
     <div class="p-4">
+
       <div class="mb-4 flex items-start justify-between gap-3">
         <div class="min-w-0 flex-1">
-          <div class="text-[18px] font-semibold text-white leading-tight break-words">
-            {{ getDetailTitle(row) }}
+          <div class="flex items-center gap-2 min-w-0 flex-wrap">
+            <div class="text-[18px] font-semibold text-white leading-tight break-words min-w-0">
+              {{ getDetailTitle(row) }}
+            </div>
+
+            <span
+              v-if="getUpgradeTypeDisplayText(row?.upgradeType)"
+              class="upgrade-badge shrink-0"
+            >
+              {{ getUpgradeTypeDisplayText(row?.upgradeType) }}
+            </span>
+          </div>
+
+          <div
+            v-if="row?.remark && row.remark.trim()"
+            class="mt-1 text-[11px] leading-snug text-neutral-400 break-words"
+          >
+            {{ row.remark }}
           </div>
         </div>
 
@@ -30,26 +47,11 @@
       </div>
 
       <div class="border-t border-neutral-700">
+
         <div class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700">
           <span class="text-[13px] text-neutral-400">보관위치</span>
           <span class="text-[13px] font-medium text-neutral-100 text-right">
-            {{
-              row?.type === 'unassigned'
-                ? '미배치'
-                : row?.type === 'pegasus'
-                ? '페가수스'
-                : row?.garage || '-'
-            }}
-          </span>
-        </div>
-
-        <div
-          v-if="row?.type === 'slot'"
-          class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700"
-        >
-          <span class="text-[13px] text-neutral-400">슬롯</span>
-          <span class="text-[13px] font-medium text-neutral-100 text-right">
-            {{ row?.slot || '-' }}
+            {{ getStorageDisplayText(row) }}
           </span>
         </div>
 
@@ -57,16 +59,6 @@
           <span class="text-[13px] text-neutral-400">분류</span>
           <span class="text-[13px] font-medium text-neutral-100 text-right">
             {{ row?.category || '-' }}
-          </span>
-        </div>
-
-        <div
-          v-if="getUpgradeTypeDisplayText(row?.upgradeType)"
-          class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700"
-        >
-          <span class="text-[13px] text-neutral-400">개조유형</span>
-          <span class="text-[13px] font-medium text-neutral-100 text-right">
-            {{ getUpgradeTypeDisplayText(row?.upgradeType) }}
           </span>
         </div>
 
@@ -80,12 +72,23 @@
           </span>
         </div>
 
-        <div class="flex items-center justify-between gap-4 px-1 py-2">
+        <div class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700">
           <span class="text-[13px] text-neutral-400">이름</span>
           <span class="text-[13px] font-medium text-neutral-100 text-right">
             {{ row?.name || '-' }}
           </span>
         </div>
+
+        <div
+          v-if="row?.upgradeLocation"
+          class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700"
+        >
+          <span class="text-[13px] text-neutral-400">개조위치</span>
+          <span class="text-[13px] font-medium text-neutral-100 text-right">
+            {{ row.upgradeLocation }}
+          </span>
+        </div>
+
       </div>
     </div>
   </div>
@@ -124,6 +127,10 @@ function getUpgradeTypeDisplayText(upgradeType)
       return item !== ''
     })
     .map((item) => {
+      if (item === '일반') {
+        return ''
+      }
+
       return upgradeTypeDisplayMap[item] ?? ''
     })
     .filter((item) => {
@@ -155,5 +162,29 @@ function getDetailTitle(row)
   }
 
   return `${manufacturer} ${name}`
+}
+
+function getStorageDisplayText(row)
+{
+  if (!row) {
+    return '-'
+  }
+
+  if (row.type === 'unassigned') {
+    return '미배치'
+  }
+
+  if (row.type === 'pegasus') {
+    return '페가수스'
+  }
+
+  const garageName = String(row.alias || row.garage || '').trim()
+  const slotNo = row.slot
+
+  if (slotNo) {
+    return garageName !== '' ? `${garageName} / ${slotNo}` : `${slotNo}`
+  }
+
+  return garageName || '-'
 }
 </script>
