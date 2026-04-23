@@ -548,19 +548,19 @@
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
-                        {{ row.topSpeed ? Number(row.topSpeed).toFixed(2) + ' km/h' : '-' }}
+                        {{ format.formatSpeed(row.topSpeed) }}
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
-                        {{ row.price ? formatPrice(row.price) : '-' }}
+                        {{ format.formatCurrencyUSD(row.price) }}
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
-                        {{ displayValue(row.releaseDate) }}
+                        {{ format.formatDate(row.releaseDate) }}
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ displayValue(row.source) }}</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ row.weight ? formatNumber(row.weight) + ' kg' : '-' }}</td>
+                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ row.weight ? format.formatNumber(row.weight) + ' kg' : '-' }}</td>
                       <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ displayValue(row.driveTrain) }}</td>
                       <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">{{ displayValue(row.seats) }}</td>
 
@@ -649,6 +649,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Plus, X, RotateCcw, ChevronDown } from 'lucide-vue-next'
 import { http } from '@/api/http'
+import * as format from '@/utils/format'
 import TransportModelModal from '@/components/TransportModelModal.vue'
 import {
   manufacturerOptions,
@@ -1209,28 +1210,6 @@ function formatLapTime(ms)
   const millis = value % 1000
 
   return `${minutes}:${String(seconds).padStart(2, '0')}:${String(millis).padStart(3, '0')}`
-}
-
-function formatPrice(value)
-{
-  if (value === null || value === undefined || value === '') {
-    return ''
-  }
-
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0
-  }).format(value)
-}
-
-function formatNumber(value)
-{
-  if (value === null || value === undefined) {
-    return ''
-  }
-
-  return new Intl.NumberFormat().format(value)
 }
 
 function displayValue(value)

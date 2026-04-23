@@ -34,6 +34,10 @@ export function normalizeOwnedTransport(x)
     speedRank: x.speedRank ?? x.speed_rank ?? null,
     lapCategoryRank: x.lapCategoryRank ?? x.lap_category_rank ?? null,
     speedCategoryRank: x.speedCategoryRank ?? x.speed_category_rank ?? null,
+    lapTotalCount: x.lapTotalCount ?? x.lap_total_count ?? null,
+    lapCategoryTotalCount: x.lapCategoryTotalCount ?? x.lap_category_total_count ?? null,
+    speedTotalCount: x.speedTotalCount ?? x.speed_total_count ?? null,
+    speedCategoryTotalCount: x.speedCategoryTotalCount ?? x.speed_category_total_count ?? null,
   }
 }
 

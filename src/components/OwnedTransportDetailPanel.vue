@@ -99,15 +99,28 @@
             <div class="flex justify-between text-[13px] mb-1">
               <span class="text-neutral-400">랩타임</span>
               <span class="text-neutral-400">
-                <span :class="getRankClass(row?.lapRank)">
-                  {{ row?.lapRank ? '전체 ' + row.lapRank + '위' : '-' }}
-                </span>
+                <template v-if="row?.lapRank">
+                  <span>전체 </span>
+                  <span :class="getRankClass(row?.lapRank)">
+                    {{ row.lapRank }}위
+                  </span>
+                  <span v-if="row?.lapTotalCount">
+                    (총 {{ row.lapTotalCount }}대)
+                  </span>
+                </template>
 
                 <template v-if="row?.lapCategoryRank">
-                  <span class="text-neutral-400"> / </span>
+                  <span> / </span>
                   <span :class="getRankClass(row?.lapCategoryRank)">
                     {{ (row?.category || '-') + ' ' + row.lapCategoryRank + '위' }}
                   </span>
+                  <span v-if="row?.lapCategoryTotalCount">
+                    (총 {{ row.lapCategoryTotalCount }}대)
+                  </span>
+                </template>
+
+                <template v-if="!row?.lapRank && !row?.lapCategoryRank">
+                  <span>-</span>
                 </template>
               </span>
             </div>
@@ -140,15 +153,28 @@
             <div class="flex justify-between text-[13px] mb-1">
               <span class="text-neutral-400">최고속도</span>
               <span class="text-neutral-400">
-                <span :class="getRankClass(row?.speedRank)">
-                  {{ row?.speedRank ? '전체 ' + row.speedRank + '위' : '-' }}
-                </span>
+                <template v-if="row?.speedRank">
+                  <span>전체 </span>
+                  <span :class="getRankClass(row?.speedRank)">
+                    {{ row.speedRank }}위
+                  </span>
+                  <span v-if="row?.speedTotalCount">
+                    (총 {{ row.speedTotalCount }}대)
+                  </span>
+                </template>
 
                 <template v-if="row?.speedCategoryRank">
-                  <span class="text-neutral-400"> / </span>
+                  <span> / </span>
                   <span :class="getRankClass(row?.speedCategoryRank)">
                     {{ (row?.category || '-') + ' ' + row.speedCategoryRank + '위' }}
                   </span>
+                  <span v-if="row?.speedCategoryTotalCount">
+                    (총 {{ row.speedCategoryTotalCount }}대)
+                  </span>
+                </template>
+
+                <template v-if="!row?.speedRank && !row?.speedCategoryRank">
+                  <span>-</span>
                 </template>
               </span>
             </div>
@@ -162,7 +188,7 @@
               </div>
 
               <span class="w-[90px] text-[13px] text-neutral-100 text-right">
-                {{ formatTopSpeed(row?.topSpeed) }}
+                {{ formatSpeed(row?.topSpeed) }}
               </span>
             </div>
           </template>
@@ -175,6 +201,22 @@
           </template>
         </div>
 
+        <!-- 가격 -->
+        <div class="flex items-center justify-between gap-4 px-1 py-2 border-t border-neutral-700">
+          <span class="text-[13px] text-neutral-400">가격</span>
+          <span class="text-[13px] font-medium text-neutral-100 text-right">
+            {{ formatCurrencyUSD(row?.price) }}
+          </span>
+        </div>
+
+        <!-- 출시일 -->
+        <div class="flex items-center justify-between gap-4 px-1 py-2 border-t border-neutral-700">
+          <span class="text-[13px] text-neutral-400">출시일</span>
+          <span class="text-[13px] font-medium text-neutral-100 text-right">
+            {{ formatDate(row?.releaseDate) }}
+          </span>
+        </div>
+
       </div>
     </div>
   </div>
@@ -183,6 +225,7 @@
 <script setup>
 import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
 import { X } from 'lucide-vue-next'
+import { formatDate, formatCurrencyUSD, formatSpeed } from '@/utils/format'
 
 const props = defineProps({
   row: Object
@@ -316,15 +359,6 @@ async function runBarAnimation()
     animatedLapWidth.value = getLapTimePercent(props.row?.lapTime)
     animatedTopSpeedWidth.value = getTopSpeedPercent(props.row?.topSpeed)
   }, 30)
-}
-
-function formatTopSpeed(value)
-{
-  if (!value) {
-    return '-'
-  }
-
-  return `${value} km/h`
 }
 
 function formatLapTime(value)
