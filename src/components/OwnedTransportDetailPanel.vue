@@ -84,9 +84,95 @@
           class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700"
         >
           <span class="text-[13px] text-neutral-400">개조위치</span>
-          <span class="text-[13px] font-medium text-neutral-100 text-right">
+
+          <span
+            class="block truncate text-[13px] font-medium text-neutral-100 text-right max-w-[280px]"
+            :title="row.upgradeLocation"
+          >
             {{ row.upgradeLocation }}
           </span>
+        </div>
+
+        <!-- 랩타임 -->
+        <div class="px-1 py-3 border-b border-neutral-700">
+          <template v-if="row?.lapTime">
+            <div class="flex justify-between text-[13px] mb-1">
+              <span class="text-neutral-400">랩타임</span>
+              <span class="text-neutral-400">
+                <span :class="getRankClass(row?.lapRank)">
+                  {{ row?.lapRank ? '전체 ' + row.lapRank + '위' : '-' }}
+                </span>
+
+                <template v-if="row?.lapCategoryRank">
+                  <span class="text-neutral-400"> / </span>
+                  <span :class="getRankClass(row?.lapCategoryRank)">
+                    {{ (row?.category || '-') + ' ' + row.lapCategoryRank + '위' }}
+                  </span>
+                </template>
+              </span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div class="flex-1 h-[6px] bg-neutral-700 rounded overflow-hidden">
+                <div
+                  class="h-[6px] bg-blue-400 rounded transition-all duration-700 ease-out"
+                  :style="{ width: animatedLapWidth + '%' }"
+                ></div>
+              </div>
+
+              <span class="w-[90px] text-[13px] text-neutral-100 text-right tabular-nums">
+                {{ formatLapTime(row?.lapTime) }}
+              </span>
+            </div>
+          </template>
+
+          <template v-else>
+            <div class="flex justify-between text-[13px]">
+              <span class="text-neutral-400">랩타임</span>
+              <span class="text-neutral-500">정보없음</span>
+            </div>
+          </template>
+        </div>
+
+        <!-- 최고속도 -->
+        <div class="px-1 py-3">
+          <template v-if="row?.topSpeed">
+            <div class="flex justify-between text-[13px] mb-1">
+              <span class="text-neutral-400">최고속도</span>
+              <span class="text-neutral-400">
+                <span :class="getRankClass(row?.speedRank)">
+                  {{ row?.speedRank ? '전체 ' + row.speedRank + '위' : '-' }}
+                </span>
+
+                <template v-if="row?.speedCategoryRank">
+                  <span class="text-neutral-400"> / </span>
+                  <span :class="getRankClass(row?.speedCategoryRank)">
+                    {{ (row?.category || '-') + ' ' + row.speedCategoryRank + '위' }}
+                  </span>
+                </template>
+              </span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div class="flex-1 h-[6px] bg-neutral-700 rounded overflow-hidden">
+                <div
+                  class="h-[6px] bg-green-400 rounded transition-all duration-700 ease-out"
+                  :style="{ width: animatedTopSpeedWidth + '%' }"
+                ></div>
+              </div>
+
+              <span class="w-[90px] text-[13px] text-neutral-100 text-right">
+                {{ formatTopSpeed(row?.topSpeed) }}
+              </span>
+            </div>
+          </template>
+
+          <template v-else>
+            <div class="flex justify-between text-[13px]">
+              <span class="text-neutral-400">최고속도</span>
+              <span class="text-neutral-500">정보없음</span>
+            </div>
+          </template>
         </div>
 
       </div>
@@ -95,11 +181,17 @@
 </template>
 
 <script setup>
+import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
 import { X } from 'lucide-vue-next'
 
 const props = defineProps({
   row: Object
 })
+
+const animatedLapWidth = ref(0)
+const animatedTopSpeedWidth = ref(0)
+
+let animationTimer = null
 
 const emit = defineEmits([
   'close'
@@ -187,4 +279,105 @@ function getStorageDisplayText(row)
 
   return garageName || '-'
 }
+
+function getLapTimePercent(value)
+{
+  if (!value) {
+    return 0
+  }
+
+  const max = 180000
+  return Math.max(0, 100 - (value / max) * 100)
+}
+
+function getTopSpeedPercent(value)
+{
+  if (!value) {
+    return 0
+  }
+
+  const max = 400
+  return Math.min((value / max) * 100, 100)
+}
+
+async function runBarAnimation()
+{
+  if (animationTimer) {
+    clearTimeout(animationTimer)
+    animationTimer = null
+  }
+
+  animatedLapWidth.value = 0
+  animatedTopSpeedWidth.value = 0
+
+  await nextTick()
+
+  animationTimer = setTimeout(() => {
+    animatedLapWidth.value = getLapTimePercent(props.row?.lapTime)
+    animatedTopSpeedWidth.value = getTopSpeedPercent(props.row?.topSpeed)
+  }, 30)
+}
+
+function formatTopSpeed(value)
+{
+  if (!value) {
+    return '-'
+  }
+
+  return `${value} km/h`
+}
+
+function formatLapTime(value)
+{
+  if (!value) {
+    return '-'
+  }
+
+  const totalMs = Number(value)
+
+  const minutes = Math.floor(totalMs / 60000)
+  const seconds = Math.floor((totalMs % 60000) / 1000)
+  const ms = totalMs % 1000
+
+  const secStr = String(seconds).padStart(2, '0')
+  const msStr = String(ms).padStart(3, '0')
+
+  return `${minutes}:${secStr}.${msStr}`
+}
+
+function getRankClass(rank)
+{
+  if (!rank) {
+    return 'text-neutral-400'
+  }
+
+  if (rank === 1) {
+    return 'text-yellow-400 font-bold'
+  }
+
+  if (rank === 2) {
+    return 'text-neutral-200 font-semibold'
+  }
+
+  if (rank === 3) {
+    return 'text-orange-400 font-semibold'
+  }
+
+  return 'text-neutral-400'
+}
+
+watch(
+  () => props.row,
+  () => {
+    runBarAnimation()
+  },
+  { immediate: true }
+)
+
+onBeforeUnmount(() => {
+  if (animationTimer) {
+    clearTimeout(animationTimer)
+    animationTimer = null
+  }
+})
 </script>

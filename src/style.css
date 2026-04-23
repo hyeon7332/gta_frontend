@@ -3,6 +3,8 @@
 @tailwind utilities;
 
 @layer components {
+
+  /* 개조유형 등 공통 배지 스타일 */
   .upgrade-badge {
     @apply px-2 py-[2px] rounded-md text-[11px] font-medium
            bg-neutral-700/60 text-neutral-200;

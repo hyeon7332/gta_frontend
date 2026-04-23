@@ -21,14 +21,19 @@ export function normalizeOwnedTransport(x)
     slot: x.slot ?? x.slotNo ?? x.slot_no ?? null,
     storageType: x.storageType ?? x.storage_type ?? '',
     remark: x.remark ?? x.memo ?? x.note ?? '',
-
     manufacturer: x.manufacturer ?? x.maker ?? x.brand ?? x.manufacturerName ?? '-',
     name: x.name ?? x.modelName ?? x.transportName ?? '-',
     upgradeType: x.upgradeType ?? x.upgrade_type ?? '',
     upgradeLocation: x.upgradeLocation ?? x.upgrade_location ?? '',
     category: x.category ?? x.transportCategory ?? x.className ?? x.class ?? '-',
     price: x.price ?? x.priceNumber ?? x.cost ?? null,
-    releaseDate: x.releaseDate ?? x.release_date ?? '-'
+    releaseDate: x.releaseDate ?? x.release_date ?? '-',
+    lapTime: x.lapTime ?? x.lap_time ?? null,
+    topSpeed: x.topSpeed ?? x.top_speed ?? null,
+    lapRank: x.lapRank ?? x.lap_rank ?? null,
+    speedRank: x.speedRank ?? x.speed_rank ?? null,
+    lapCategoryRank: x.lapCategoryRank ?? x.lap_category_rank ?? null,
+    speedCategoryRank: x.speedCategoryRank ?? x.speed_category_rank ?? null,
   }
 }
 
