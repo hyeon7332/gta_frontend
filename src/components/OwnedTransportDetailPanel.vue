@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-[500px] h-[754px] shrink-0 rounded-lg border border-neutral-700 bg-neutral-900/40 shadow-lg overflow-hidden flex flex-col"
+    class="w-[500px] h-[754.5px] shrink-0 rounded-lg border border-neutral-700 bg-neutral-900/40 shadow-lg overflow-hidden flex flex-col"
   >
     <div class="pt-4 px-4 pb-2 flex flex-col min-h-0 flex-1">
 
