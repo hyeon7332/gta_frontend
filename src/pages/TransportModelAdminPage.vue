@@ -419,7 +419,7 @@
             </div>
 
             <!-- table -->
-            <div class="mt-2 sm:mt-3 w-full overflow-auto max-h-[calc(100dvh-230px)]">
+            <div class="scroll-dark mt-2 sm:mt-3 w-full overflow-auto max-h-[calc(100dvh-230px)]">
               <table class="w-full text-sm text-neutral-200 border-separate border-spacing-0 table-fixed">
                 <thead class="bg-neutral-800">
                   <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap bg-neutral-900/30">

@@ -38,6 +38,11 @@ export function normalizeOwnedTransport(x)
     lapCategoryTotalCount: x.lapCategoryTotalCount ?? x.lap_category_total_count ?? null,
     speedTotalCount: x.speedTotalCount ?? x.speed_total_count ?? null,
     speedCategoryTotalCount: x.speedCategoryTotalCount ?? x.speed_category_total_count ?? null,
+    source: x.source ?? x.source_name ?? x.obtainSource ?? '-',
+    weight: x.weight ?? x.weight_kg ?? null,
+    driveTrain: x.driveTrain ?? x.drive_train ?? '-',
+    seats: x.seats ?? null,
+    features: x.features ?? ''
   }
 }
 

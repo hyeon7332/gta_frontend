@@ -127,7 +127,7 @@
                 </div>
   
                 <!-- table -->
-                <div class="overflow-y-auto overflow-x-hidden h-[641px]">
+                <div class="scroll-dark overflow-y-auto overflow-x-hidden h-[641px]">
                   <table class="w-full table-fixed border-separate border-spacing-0">
                     <colgroup>
                       <col class="w-[6%]" />   <!-- 슬롯 -->

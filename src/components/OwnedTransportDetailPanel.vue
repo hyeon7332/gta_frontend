@@ -1,8 +1,8 @@
 <template>
   <div
-    class="w-[500px] shrink-0 rounded-lg border border-neutral-700 bg-neutral-900/40 shadow-lg overflow-hidden"
+    class="w-[500px] h-[754px] shrink-0 rounded-lg border border-neutral-700 bg-neutral-900/40 shadow-lg overflow-hidden flex flex-col"
   >
-    <div class="p-4">
+    <div class="pt-4 px-4 pb-2 flex flex-col min-h-0 flex-1">
 
       <div class="mb-4 flex items-start justify-between gap-3">
         <div class="min-w-0 flex-1">
@@ -46,7 +46,7 @@
         </div>
       </div>
 
-      <div class="border-t border-neutral-700">
+      <div class="scroll-dark border-t border-neutral-700 overflow-y-auto pr-3 min-h-0 flex-1">
 
         <div class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700">
           <span class="text-[13px] text-neutral-400">보관위치</span>
@@ -62,34 +62,15 @@
           </span>
         </div>
 
-        <div
-          v-if="row?.manufacturer && row?.manufacturer !== '미분류'"
-          class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700"
-        >
-          <span class="text-[13px] text-neutral-400">제조사</span>
-          <span class="text-[13px] font-medium text-neutral-100 text-right">
-            {{ row?.manufacturer }}
-          </span>
-        </div>
-
         <div class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700">
-          <span class="text-[13px] text-neutral-400">이름</span>
-          <span class="text-[13px] font-medium text-neutral-100 text-right">
-            {{ row?.name || '-' }}
-          </span>
-        </div>
-
-        <div
-          v-if="row?.upgradeLocation"
-          class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700"
-        >
           <span class="text-[13px] text-neutral-400">개조위치</span>
 
           <span
-            class="block truncate text-[13px] font-medium text-neutral-100 text-right max-w-[280px]"
-            :title="row.upgradeLocation"
+            class="block truncate text-[13px] text-right max-w-[280px]"
+            :class="row?.upgradeLocation?.trim() ? 'font-medium text-neutral-100' : 'text-neutral-500'"
+            :title="row?.upgradeLocation"
           >
-            {{ row.upgradeLocation }}
+            {{ row?.upgradeLocation?.trim() ? row.upgradeLocation : '개조불가' }}
           </span>
         </div>
 
@@ -100,9 +81,8 @@
               <span class="text-neutral-400">랩타임</span>
               <span class="text-neutral-400">
                 <template v-if="row?.lapRank">
-                  <span>전체 </span>
                   <span :class="getRankClass(row?.lapRank)">
-                    {{ row.lapRank }}위
+                    전체 {{ row.lapRank }}위
                   </span>
                   <span v-if="row?.lapTotalCount">
                     (총 {{ row.lapTotalCount }}대)
@@ -154,9 +134,8 @@
               <span class="text-neutral-400">최고속도</span>
               <span class="text-neutral-400">
                 <template v-if="row?.speedRank">
-                  <span>전체 </span>
                   <span :class="getRankClass(row?.speedRank)">
-                    {{ row.speedRank }}위
+                    전체 {{ row.speedRank }}위
                   </span>
                   <span v-if="row?.speedTotalCount">
                     (총 {{ row.speedTotalCount }}대)
@@ -215,6 +194,70 @@
           <span class="text-[13px] font-medium text-neutral-100 text-right">
             {{ formatDate(row?.releaseDate) }}
           </span>
+        </div>
+
+        <!-- 획득처 -->
+        <div class="flex items-center justify-between gap-4 px-1 py-2 border-t border-neutral-700">
+          <span class="text-[13px] text-neutral-400">획득처</span>
+
+          <span
+            class="block truncate text-[13px] font-medium text-neutral-100 text-right max-w-[280px]"
+            :title="row?.source"
+          >
+            {{ row?.source || '-' }}
+          </span>
+        </div>
+
+        <!-- 무게 -->
+        <div class="flex items-center justify-between gap-4 px-1 py-2 border-t border-neutral-700">
+          <span class="text-[13px] text-neutral-400">무게</span>
+
+          <span class="text-[13px] font-medium text-neutral-100 text-right">
+            {{ row?.weight ? row.weight + ' kg' : '-' }}
+          </span>
+        </div>
+
+        <!-- 구동방식 -->
+        <div class="flex items-center justify-between gap-4 px-1 py-2 border-t border-neutral-700">
+          <span class="text-[13px] text-neutral-400">구동방식</span>
+
+          <span class="text-[13px] font-medium text-neutral-100 text-right">
+            {{ row?.driveTrain || '-' }}
+          </span>
+        </div>
+
+        <!-- 좌석 -->
+        <div class="flex items-center justify-between gap-4 px-1 py-2 border-t border-neutral-700">
+          <span class="text-[13px] text-neutral-400">좌석</span>
+
+          <span class="text-[13px] font-medium text-neutral-100 text-right">
+            {{ row?.seats || '-' }}
+          </span>
+        </div>
+
+        <!-- 특징 -->
+        <div class="px-1 py-2 border-t border-neutral-700">
+          <div class="mb-2 text-[13px] text-neutral-400">특징</div>
+
+          <div
+            v-if="row?.features"
+            class="flex flex-wrap gap-4 pr-1"
+          >
+            <span
+              v-for="feature in row.features.split(',')"
+              :key="feature"
+              class="px-2.5 py-1 rounded-md border border-neutral-700/70 bg-neutral-800/50 text-[12px] text-neutral-200 whitespace-nowrap"
+            >
+              {{ feature.trim() }}
+            </span>
+          </div>
+
+          <div
+            v-else
+            class="text-[13px] text-neutral-500 text-center"
+          >
+            정보없음
+          </div>
         </div>
 
       </div>
@@ -386,18 +429,18 @@ function getRankClass(rank)
   }
 
   if (rank === 1) {
-    return 'text-yellow-400 font-bold'
+    return 'text-yellow-400 font-semibold'
   }
 
   if (rank === 2) {
-    return 'text-neutral-200 font-semibold'
+    return 'text-violet-400 font-semibold'
   }
 
   if (rank === 3) {
-    return 'text-orange-400 font-semibold'
+    return 'text-sky-400 font-semibold'
   }
 
-  return 'text-neutral-400'
+  return 'text-neutral-100 font-medium'
 }
 
 watch(

@@ -9,4 +9,29 @@
     @apply px-2 py-[2px] rounded-md text-[11px] font-medium
            bg-neutral-700/60 text-neutral-200;
   }
+
+  /* 공통 다크 스크롤 */
+  .scroll-dark {
+    scrollbar-width: auto;
+    scrollbar-color: rgba(163,163,163,0.7) rgba(38,38,38,0.6);
+  }
+
+  .scroll-dark::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  .scroll-dark::-webkit-scrollbar-track {
+    background: rgba(38, 38, 38, 0.6);
+    border-radius: 999px;
+  }
+
+  .scroll-dark::-webkit-scrollbar-thumb {
+    background: rgba(163, 163, 163, 0.7);
+    border-radius: 999px;
+    border: 2px solid rgba(38, 38, 38, 0.6);
+  }
+
+  .scroll-dark::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 212, 212, 0.85);
+  }
 }
