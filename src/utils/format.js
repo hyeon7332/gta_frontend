@@ -53,3 +53,58 @@ export function formatSpeed(value)
 
   return `${num.toFixed(2)} km/h`
 }
+
+/** 개조타입 표시명 매핑 */
+export const upgradeTypeDisplayMap = {
+  'HSW': 'HSW',
+  '드리프트': 'Drift',
+  '아레나': 'Arena',
+  '베니즈 커스텀': "Benny's"
+}
+
+/** 개조타입 표시 텍스트 생성 */
+export function formatUpgradeType(upgradeType)
+{
+  if (!upgradeType || upgradeType.trim() === '') {
+    return ''
+  }
+
+  const labels = upgradeType
+    .split(',')
+    .map((item) => {
+      return item.trim()
+    })
+    .filter((item) => {
+      return item !== ''
+    })
+    .map((item) => {
+      if (item === '일반') {
+        return ''
+      }
+
+      return upgradeTypeDisplayMap[item] ?? ''
+    })
+    .filter((item) => {
+      return item !== ''
+    })
+
+  if (labels.length === 0) {
+    return ''
+  }
+
+  return labels.join(' / ')
+}
+
+/** 서버에 저장된 이미지 상대경로를 전체 URL로 변환 */
+export function resolveImageUrl(imageUrl)
+{
+  if (!imageUrl) {
+    return ''
+  }
+
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl
+  }
+
+  return import.meta.env.VITE_FILE_BASE_URL + imageUrl
+}

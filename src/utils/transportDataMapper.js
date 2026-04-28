@@ -42,7 +42,8 @@ export function normalizeOwnedTransport(x)
     weight: x.weight ?? x.weight_kg ?? null,
     driveTrain: x.driveTrain ?? x.drive_train ?? '-',
     seats: x.seats ?? null,
-    features: x.features ?? ''
+    features: x.features ?? '',
+    imageUrl: x.imageUrl ?? x.image_url ?? null
   }
 }
 

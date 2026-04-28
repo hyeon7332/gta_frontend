@@ -222,10 +222,10 @@
                                 {{ row.name }}
                               </span>
                               <span
-                                v-if="getUpgradeTypeDisplayText(row.upgradeType)"
+                                v-if="formatUpgradeType(row.upgradeType)"
                                 class="upgrade-badge shrink-0"
                               >
-                                {{ getUpgradeTypeDisplayText(row.upgradeType) }}
+                                {{ formatUpgradeType(row.upgradeType) }}
                               </span>
                             </div>
                           </td>
@@ -270,10 +270,10 @@
                                 {{ row.name }}
                               </span>
                               <span
-                                v-if="getUpgradeTypeDisplayText(row.upgradeType)"
+                                v-if="formatUpgradeType(row.upgradeType)"
                                 class="upgrade-badge shrink-0"
                               >
-                                {{ getUpgradeTypeDisplayText(row.upgradeType) }}
+                                {{ formatUpgradeType(row.upgradeType) }}
                               </span>
                             </div>
                           </td>
@@ -414,6 +414,7 @@ import {
   normalizeGarage,
   normalizeTransportModel
 } from '@/utils/transportDataMapper'
+import { formatUpgradeType } from '@/utils/format'
 
 // 보유 이동수단 목록 데이터
 const rows = ref([])
@@ -489,14 +490,6 @@ watch(showModal, (isOpen) => {
     activeRowKey.value = ''
   }
 })
-
-// 개조타입 표시명 매핑
-const upgradeTypeDisplayMap = {
-  'HSW': 'HSW',
-  '드리프트': 'Drift',
-  '아레나': 'Arena',
-  '베니즈 커스텀': "Benny's"
-}
 
 // 모든 일반 차고가 접혀있는지 여부
 const allGarageCollapsed = computed(() => {
@@ -830,39 +823,6 @@ function toggleAllGaragesCollapsed()
   }
 
   collapsedGarageIds.value = new Set(garageIds)
-}
-
-// 개조타입 표시 텍스트 생성
-function getUpgradeTypeDisplayText(upgradeType)
-{
-  if (!upgradeType || upgradeType.trim() === '') {
-    return ''
-  }
-
-  const labels = upgradeType
-    .split(',')
-    .map((item) => {
-      return item.trim()
-    })
-    .filter((item) => {
-      return item !== ''
-    })
-    .map((item) => {
-      if (item === '일반') {
-        return ''
-      }
-
-      return upgradeTypeDisplayMap[item] ?? ''
-    })
-    .filter((item) => {
-      return item !== ''
-    })
-
-  if (labels.length === 0) {
-    return ''
-  }
-
-  return labels.join(' / ')
 }
 
 // 우측 상세 패널 닫기
@@ -1339,7 +1299,8 @@ async function handleUpdate(payload)
       storageType: payload.storageType,
       garageId: payload.garageId,
       slotNo: payload.slotNo,
-      remark: payload.remark
+      remark: payload.remark,
+      imageUrl: payload.imageUrl
     })
 
     await handleOwnedTransportSuccess('수정 완료')
@@ -1351,6 +1312,8 @@ async function handleUpdate(payload)
 // 등록/수정/삭제 성공 시 후처리
 async function handleOwnedTransportSuccess(successMessage)
 {
+  const selectedId = selectedDetailRow.value?.id ?? null
+
   showModal.value = false     // 모달 닫기
   editTarget.value = null     // 편집 대상 초기화
   activeRowKey.value = ''     // 행 하이라이트 초기화
@@ -1358,6 +1321,20 @@ async function handleOwnedTransportSuccess(successMessage)
   showToast(successMessage)   // 성공 토스트 표시
 
   await load()                // 목록 새로고침
+
+  if (selectedId) {
+    const refreshedRow = rows.value.find((row) => {
+      return Number(row.id) === Number(selectedId)
+    })
+
+    if (refreshedRow) {
+      selectedDetailRow.value = refreshedRow
+      showDetailPanel.value = true
+    } else {
+      selectedDetailRow.value = null
+      showDetailPanel.value = false
+    }
+  }
 }
 
 // 차고 설정 저장 요청 처리

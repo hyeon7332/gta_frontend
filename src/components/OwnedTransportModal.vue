@@ -201,6 +201,45 @@
             </div>
           </div>
 
+          <!-- 이미지 -->
+          <div class="col-span-2">
+            <div class="text-xs text-neutral-700 mb-1">이미지</div>
+
+            <div class="relative h-[180px] rounded-md border border-neutral-300 bg-white overflow-hidden">
+              <img
+                v-if="!removeImageYn && (previewUrl || props.initialRow?.imageUrl)"
+                :src="previewUrl || resolveImageUrl(props.initialRow?.imageUrl)"
+                class="w-full h-full object-cover"
+              />
+
+              <div
+                v-else
+                class="w-full h-full flex items-center justify-center text-sm text-neutral-400"
+              >
+                이미지 없음
+              </div>
+
+              <button
+                v-if="!removeImageYn && (previewUrl || props.initialRow?.imageUrl)"
+                type="button"
+                class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center
+                      rounded-full bg-black/60 text-white hover:bg-black/80"
+                @click="removeImage"
+              >
+                <Trash2 class="w-4 h-4" />
+              </button>
+            </div>
+
+            <div class="mt-2">
+              <input
+                type="file"
+                accept="image/*"
+                class="block w-full text-sm text-neutral-700"
+                @change="handleImageChange"
+              />
+            </div>
+          </div>
+
         </div>
 
         <!-- buttons -->
@@ -270,8 +309,9 @@
 
 <script setup>
 import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
-import { X } from 'lucide-vue-next'
+import { X, Trash2 } from 'lucide-vue-next'
 import { http } from '@/api/http'
+import { resolveImageUrl } from '@/utils/format'
 
 const props = defineProps({
   open: Boolean,
@@ -318,12 +358,20 @@ const currentSlotNo = ref(null)
 const garageText = ref('')
 const slotNoText = ref('')
 const remark = ref('')
+const imageFile = ref(null)
+const previewUrl = ref('')
 
 const showDeleteConfirm = ref(false)
+
+const removeImageYn = ref(false)
 
 watch(() => props.open, async (v) => {
 
   if (v) {
+    imageFile.value = null
+    previewUrl.value = ''
+    removeImageYn.value = false
+
     if (isEditMode.value) {
       // 수정
       if (props.initialRow?.storageType === 'PEGASUS') {
@@ -666,7 +714,7 @@ function selectTransport(t)
   occupiedSlotList.value = []
 }
 
-function handleSubmit()
+async function handleSubmit()
 {
   if (isEditMode.value) {
 
@@ -695,12 +743,19 @@ function handleSubmit()
       ? 'PEGASUS'
       : (selectedGarageId.value ? 'GARAGE' : 'UNASSIGNED')
 
+    const uploadedImageUrl = await uploadImageIfNeeded()
+
+    const imageUrl = removeImageYn.value
+      ? null
+      : (uploadedImageUrl || props.initialRow?.imageUrl || null)
+    
     emit('update', {
       ownedId: ownedId,
       storageType: storageType,
       garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
       slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
-      remark: remark.value
+      remark: remark.value,
+      imageUrl: imageUrl
     })
 
     return
@@ -741,12 +796,15 @@ function handleSubmit()
     ? 'PEGASUS'
     : (selectedGarageId.value ? 'GARAGE' : 'UNASSIGNED')
 
+  const imageUrl = await uploadImageIfNeeded()
+
   emit('created', {
     modelId: Number(modelId),
     storageType: storageType,
     garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
     slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
-    remark: remark.value
+    remark: remark.value,
+    imageUrl: imageUrl
   })
 }
 
@@ -1017,6 +1075,65 @@ function clearGarage()
   slotQuery.value = ''
   currentSlotNo.value = null
   occupiedSlotList.value = []
+}
+
+function handleImageChange(e)
+{
+  const file = e.target.files?.[0]
+
+  if (!file) {
+    return
+  }
+
+  const allowedTypes = ['image/png', 'image/jpeg']
+
+  if (!allowedTypes.includes(file.type)) {
+    alert('PNG 또는 JPEG 이미지만 업로드 가능합니다.')
+
+    e.target.value = ''       // input 초기화
+    imageFile.value = null
+    previewUrl.value = ''
+    return
+  }
+
+  const maxSize = 2 * 1024 * 1024
+
+  if (file.size > maxSize) {
+    alert('이미지는 2MB 이하만 업로드 가능합니다.')
+
+    e.target.value = ''
+    imageFile.value = null
+    previewUrl.value = ''
+    return
+  }
+
+  imageFile.value = file
+  previewUrl.value = URL.createObjectURL(file)
+}
+
+async function uploadImageIfNeeded()
+{
+  if (!imageFile.value) {
+    return null
+  }
+
+  const formData = new FormData()
+  formData.append('file', imageFile.value)
+
+  const res = await http.post('/uploads/owned-transport', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+
+  return res.data?.imageUrl || null
+}
+
+function removeImage()
+{
+  imageFile.value = null
+  previewUrl.value = ''
+  removeImageYn.value = true
 }
 
 onUnmounted(() => {

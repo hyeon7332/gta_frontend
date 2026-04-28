@@ -12,10 +12,10 @@
             </div>
 
             <span
-              v-if="getUpgradeTypeDisplayText(row?.upgradeType)"
+              v-if="formatUpgradeType(row?.upgradeType)"
               class="upgrade-badge shrink-0"
             >
-              {{ getUpgradeTypeDisplayText(row?.upgradeType) }}
+              {{ formatUpgradeType(row?.upgradeType) }}
             </span>
           </div>
 
@@ -40,7 +40,7 @@
         <div class="h-[260px] rounded-md border border-neutral-700 bg-neutral-800/40 overflow-hidden">
           <img
             v-if="row?.imageUrl"
-            :src="row.imageUrl"
+            :src="resolveImageUrl(row.imageUrl)"
             class="w-full h-full object-cover"
           />
         </div>
@@ -268,7 +268,8 @@
 <script setup>
 import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
 import { X } from 'lucide-vue-next'
-import { formatDate, formatCurrencyUSD, formatSpeed } from '@/utils/format'
+import { formatDate, formatCurrencyUSD, formatSpeed, formatUpgradeType } from '@/utils/format'
+import { resolveImageUrl } from '@/utils/format'
 
 const props = defineProps({
   row: Object
@@ -282,45 +283,6 @@ let animationTimer = null
 const emit = defineEmits([
   'close'
 ])
-
-const upgradeTypeDisplayMap = {
-  'HSW': 'HSW',
-  '드리프트': 'Drift',
-  '아레나': 'Arena',
-  '베니즈 커스텀': "Benny's"
-}
-
-function getUpgradeTypeDisplayText(upgradeType)
-{
-  if (!upgradeType || upgradeType.trim() === '') {
-    return ''
-  }
-
-  const labels = upgradeType
-    .split(',')
-    .map((item) => {
-      return item.trim()
-    })
-    .filter((item) => {
-      return item !== ''
-    })
-    .map((item) => {
-      if (item === '일반') {
-        return ''
-      }
-
-      return upgradeTypeDisplayMap[item] ?? ''
-    })
-    .filter((item) => {
-      return item !== ''
-    })
-
-  if (labels.length === 0) {
-    return ''
-  }
-
-  return labels.join(' / ')
-}
 
 function getDetailTitle(row)
 {
