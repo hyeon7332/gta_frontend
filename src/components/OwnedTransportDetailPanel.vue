@@ -37,13 +37,16 @@
       </div>
 
       <div class="mb-4">
-        <div class="h-[260px] rounded-md bg-neutral-800/40 overflow-hidden 
-             shadow-[inset_0_0_0_2px_rgba(0,0,0,0.9),inset_0_0_0_3px_rgba(255,255,255,0.08)]">
+        <div class="relative h-[260px] rounded-md bg-neutral-800/40 overflow-hidden">
           <img
             v-if="row?.imageUrl"
             :src="resolveImageUrl(row.imageUrl)"
             class="w-full h-full object-cover"
           />
+          <!-- 이미지 위 테두리 -->
+          <div
+            class="pointer-events-none absolute inset-0 rounded-md border-2 border-white/80"
+          ></div>
         </div>
       </div>
 
