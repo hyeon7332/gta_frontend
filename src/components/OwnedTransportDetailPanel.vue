@@ -37,7 +37,8 @@
       </div>
 
       <div class="mb-4">
-        <div class="h-[260px] rounded-md border border-neutral-600/70 bg-neutral-800/40 overflow-hidden">
+        <div class="h-[260px] rounded-md bg-neutral-800/40 overflow-hidden 
+             shadow-[inset_0_0_0_1px_rgba(0,0,0,0.6),inset_0_0_0_2px_rgba(255,255,255,0.05)]">
           <img
             v-if="row?.imageUrl"
             :src="resolveImageUrl(row.imageUrl)"
