@@ -1,6 +1,18 @@
 <template>
   <!-- page background -->
   <div class="min-h-[calc(100dvh-56px)] bg-neutral-700">
+
+    <!-- Toast -->
+    <div class="fixed top-[64px] left-1/2 -translate-x-1/2 z-[9999] pointer-events-none">
+      <div class="min-w-[240px] max-w-[360px] pointer-events-auto">
+        <Toast
+          :open="toast.open"
+          :text="toast.text"
+          :type="toast.type"
+        />
+      </div>
+    </div>
+
     <div
       class="w-full px-4 pt-2 pb-4 transition-all duration-300"
       :class="showDetailPanel ? 'max-w-[1400px] mx-auto' : 'max-w-[1000px] mx-auto'"
@@ -15,9 +27,24 @@
             <div class="p-2">
               <div class="border border-neutral-700 rounded-md overflow-hidden">
   
-                <!-- toolbar: 차고 필터 / 초기화 / 전체 접힘 토글 -->
+                <!-- toolbar -->
                 <div class="relative flex items-center justify-between px-3 py-2 bg-neutral-900/30 border-b border-neutral-700">
                   <div ref="garageFilterRef" class="relative flex items-center gap-2 min-w-0">
+                    <!-- 펼침/접힘 -->
+                    <button
+                      type="button"
+                      class="h-8 px-2 flex items-center gap-1
+                            rounded-md
+                            text-[12px] text-neutral-300
+                            hover:bg-neutral-700/40
+                            transition"
+                      @click="toggleAllGaragesCollapsed"
+                    >
+                      <ChevronsUpDown class="w-4 h-4" />
+                      <span>{{ allGarageCollapsed ? '펼침' : '접힘' }}</span>
+                    </button>
+
+                    <!-- 차고 필터 -->
                     <button
                       type="button"
                       class="h-8 min-w-[180px] max-w-[260px] px-3
@@ -34,37 +61,11 @@
                       <span class="truncate">{{ selectedGarageFilterLabel }}</span>
                       <ChevronDown class="w-4 h-4 text-neutral-400" />
                     </button>
-                    <button
-                      type="button"
-                      class="h-8 w-8 flex items-center justify-center
-                            rounded-md
-                            bg-neutral-800/60
-                            border border-neutral-600
-                            text-neutral-200
-                            hover:bg-neutral-700
-                            active:bg-neutral-600
-                            transition"
-                      @click="resetFilters"
-                    >
-                      <RotateCcw class="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      class="h-8 px-2 flex items-center gap-1
-                            rounded-md
-                            text-[12px] text-neutral-300
-                            hover:bg-neutral-700/40
-                            transition"
-                      @click="toggleAllGaragesCollapsed"
-                    >
-                      <ChevronsUpDown class="w-4 h-4" />
-                      <span>{{ allGarageCollapsed ? '펼침' : '접힘' }}</span>
-                    </button>
-  
+
                     <!-- 차고 필터 드롭다운 -->
                     <div
                       v-if="showGarageFilterDropdown"
-                      class="absolute left-0 top-full mt-2 z-30
+                      class="absolute left-[84px] top-full mt-2 z-30
                             w-[260px] max-h-[280px] overflow-y-auto
                             rounded-md border border-neutral-600
                             bg-neutral-900 shadow-lg"
@@ -101,14 +102,43 @@
                         <span class="truncate">{{ garage.garageName }}</span>
                       </label>
                     </div>
+
+                    <!-- 검색 -->
+                    <input
+                      ref="searchInputRef"
+                      v-model="searchKeyword"
+                      type="text"
+                      placeholder="제조사 / 모델명 검색"
+                      class="h-8 w-[220px] shrink-0 px-2 rounded-md bg-neutral-800/60 border border-neutral-600 text-[13px] text-neutral-200"
+                      @keyup.enter="searchOwnedTransport"
+                    />
+
+                    <button
+                      type="button"
+                      class="h-8 px-3 rounded-md bg-neutral-800/60 border border-neutral-600 text-[13px] text-neutral-200 hover:bg-neutral-700"
+                      @click="searchOwnedTransport"
+                    >
+                      검색
+                    </button>
+
+                    <!-- 초기화 -->
+                    <button
+                      type="button"
+                      class="h-8 w-8 flex items-center justify-center
+                            rounded-md
+                            bg-neutral-800/60
+                            border border-neutral-600
+                            text-neutral-200
+                            hover:bg-neutral-700
+                            active:bg-neutral-600
+                            transition"
+                      @click="resetFilters"
+                    >
+                      <RotateCcw class="w-4 h-4" />
+                    </button>
+
                   </div>
   
-                  <!-- toast -->
-                  <Toast
-                    :open="toast.open"
-                    :text="toast.text"
-                    :type="toast.type"
-                  />
                   <button
                     type="button"
                     class="h-8 px-3 flex items-center gap-1
@@ -398,6 +428,13 @@
     :garage="selectedGarageSettingRow"
     @save="handleGarageSettingSave"
   />
+
+  <!-- 보유 이동수단 검색 결과 모달 -->
+  <OwnedTransportSearchResultModal
+    v-model:open="showSearchResultModal"
+    :results="searchResultList"
+    @move="moveToSearchResult"
+  />
 </template>
 
 <script setup>
@@ -408,6 +445,7 @@ import OwnedTransportModal from '@/components/OwnedTransportModal.vue'
 import GarageSettingModal from '@/components/GarageSettingModal.vue'
 import Toast from '@/components/Toast.vue'
 import OwnedTransportDetailPanel from '@/components/OwnedTransportDetailPanel.vue'
+import OwnedTransportSearchResultModal from '@/components/OwnedTransportSearchResultModal.vue'
 import {
   extractList,
   normalizeOwnedTransport,
@@ -460,6 +498,18 @@ const showGarageFilterDropdown = ref(false)
 
 // 차고 필터 영역 DOM 참조
 const garageFilterRef = ref(null)
+
+// 이동수단 검색어 입력창 DOM 참조
+const searchInputRef = ref(null)
+
+// 이동수단 검색어
+const searchKeyword = ref('')
+
+// 검색 결과 모달 표시 여부
+const showSearchResultModal = ref(false)
+
+// 검색 결과 목록
+const searchResultList = ref([])
 
 // 접힌 차고 ID 집합
 const collapsedGarageIds = ref(new Set())
@@ -786,6 +836,82 @@ function resetFilters()
 {
   selectedGarageIds.value = []
   collapsedGarageIds.value = new Set()
+  searchKeyword.value = ''
+  closeDetailPanel()
+}
+
+// 보유 이동수단 검색
+function searchOwnedTransport()
+{
+  const keyword = searchKeyword.value.trim().toLowerCase()
+
+  if (keyword === '') {
+    showToast('검색어를 입력하세요', 'error')
+
+    if (searchInputRef.value) {
+      searchInputRef.value.focus()
+      searchInputRef.value.select()
+    }
+
+    return
+  }
+
+  const foundList = rows.value.filter((row) => {
+    const manufacturer = row.manufacturer ?? ''
+    const name = row.name ?? ''
+    const searchText = `${manufacturer} ${name}`.toLowerCase()
+
+    return searchText.includes(keyword)
+  })
+
+  if (foundList.length === 0) {
+    showToast('검색 결과 없음', 'error')
+    return
+  }
+
+  searchResultList.value = foundList
+  showSearchResultModal.value = true
+}
+
+// 검색 결과 모달에서 선택한 이동수단 위치로 이동
+function moveToSearchResult(row)
+{
+  showSearchResultModal.value = false
+  applySearchResult(row)
+}
+
+// 검색 결과를 화면 상태(차고/선택/상세패널)에 반영
+function applySearchResult(row)
+{
+  if (row.storageType === 'PEGASUS') {
+    selectedGarageIds.value = ['pegasus']
+  } else if (row.storageType === 'UNASSIGNED' || (!row.storageType && !row.garageId)) {
+    selectedGarageIds.value = ['unassigned']
+  } else {
+    selectedGarageIds.value = [String(row.garageId)]
+
+    collapsedGarageIds.value = new Set(
+      garageList.value
+        .map((garage) => {
+          return garage.garageId
+        })
+        .filter((garageId) => {
+          return Number(garageId) !== Number(row.garageId)
+        })
+    )
+  }
+
+  setTimeout(() => {
+    const target = displayRows.value.find((item) => {
+      return item && Number(item.id) === Number(row.id)
+    })
+
+    if (!target) {
+      return
+    }
+
+    handleRowClick(target)
+  }, 0)
 }
 
 // 특정 차고 접힘 상태 토글
@@ -1410,9 +1536,3 @@ onUnmounted(() => {
   }
 })
 </script>
-<style scoped>
-.upgrade-badge {
-  @apply px-2 py-[2px] rounded-md text-[11px] font-medium
-         bg-neutral-700/60 text-neutral-200;
-}
-</style>

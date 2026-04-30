@@ -7,21 +7,21 @@
 
       <div
         ref="modalBoxRef"
-        class="relative w-full max-w-[620px] bg-neutral-100 rounded-2xl p-6 shadow-2xl"
+        class="relative w-[620px] max-h-[90vh] bg-neutral-900 border border-neutral-700 rounded-lg shadow-xl overflow-hidden"
       >
         <!-- header -->
-        <div class="flex items-center justify-between mb-6">
-          <div class="text-xl font-semibold">
+        <div class="px-4 py-3 border-b border-neutral-700">
+          <div class="text-[15px] font-semibold text-neutral-100">
             {{ isEditMode ? '보유 이동수단 수정' : '보유 이동수단 등록' }}
           </div>
         </div>
 
         <!-- body -->
-        <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="grid grid-cols-2 gap-4 p-4">
 
           <!-- 이동수단 -->
           <div>
-            <div class="text-xs text-neutral-700 mb-1">이동수단</div>
+            <div class="text-xs text-neutral-400 mb-1">이동수단</div>
 
             <!-- 등록 모드 -->
             <template v-if="!isEditMode">
@@ -29,7 +29,7 @@
               <div class="relative min-w-0" ref="transportWrapRef">
                 <input
                   :value="transportDisplay"
-                  class="w-full h-10 px-3 pr-8 rounded-md border border-neutral-300 bg-white text-sm"
+                  class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
                   placeholder="이동수단 검색"
                   @click="openTransportDropdown"
                   @input="onTransportInput"
@@ -88,19 +88,19 @@
 
           <!-- 비고 -->
           <div>
-            <div class="text-xs text-neutral-700 mb-1">비고</div>
+            <div class="text-xs text-neutral-400 mb-1">비고</div>
             <input
               v-model="remark"
               type="text"
               maxlength="255"
-              class="w-full h-10 px-3 rounded-md border border-neutral-300 bg-white text-sm"
+              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
               placeholder="비고 입력"
             />
           </div>
 
           <!-- 차고 -->
           <div>
-            <div class="text-xs text-neutral-700 mb-1">차고</div>
+            <div class="text-xs text-neutral-400 mb-1">차고</div>
 
             <div class="relative min-w-0" ref="garageWrapRef" @mousedown.stop>
               <input
@@ -108,9 +108,9 @@
                 :value="garageText"
                 type="text"
                 placeholder="차고를 검색/선택하세요"
-                class="w-full h-10 px-3 pr-8 rounded-md border border-neutral-300 bg-white text-sm
-                      disabled:bg-neutral-100 disabled:text-neutral-400 disabled:cursor-not-allowed
-                      focus:outline-none"
+                class="w-full h-10 px-3 pr-8 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500
+                      disabled:bg-neutral-800/40 disabled:text-neutral-500 disabled:cursor-not-allowed
+                      focus:outline-none focus:border-blue-500/70"
                 :disabled="isGarageDisabled"
                 @click="openGarageDropdown"
                 @input="onGarageInput"
@@ -155,7 +155,7 @@
 
           <!-- 슬롯 -->
           <div>
-            <div class="text-xs text-neutral-700 mb-1">슬롯</div>
+            <div class="text-xs text-neutral-400 mb-1">슬롯</div>
 
             <div class="relative min-w-0" ref="slotWrapRef" @mousedown.stop>
               <input
@@ -163,9 +163,9 @@
                 :value="slotNoText"
                 type="text"
                 placeholder="슬롯 번호를 선택하세요"
-                class="w-full h-10 px-3 rounded-md border border-neutral-300 bg-white text-sm
-                      disabled:bg-neutral-100 disabled:text-neutral-400 disabled:cursor-not-allowed
-                      focus:outline-none"
+                class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500
+                      disabled:bg-neutral-800/40 disabled:text-neutral-500 disabled:cursor-not-allowed
+                      focus:outline-none focus:border-blue-500/70"
                 :disabled="!isSlotEnabled"
                 readonly
                 @click="openSlotDropdown"
@@ -203,9 +203,9 @@
 
           <!-- 이미지 -->
           <div class="col-span-2">
-            <div class="text-xs text-neutral-700 mb-1">이미지</div>
+            <div class="text-xs text-neutral-400 mb-1">이미지</div>
 
-            <div class="relative h-[180px] rounded-md border border-neutral-300 bg-white overflow-hidden">
+            <div class="relative h-[260px] rounded-md border border-neutral-700 bg-neutral-800/40 overflow-hidden">
               <img
                 v-if="!removeImageYn && (previewUrl || props.initialRow?.imageUrl)"
                 :src="previewUrl || resolveImageUrl(props.initialRow?.imageUrl)"
@@ -234,7 +234,11 @@
               <input
                 type="file"
                 accept="image/*"
-                class="block w-full text-sm text-neutral-700"
+                class="block w-full text-sm text-neutral-300
+                      file:mr-3 file:px-3 file:py-1.5 file:rounded-md
+                      file:border file:border-neutral-600
+                      file:bg-neutral-800/60 file:text-neutral-200
+                      hover:file:bg-neutral-700"
                 @change="handleImageChange"
               />
             </div>
@@ -243,10 +247,10 @@
         </div>
 
         <!-- buttons -->
-        <div class="flex justify-end gap-2">
+        <div class="flex justify-end gap-2 px-4 py-3 border-t border-neutral-700 bg-neutral-900/80">
 
           <button
-            class="h-8 px-3 rounded-md border border-neutral-400 bg-neutral-200 text-sm"
+            class="h-8 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
             @click="closeModal"
           >
             취소
@@ -254,14 +258,14 @@
 
           <button
             v-if="isEditMode"
-            class="h-8 px-3 rounded-md bg-red-600 text-white text-sm"
+            class="h-8 px-3 rounded-md border border-red-500/70 bg-red-900/60 text-[13px] text-white hover:bg-red-800/70 transition"
             @click="handleDeleteClick"
           >
             삭제
           </button>
 
           <button
-            class="h-8 px-3 rounded-md bg-black text-white text-sm"
+            class="h-8 px-4 rounded-md border border-blue-500/70 bg-blue-900/50 text-[13px] text-white hover:bg-blue-800/60 transition"
             @click="handleSubmit"
           >
             {{ isEditMode ? '수정' : '등록' }}
@@ -902,16 +906,6 @@ function onDocMouseDownCapture(e)
       showSlotDropdown.value = false
       slotQuery.value = ''
     }
-  }
-
-  const modalEl = modalBoxRef.value
-
-  if (!modalEl) {
-    return
-  }
-
-  if (!modalEl.contains(e.target)) {
-    closeModal()
   }
 }
 
