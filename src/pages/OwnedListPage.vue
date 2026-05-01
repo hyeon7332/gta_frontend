@@ -29,21 +29,9 @@
   
                 <!-- toolbar -->
                 <div class="relative flex items-center justify-between px-3 py-2 bg-neutral-900/30 border-b border-neutral-700">
-                  <div ref="garageFilterRef" class="relative flex items-center gap-2 min-w-0">
-                    <!-- 펼침/접힘 -->
-                    <button
-                      type="button"
-                      class="h-8 px-2 flex items-center gap-1
-                            rounded-md
-                            text-[12px] text-neutral-300
-                            hover:bg-neutral-700/40
-                            transition"
-                      @click="toggleAllGaragesCollapsed"
-                    >
-                      <ChevronsUpDown class="w-4 h-4" />
-                      <span>{{ allGarageCollapsed ? '펼침' : '접힘' }}</span>
-                    </button>
 
+                  <!-- 좌측 영역 -->
+                  <div ref="garageFilterRef" class="flex items-center gap-2 min-w-0">
                     <!-- 차고 필터 -->
                     <button
                       type="button"
@@ -65,7 +53,7 @@
                     <!-- 차고 필터 드롭다운 -->
                     <div
                       v-if="showGarageFilterDropdown"
-                      class="absolute left-[84px] top-full mt-2 z-30
+                      class="absolute left-0 top-full mt-2 z-30
                             w-[260px] max-h-[280px] overflow-y-auto
                             rounded-md border border-neutral-600
                             bg-neutral-900 shadow-lg"
@@ -139,21 +127,39 @@
 
                   </div>
   
-                  <button
-                    type="button"
-                    class="h-8 px-3 flex items-center gap-1
-                          rounded-md
-                          bg-neutral-800/60
-                          border border-neutral-600
-                          text-[13px] text-neutral-200
-                          hover:bg-neutral-700
-                          active:bg-neutral-600
-                          transition"
-                    @click="openCreateModal"
-                  >
-                    <Plus class="w-4 h-4" />
-                    <span>추가</span>
-                  </button>
+                  <!-- 우측 영역 -->
+                  <div class="flex items-center gap-2">
+                    <!-- 펼침/접힘 -->
+                    <button
+                      type="button"
+                      class="h-8 px-2 flex items-center gap-1
+                            rounded-md
+                            text-[12px] text-neutral-300
+                            hover:bg-neutral-700/40
+                            transition"
+                      @click="toggleAllGaragesCollapsed"
+                    >
+                      <ChevronsUpDown class="w-4 h-4" />
+                      <span>{{ allGarageCollapsed ? '펼침' : '접힘' }}</span>
+                    </button>
+
+                    <!-- 추가 -->
+                    <button
+                      type="button"
+                      class="h-8 px-3 flex items-center gap-1
+                            rounded-md
+                            bg-neutral-800/60
+                            border border-neutral-600
+                            text-[13px] text-neutral-200
+                            hover:bg-neutral-700
+                            active:bg-neutral-600
+                            transition"
+                      @click="openCreateModal"
+                    >
+                      <Plus class="w-4 h-4" />
+                      <span>추가</span>
+                    </button>
+                  </div>
                 </div>
   
                 <!-- table -->
