@@ -186,6 +186,7 @@
                       <tr
                         v-for="(row, index) in displayRows"
                         :key="row ? row.id : `empty-${index}`"
+                        :data-row-id="row ? row.id : ''"
                         :draggable="canDragRow(row)"
                         :class="[
                           'h-[40px]',
@@ -917,6 +918,15 @@ function applySearchResult(row)
     }
 
     handleRowClick(target)
+
+    const el = document.querySelector(`[data-row-id="${target.id}"]`)
+
+    if (el) {
+      el.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      })
+    }
   }, 0)
 }
 
