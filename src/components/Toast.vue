@@ -36,10 +36,8 @@ const isSuccess = computed(() => {
 })
 
 // 성공 스타일
-const successClass =
-  'bg-neutral-900 border-neutral-700 text-neutral-200'
+const successClass = 'bg-neutral-900 border-neutral-700 text-neutral-200'
 
 // 실패 스타일
-const failClass =
-  'bg-red-900/80 border-red-500 text-white'
+const failClass = 'bg-red-900/80 border-red-500 text-white'
 </script>
