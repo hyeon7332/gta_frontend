@@ -125,10 +125,6 @@
                       <RotateCcw class="w-4 h-4" />
                     </button>
 
-                  </div>
-  
-                  <!-- 우측 영역 -->
-                  <div class="flex items-center gap-2">
                     <!-- 펼침/접힘 -->
                     <button
                       type="button"
@@ -142,6 +138,11 @@
                       <ChevronsUpDown class="w-4 h-4" />
                       <span>{{ allGarageCollapsed ? '펼침' : '접힘' }}</span>
                     </button>
+
+                  </div>
+  
+                  <!-- 우측 영역 -->
+                  <div class="flex items-center gap-2">
 
                     <!-- 추가 -->
                     <button
