@@ -169,9 +169,9 @@
                     <colgroup>
                       <col class="w-[6%]" />   <!-- 슬롯 -->
                       <col class="w-[16%]" />  <!-- 제조사 -->
-                      <col class="w-[32%]" />  <!-- 모델명 -->
+                      <col class="w-[28%]" />  <!-- 모델명 -->
                       <col class="w-[16%]" />  <!-- 분류 -->
-                      <col class="w-[30%]" />  <!-- 비고 -->
+                      <col class="w-[34%]" />  <!-- 비고 -->
                     </colgroup>
                     <thead>
                       <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap">
