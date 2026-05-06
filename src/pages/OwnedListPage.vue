@@ -1048,9 +1048,6 @@ function handleRowClick(row)
     return
   }
 
-  // 상세패널에 들어가는 row 확인용
-  console.log('selected detail row', row)
-
   // 하이라이트 직접 처리
   activeRowKey.value = getRowHighlightKey(row)
 
