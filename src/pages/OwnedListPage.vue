@@ -15,13 +15,13 @@
 
     <div
       class="w-full px-4 pt-2 pb-4 transition-all duration-300"
-      :class="showDetailPanel ? 'max-w-[1400px] mx-auto' : 'max-w-[1000px] mx-auto'"
+      :class="showDetailPanel ? 'max-w-[1500px] mx-auto' : 'max-w-[1100px] mx-auto'"
     >
       <div
         class="flex items-start gap-4 transition-all duration-300"
         :class="showDetailPanel ? 'justify-start' : 'justify-center'"
       >
-        <div class="w-[1000px] shrink-0">
+        <div class="w-[1100px] shrink-0">
           <!-- main panel -->
           <div class="bg-neutral-900/40 border border-neutral-700 rounded-lg shadow-lg overflow-hidden">
             <div class="p-2">
@@ -164,14 +164,14 @@
                 </div>
   
                 <!-- table -->
-                <div class="scroll-dark overflow-y-auto overflow-x-hidden h-[641px]">
+                <div class="scroll-dark overflow-y-auto overflow-x-hidden h-[675px]">
                   <table class="w-full table-fixed border-separate border-spacing-0">
                     <colgroup>
-                      <col class="w-[6%]" />   <!-- 슬롯 -->
-                      <col class="w-[16%]" />  <!-- 제조사 -->
-                      <col class="w-[28%]" />  <!-- 모델명 -->
-                      <col class="w-[16%]" />  <!-- 분류 -->
-                      <col class="w-[34%]" />  <!-- 비고 -->
+                      <col class="w-[5%]" />   <!-- 슬롯 -->
+                      <col class="w-[15%]" />  <!-- 제조사 -->
+                      <col class="w-[25%]" />  <!-- 모델명 -->
+                      <col class="w-[15%]" />  <!-- 분류 -->
+                      <col class="w-[40%]" />  <!-- 비고 -->
                     </colgroup>
                     <thead>
                       <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap">
