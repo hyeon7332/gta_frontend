@@ -1103,6 +1103,7 @@ function handleImageChange(e)
 
   imageFile.value = file
   previewUrl.value = URL.createObjectURL(file)
+  removeImageYn.value = false
 }
 
 async function uploadImageIfNeeded()

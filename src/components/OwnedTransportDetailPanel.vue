@@ -37,7 +37,7 @@
       </div>
 
       <div class="mb-4">
-        <div class="relative h-[288px] rounded-md bg-neutral-800/40 overflow-hidden">
+        <div class="relative aspect-[7/4] rounded-md bg-neutral-800/40 overflow-hidden">
           <img
             v-if="row?.imageUrl"
             :src="resolveImageUrl(row.imageUrl)"
