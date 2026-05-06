@@ -167,11 +167,11 @@
                 <div class="scroll-dark overflow-y-auto overflow-x-hidden h-[675px]">
                   <table class="w-full table-fixed border-separate border-spacing-0">
                     <colgroup>
-                      <col class="w-[5%]" />   <!-- 슬롯 -->
-                      <col class="w-[15%]" />  <!-- 제조사 -->
-                      <col class="w-[25%]" />  <!-- 모델명 -->
-                      <col class="w-[15%]" />  <!-- 분류 -->
-                      <col class="w-[40%]" />  <!-- 비고 -->
+                      <col class="w-[7%]" />   <!-- 슬롯 -->
+                      <col class="w-[17%]" />  <!-- 제조사 -->
+                      <col class="w-[27%]" />  <!-- 모델명 -->
+                      <col class="w-[17%]" />  <!-- 분류 -->
+                      <col class="w-[32%]" />  <!-- 비고 -->
                     </colgroup>
                     <thead>
                       <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap">
