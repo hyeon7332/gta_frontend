@@ -818,7 +818,7 @@ async function handleSubmit()
     const uploadedImageUrl = await uploadImageIfNeeded()
 
     const imageUrl = removeImageYn.value
-      ? null
+      ? ''
       : (uploadedImageUrl || props.initialRow?.imageUrl || null)
     
     emit('update', {
