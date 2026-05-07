@@ -43,7 +43,11 @@ export function normalizeOwnedTransport(x)
     driveTrain: x.driveTrain ?? x.drive_train ?? '-',
     seats: x.seats ?? null,
     features: x.features ?? '',
-    imageUrl: x.imageUrl ?? x.image_url ?? null
+    imageUrl: x.imageUrl ?? x.image_url ?? null,
+    primaryColor: x.primaryColor ?? x.primary_color ?? '',
+    secondaryColor: x.secondaryColor ?? x.secondary_color ?? '',
+    trimColor: x.trimColor ?? x.trim_color ?? '',
+    accentColor: x.accentColor ?? x.accent_color ?? '',
   }
 }
 

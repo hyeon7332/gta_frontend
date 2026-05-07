@@ -59,6 +59,50 @@
           </span>
         </div>
 
+        <!-- 1차 색상 -->
+        <div
+          v-if="row?.primaryColor && row.primaryColor.trim()"
+          class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700"
+        >
+          <span class="text-[13px] text-neutral-400">1차 색상</span>
+          <span class="text-[13px] font-medium text-neutral-100 text-right">
+            {{ row.primaryColor }}
+          </span>
+        </div>
+
+        <!-- 2차 색상 -->
+        <div
+          v-if="row?.secondaryColor && row.secondaryColor.trim()"
+          class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700"
+        >
+          <span class="text-[13px] text-neutral-400">2차 색상</span>
+          <span class="text-[13px] font-medium text-neutral-100 text-right">
+            {{ row.secondaryColor }}
+          </span>
+        </div>
+
+        <!-- 트림 색상 -->
+        <div
+          v-if="row?.trimColor && row.trimColor.trim()"
+          class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700"
+        >
+          <span class="text-[13px] text-neutral-400">트림 색상</span>
+          <span class="text-[13px] font-medium text-neutral-100 text-right">
+            {{ row.trimColor }}
+          </span>
+        </div>
+
+        <!-- 액센트 색상 -->
+        <div
+          v-if="row?.accentColor && row.accentColor.trim()"
+          class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700"
+        >
+          <span class="text-[13px] text-neutral-400">액센트 색상</span>
+          <span class="text-[13px] font-medium text-neutral-100 text-right">
+            {{ row.accentColor }}
+          </span>
+        </div>
+
         <div class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700">
           <span class="text-[13px] text-neutral-400">분류</span>
           <span class="text-[13px] font-medium text-neutral-100 text-right">

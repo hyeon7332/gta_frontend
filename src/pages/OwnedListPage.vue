@@ -1440,7 +1440,11 @@ async function handleUpdate(payload)
       garageId: payload.garageId,
       slotNo: payload.slotNo,
       remark: payload.remark,
-      imageUrl: payload.imageUrl
+      imageUrl: payload.imageUrl,
+      primaryColor: payload.primaryColor,
+      secondaryColor: payload.secondaryColor,
+      trimColor: payload.trimColor,
+      accentColor: payload.accentColor
     })
 
     await handleOwnedTransportSuccess('수정 완료')

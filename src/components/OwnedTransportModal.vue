@@ -98,6 +98,54 @@
             />
           </div>
 
+          <!-- 1차 색상 -->
+          <div>
+            <div class="text-xs text-neutral-400 mb-1">1차 색상</div>
+            <input
+              v-model="primaryColor"
+              type="text"
+              maxlength="100"
+              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
+              placeholder="1차 색상 입력"
+            />
+          </div>
+
+          <!-- 2차 색상 -->
+          <div>
+            <div class="text-xs text-neutral-400 mb-1">2차 색상</div>
+            <input
+              v-model="secondaryColor"
+              type="text"
+              maxlength="100"
+              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
+              placeholder="2차 색상 입력"
+            />
+          </div>
+
+          <!-- 트림 색상 -->
+          <div>
+            <div class="text-xs text-neutral-400 mb-1">트림 색상</div>
+            <input
+              v-model="trimColor"
+              type="text"
+              maxlength="100"
+              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
+              placeholder="트림 색상 입력"
+            />
+          </div>
+
+          <!-- 액센트 색상 -->
+          <div>
+            <div class="text-xs text-neutral-400 mb-1">액센트 색상</div>
+            <input
+              v-model="accentColor"
+              type="text"
+              maxlength="100"
+              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
+              placeholder="액센트 색상 입력"
+            />
+          </div>
+
           <!-- 차고 -->
           <div>
             <div class="text-xs text-neutral-400 mb-1">차고</div>
@@ -362,6 +410,10 @@ const currentSlotNo = ref(null)
 const garageText = ref('')
 const slotNoText = ref('')
 const remark = ref('')
+const primaryColor = ref('')
+const secondaryColor = ref('')
+const trimColor = ref('')
+const accentColor = ref('')
 const imageFile = ref(null)
 const previewUrl = ref('')
 
@@ -399,6 +451,10 @@ watch(() => props.open, async (v) => {
         showDeleteConfirm.value = false
 
         remark.value = props.initialRow?.remark || ''
+        primaryColor.value = props.initialRow?.primaryColor || ''
+        secondaryColor.value = props.initialRow?.secondaryColor || ''
+        trimColor.value = props.initialRow?.trimColor || ''
+        accentColor.value = props.initialRow?.accentColor || ''
 
         document.addEventListener('keydown', onDocKeyDown)
         document.addEventListener('mousedown', onDocMouseDownCapture, true)
@@ -435,6 +491,10 @@ watch(() => props.open, async (v) => {
         }
 
         remark.value = props.initialRow?.remark || ''
+        primaryColor.value = props.initialRow?.primaryColor || ''
+        secondaryColor.value = props.initialRow?.secondaryColor || ''
+        trimColor.value = props.initialRow?.trimColor || ''
+        accentColor.value = props.initialRow?.accentColor || ''
 
         await loadOccupiedSlots(matched.garageId)
       } else {
@@ -450,6 +510,10 @@ watch(() => props.open, async (v) => {
         occupiedSlotList.value = []
 
         remark.value = props.initialRow?.remark || ''
+        primaryColor.value = props.initialRow?.primaryColor || ''
+        secondaryColor.value = props.initialRow?.secondaryColor || ''
+        trimColor.value = props.initialRow?.trimColor || ''
+        accentColor.value = props.initialRow?.accentColor || ''
       }
     // 등록
     } else {
@@ -469,6 +533,10 @@ watch(() => props.open, async (v) => {
       occupiedSlotList.value = []
 
       remark.value = ''
+      primaryColor.value = ''
+      secondaryColor.value = ''
+      trimColor.value = ''
+      accentColor.value = ''
 
       const presetGarageId = props.initialRow?.garageId ?? null
       const presetSlotNo = props.initialRow?.slotNo ?? props.initialRow?.slot ?? null
@@ -759,7 +827,11 @@ async function handleSubmit()
       garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
       slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
       remark: remark.value,
-      imageUrl: imageUrl
+      imageUrl: imageUrl,
+      primaryColor: primaryColor.value,
+      secondaryColor: secondaryColor.value,
+      trimColor: trimColor.value,
+      accentColor: accentColor.value
     })
 
     return
@@ -808,7 +880,11 @@ async function handleSubmit()
     garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
     slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
     remark: remark.value,
-    imageUrl: imageUrl
+    imageUrl: imageUrl,
+    primaryColor: primaryColor.value,
+    secondaryColor: secondaryColor.value,
+    trimColor: trimColor.value,
+    accentColor: accentColor.value
   })
 }
 
