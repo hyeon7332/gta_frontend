@@ -7,7 +7,7 @@
 
       <div
         ref="modalBoxRef"
-        class="relative w-[620px] max-h-[90vh] bg-neutral-900 border border-neutral-700 rounded-lg shadow-xl overflow-hidden"
+        class="relative w-[620px] max-h-[90vh] bg-neutral-900 border border-neutral-700 rounded-lg shadow-xl overflow-hidden flex flex-col"
       >
         <!-- header -->
         <div class="px-4 py-3 border-b border-neutral-700">
@@ -17,7 +17,7 @@
         </div>
 
         <!-- body -->
-        <div class="grid grid-cols-2 gap-4 p-4">
+        <div class="grid grid-cols-2 gap-4 p-4 overflow-y-auto scroll-dark flex-1 min-h-0">
 
           <!-- 이동수단 -->
           <div>
