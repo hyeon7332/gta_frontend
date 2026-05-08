@@ -523,6 +523,8 @@ watch(() => props.open, async (v) => {
         secondaryColor.value = props.initialRow?.secondaryColor || ''
         trimColor.value = props.initialRow?.trimColor || ''
         accentColor.value = props.initialRow?.accentColor || ''
+        pearlescentColor.value = props.initialRow?.pearlescentColor || ''
+        decal.value = props.initialRow?.decal || ''
 
         await loadOccupiedSlots(matched.garageId)
       } else {
@@ -542,6 +544,8 @@ watch(() => props.open, async (v) => {
         secondaryColor.value = props.initialRow?.secondaryColor || ''
         trimColor.value = props.initialRow?.trimColor || ''
         accentColor.value = props.initialRow?.accentColor || ''
+        pearlescentColor.value = props.initialRow?.pearlescentColor || ''
+        decal.value = props.initialRow?.decal || ''
       }
     // 등록
     } else {
@@ -914,9 +918,11 @@ async function handleSubmit()
     remark: remark.value,
     imageUrl: imageUrl,
     primaryColor: primaryColor.value,
+    pearlescentColor: pearlescentColor.value,
     secondaryColor: secondaryColor.value,
     trimColor: trimColor.value,
-    accentColor: accentColor.value
+    accentColor: accentColor.value,
+    decal: decal.value
   })
 }
 
