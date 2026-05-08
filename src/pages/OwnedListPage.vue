@@ -1444,7 +1444,9 @@ async function handleUpdate(payload)
       primaryColor: payload.primaryColor,
       secondaryColor: payload.secondaryColor,
       trimColor: payload.trimColor,
-      accentColor: payload.accentColor
+      accentColor: payload.accentColor,
+      pearlescentColor: payload.pearlescentColor,
+      decal: payload.decal
     })
 
     await handleOwnedTransportSuccess('수정 완료')

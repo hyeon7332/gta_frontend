@@ -45,9 +45,11 @@ export function normalizeOwnedTransport(x)
     features: x.features ?? '',
     imageUrl: x.imageUrl ?? x.image_url ?? null,
     primaryColor: x.primaryColor ?? x.primary_color ?? '',
+    pearlescentColor: x.pearlescentColor ?? x.pearlescent_color ?? '',
     secondaryColor: x.secondaryColor ?? x.secondary_color ?? '',
     trimColor: x.trimColor ?? x.trim_color ?? '',
     accentColor: x.accentColor ?? x.accent_color ?? '',
+    decal: x.decal ?? '',
   }
 }
 

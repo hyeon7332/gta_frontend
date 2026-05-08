@@ -110,6 +110,18 @@
             />
           </div>
 
+          <!-- 펄 광택 -->
+          <div>
+            <div class="text-xs text-neutral-400 mb-1">펄 광택</div>
+            <input
+              v-model="pearlescentColor"
+              type="text"
+              maxlength="100"
+              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
+              placeholder="펄 광택 입력"
+            />
+          </div>
+
           <!-- 2차 색상 -->
           <div>
             <div class="text-xs text-neutral-400 mb-1">2차 색상</div>
@@ -143,6 +155,18 @@
               maxlength="100"
               class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
               placeholder="액센트 색상 입력"
+            />
+          </div>
+
+          <!-- 상징 -->
+          <div>
+            <div class="text-xs text-neutral-400 mb-1">상징</div>
+            <input
+              v-model="decal"
+              type="text"
+              maxlength="100"
+              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
+              placeholder="상징 입력"
             />
           </div>
 
@@ -411,9 +435,11 @@ const garageText = ref('')
 const slotNoText = ref('')
 const remark = ref('')
 const primaryColor = ref('')
+const pearlescentColor = ref('')
 const secondaryColor = ref('')
 const trimColor = ref('')
 const accentColor = ref('')
+const decal = ref('')
 const imageFile = ref(null)
 const previewUrl = ref('')
 
@@ -455,6 +481,8 @@ watch(() => props.open, async (v) => {
         secondaryColor.value = props.initialRow?.secondaryColor || ''
         trimColor.value = props.initialRow?.trimColor || ''
         accentColor.value = props.initialRow?.accentColor || ''
+        pearlescentColor.value = props.initialRow?.pearlescentColor || ''
+        decal.value = props.initialRow?.decal || ''
 
         document.addEventListener('keydown', onDocKeyDown)
         document.addEventListener('mousedown', onDocMouseDownCapture, true)
@@ -534,9 +562,11 @@ watch(() => props.open, async (v) => {
 
       remark.value = ''
       primaryColor.value = ''
+      pearlescentColor.value = ''
       secondaryColor.value = ''
       trimColor.value = ''
       accentColor.value = ''
+      decal.value = ''
 
       const presetGarageId = props.initialRow?.garageId ?? null
       const presetSlotNo = props.initialRow?.slotNo ?? props.initialRow?.slot ?? null
@@ -829,9 +859,11 @@ async function handleSubmit()
       remark: remark.value,
       imageUrl: imageUrl,
       primaryColor: primaryColor.value,
+      pearlescentColor: pearlescentColor.value,
       secondaryColor: secondaryColor.value,
       trimColor: trimColor.value,
-      accentColor: accentColor.value
+      accentColor: accentColor.value,
+      decal: decal.value
     })
 
     return
