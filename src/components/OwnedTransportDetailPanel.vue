@@ -73,7 +73,6 @@
         <!-- 도색 -->
         <div
           v-if="hasPaintInfo"
-          class="border-b border-neutral-700"
         >
           <button
             type="button"
