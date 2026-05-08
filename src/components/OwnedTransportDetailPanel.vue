@@ -38,11 +38,18 @@
 
       <div class="mb-4">
         <div class="relative aspect-[7/4] rounded-md bg-neutral-800/40 overflow-hidden">
-          <img
+          <a
             v-if="row?.imageUrl"
-            :src="resolveImageUrl(row.imageUrl)"
-            class="w-full h-full object-cover"
-          />
+            :href="resolveImageUrl(row.imageUrl)"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="block w-full h-full"
+          >
+            <img
+              :src="resolveImageUrl(row.imageUrl)"
+              class="w-full h-full object-cover cursor-zoom-in"
+            />
+          </a>
           <!-- 이미지 위 테두리 -->
           <div
             class="pointer-events-none absolute inset-0 rounded-md border-2 border-white/80"
