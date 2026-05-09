@@ -99,7 +99,7 @@
           </div>
 
           <!-- 1차 색상 -->
-          <div>
+          <div v-if="!isUpgradeUnavailable">
             <div class="text-xs text-neutral-400 mb-1">1차 색상</div>
             <input
               v-model="primaryColor"
@@ -111,7 +111,7 @@
           </div>
 
           <!-- 펄 광택 -->
-          <div>
+          <div v-if="!isUpgradeUnavailable">
             <div class="text-xs text-neutral-400 mb-1">펄 광택</div>
             <input
               v-model="pearlescentColor"
@@ -123,7 +123,7 @@
           </div>
 
           <!-- 2차 색상 -->
-          <div>
+          <div v-if="!isUpgradeUnavailable">
             <div class="text-xs text-neutral-400 mb-1">2차 색상</div>
             <input
               v-model="secondaryColor"
@@ -135,7 +135,7 @@
           </div>
 
           <!-- 트림 색상 -->
-          <div>
+          <div v-if="!isUpgradeUnavailable">
             <div class="text-xs text-neutral-400 mb-1">트림 색상</div>
             <input
               v-model="trimColor"
@@ -147,7 +147,7 @@
           </div>
 
           <!-- 액센트 색상 -->
-          <div>
+          <div v-if="!isUpgradeUnavailable">
             <div class="text-xs text-neutral-400 mb-1">액센트 색상</div>
             <input
               v-model="accentColor"
@@ -159,7 +159,7 @@
           </div>
 
           <!-- 상징 -->
-          <div>
+          <div v-if="!isUpgradeUnavailable">
             <div class="text-xs text-neutral-400 mb-1">상징</div>
             <input
               v-model="decal"
@@ -667,6 +667,14 @@ const filteredGarageList = computed(() => {
 
 const isPegasusSelected = computed(() => {
   return isPegasusTransport(selectedTransport.value)
+})
+
+const isUpgradeUnavailable = computed(() => {
+  const target = isEditMode.value
+    ? props.initialRow
+    : selectedTransport.value
+
+  return !String(target?.upgradeLocation || '').trim()
 })
 
 const isSlotEnabled = computed(() => {
