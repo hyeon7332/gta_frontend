@@ -86,87 +86,29 @@
 
           </div>
 
-          <!-- 비고 -->
-          <div>
-            <div class="text-xs text-neutral-400 mb-1">비고</div>
-            <input
-              v-model="remark"
-              type="text"
-              maxlength="255"
-              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
-              placeholder="비고 입력"
-            />
-          </div>
-
-          <!-- 1차 색상 -->
-          <div v-if="!upgradeUnavailableYn">
-            <div class="text-xs text-neutral-400 mb-1">1차 색상</div>
-            <input
-              v-model="primaryColor"
-              type="text"
-              maxlength="100"
-              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
-              placeholder="1차 색상 입력"
-            />
-          </div>
-
-          <!-- 펄 광택 -->
-          <div v-if="!upgradeUnavailableYn">
-            <div class="text-xs text-neutral-400 mb-1">펄 광택</div>
-            <input
-              v-model="pearlescentColor"
-              type="text"
-              maxlength="100"
-              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
-              placeholder="펄 광택 입력"
-            />
-          </div>
-
-          <!-- 2차 색상 -->
-          <div v-if="!upgradeUnavailableYn">
-            <div class="text-xs text-neutral-400 mb-1">2차 색상</div>
-            <input
-              v-model="secondaryColor"
-              type="text"
-              maxlength="100"
-              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
-              placeholder="2차 색상 입력"
-            />
-          </div>
-
-          <!-- 트림 색상 -->
-          <div v-if="!upgradeUnavailableYn">
-            <div class="text-xs text-neutral-400 mb-1">트림 색상</div>
-            <input
-              v-model="trimColor"
-              type="text"
-              maxlength="100"
-              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
-              placeholder="트림 색상 입력"
-            />
-          </div>
-
-          <!-- 액센트 색상 -->
-          <div v-if="!upgradeUnavailableYn">
-            <div class="text-xs text-neutral-400 mb-1">액센트 색상</div>
-            <input
-              v-model="accentColor"
-              type="text"
-              maxlength="100"
-              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
-              placeholder="액센트 색상 입력"
-            />
-          </div>
-
           <!-- 상징 -->
           <div v-if="!upgradeUnavailableYn">
             <div class="text-xs text-neutral-400 mb-1">상징</div>
+
             <input
               v-model="decal"
               type="text"
               maxlength="100"
               class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
               placeholder="상징 입력"
+            />
+          </div>
+
+          <!-- 비고 -->
+          <div class="col-span-2">
+            <div class="text-xs text-neutral-400 mb-1">비고</div>
+
+            <input
+              v-model="remark"
+              type="text"
+              maxlength="255"
+              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
+              placeholder="비고 입력"
             />
           </div>
 
@@ -384,7 +326,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import { X, Trash2 } from 'lucide-vue-next'
 import { http } from '@/api/http'
 import { resolveImageUrl } from '@/utils/format'
@@ -434,193 +376,220 @@ const currentSlotNo = ref(null)
 const garageText = ref('')
 const slotNoText = ref('')
 const remark = ref('')
-const primaryColor = ref('')
-const pearlescentColor = ref('')
-const secondaryColor = ref('')
-const trimColor = ref('')
-const accentColor = ref('')
 const decal = ref('')
 const upgradeUnavailableYn = ref(false)
 const imageFile = ref(null)
 const previewUrl = ref('')
 
 const showDeleteConfirm = ref(false)
-
 const removeImageYn = ref(false)
 
 watch(() => props.open, async (v) => {
-
   if (v) {
-    imageFile.value = null
-    previewUrl.value = ''
-    removeImageYn.value = false
-
-    if (isEditMode.value) {
-      updateUpgradeUnavailableYn(props.initialRow)
-      
-      // 수정
-      if (props.initialRow?.storageType === 'PEGASUS') {
-        selectedTransport.value = props.initialRow
-        transportDisplay.value = getTransportDisplayText(props.initialRow)
-
-        selectedGarage.value = null
-        selectedGarageId.value = ''
-        garageText.value = '페가수스'
-        garageQuery.value = ''
-
-        slotNo.value = ''
-        slotNoText.value = '-'
-        slotQuery.value = ''
-        currentSlotNo.value = null
-        occupiedSlotList.value = []
-
-        showTransportDropdown.value = false
-        showGarageDropdown.value = false
-        showSlotDropdown.value = false
-        showDeleteConfirm.value = false
-
-        remark.value = props.initialRow?.remark || ''
-        primaryColor.value = props.initialRow?.primaryColor || ''
-        secondaryColor.value = props.initialRow?.secondaryColor || ''
-        trimColor.value = props.initialRow?.trimColor || ''
-        accentColor.value = props.initialRow?.accentColor || ''
-        pearlescentColor.value = props.initialRow?.pearlescentColor || ''
-        decal.value = props.initialRow?.decal || ''
-
-        document.addEventListener('keydown', onDocKeyDown)
-        document.addEventListener('mousedown', onDocMouseDownCapture, true)
-        return
-      }
-
-      const currentGarageId = props.initialRow?.garageId ?? null
-      const currentSlot = (props.initialRow?.slot && props.initialRow?.slot !== '-')
-        ? Number(props.initialRow.slot)
-        : null
-
-      const matched = currentGarageId
-        ? (Array.isArray(props.garageList)
-            ? props.garageList.find((garage) => {
-                return Number(garage?.garageId) === Number(currentGarageId)
-              })
-            : null)
-        : null
-
-      if (matched) {
-        selectedGarage.value = matched
-        selectedGarageId.value = matched.garageId
-        garageText.value = String(matched.garageName || '').trim()
-        garageQuery.value = ''
-
-        if (Number.isFinite(currentSlot) && currentSlot > 0) {
-          slotNo.value = String(currentSlot)
-          slotNoText.value = String(currentSlot)
-          currentSlotNo.value = currentSlot
-        } else {
-          slotNo.value = ''
-          slotNoText.value = ''
-          currentSlotNo.value = null
-        }
-
-        remark.value = props.initialRow?.remark || ''
-        primaryColor.value = props.initialRow?.primaryColor || ''
-        secondaryColor.value = props.initialRow?.secondaryColor || ''
-        trimColor.value = props.initialRow?.trimColor || ''
-        accentColor.value = props.initialRow?.accentColor || ''
-        pearlescentColor.value = props.initialRow?.pearlescentColor || ''
-        decal.value = props.initialRow?.decal || ''
-
-        await loadOccupiedSlots(matched.garageId)
-      } else {
-        selectedGarage.value = null
-        selectedGarageId.value = ''
-        garageText.value = ''
-        garageQuery.value = ''
-
-        slotNo.value = ''
-        slotNoText.value = ''
-        slotQuery.value = ''
-        currentSlotNo.value = null
-        occupiedSlotList.value = []
-
-        remark.value = props.initialRow?.remark || ''
-        primaryColor.value = props.initialRow?.primaryColor || ''
-        secondaryColor.value = props.initialRow?.secondaryColor || ''
-        trimColor.value = props.initialRow?.trimColor || ''
-        accentColor.value = props.initialRow?.accentColor || ''
-        pearlescentColor.value = props.initialRow?.pearlescentColor || ''
-        decal.value = props.initialRow?.decal || ''
-      }
-    // 등록
-    } else {
-      upgradeUnavailableYn.value = false
-
-      selectedTransport.value = null
-      transportDisplay.value = ''
-
-      selectedGarage.value = null
-      selectedGarageId.value = ''
-      garageText.value = ''
-      garageQuery.value = ''
-
-      slotNo.value = ''
-      slotNoText.value = ''
-      slotQuery.value = ''
-      currentSlotNo.value = null
-      occupiedSlotList.value = []
-
-      remark.value = ''
-      primaryColor.value = ''
-      pearlescentColor.value = ''
-      secondaryColor.value = ''
-      trimColor.value = ''
-      accentColor.value = ''
-      decal.value = ''
-
-      const presetGarageId = props.initialRow?.garageId ?? null
-      const presetSlotNo = props.initialRow?.slotNo ?? props.initialRow?.slot ?? null
-
-      if (presetGarageId) {
-        const matched = Array.isArray(props.garageList)
-          ? props.garageList.find((garage) => {
-              return Number(garage?.garageId) === Number(presetGarageId)
-            })
-          : null
-
-        if (matched) {
-          selectedGarage.value = matched
-          selectedGarageId.value = matched.garageId
-          garageText.value = String(matched.garageName || '').trim()
-
-          await loadOccupiedSlots(matched.garageId)
-
-          if (Number.isFinite(Number(presetSlotNo)) && Number(presetSlotNo) > 0) {
-            slotNo.value = String(presetSlotNo)
-            slotNoText.value = String(presetSlotNo)
-            currentSlotNo.value = Number(presetSlotNo)
-          }
-        }
-      }
-    }
-
-    showTransportDropdown.value = false
-    showGarageDropdown.value = false
-    showSlotDropdown.value = false
-    showDeleteConfirm.value = false
-
-    document.addEventListener('keydown', onDocKeyDown)
-    document.addEventListener('mousedown', onDocMouseDownCapture, true)
-
-  } else {
-
-    showTransportDropdown.value = false
-    showGarageDropdown.value = false
-    showSlotDropdown.value = false
-    showDeleteConfirm.value = false
-
-    document.removeEventListener('keydown', onDocKeyDown)
-    document.removeEventListener('mousedown', onDocMouseDownCapture, true)
+    await initModalState()
+    addModalEvents()
+    return
   }
+
+  resetDropdownState()
+  removeModalEvents()
 })
+
+async function initModalState()
+{
+  resetImageState()
+
+  if (isEditMode.value) {
+    await initEditMode()
+    resetDropdownState()
+    return
+  }
+
+  await initCreateMode()
+  resetDropdownState()
+}
+
+async function initEditMode()
+{
+  const row = props.initialRow
+
+  updateUpgradeUnavailableYn(row)
+
+  if (row?.storageType === 'PEGASUS') {
+    selectedTransport.value = row
+    transportDisplay.value = getTransportDisplayText(row)
+
+    setPegasusGarageState()
+    setFormValue(row)
+    return
+  }
+
+  const currentGarageId = row?.garageId ?? null
+  const currentSlot = getCurrentSlot(row)
+  const matched = findGarageById(currentGarageId)
+
+  if (matched) {
+    setGarageValue(matched)
+    setSlotValue(currentSlot)
+    setFormValue(row)
+
+    await loadOccupiedSlots(matched.garageId)
+    return
+  }
+
+  resetGarageState()
+  setFormValue(row)
+}
+
+async function initCreateMode()
+{
+  resetCreateState()
+
+  const presetGarageId = props.initialRow?.garageId ?? null
+  const presetSlotNo = props.initialRow?.slotNo ?? props.initialRow?.slot ?? null
+  const matched = findGarageById(presetGarageId)
+
+  if (!matched) {
+    return
+  }
+
+  setGarageValue(matched)
+
+  await loadOccupiedSlots(matched.garageId)
+
+  if (Number.isFinite(Number(presetSlotNo)) && Number(presetSlotNo) > 0) {
+    setSlotValue(Number(presetSlotNo))
+  }
+}
+
+function resetCreateState()
+{
+  selectedTransport.value = null
+  transportDisplay.value = ''
+  upgradeUnavailableYn.value = false
+
+  remark.value = ''
+  decal.value = ''
+
+  resetGarageState()
+}
+
+function resetImageState()
+{
+  imageFile.value = null
+  previewUrl.value = ''
+  removeImageYn.value = false
+}
+
+function resetDropdownState()
+{
+  showTransportDropdown.value = false
+  showGarageDropdown.value = false
+  showSlotDropdown.value = false
+  showDeleteConfirm.value = false
+}
+
+function resetGarageState()
+{
+  selectedGarage.value = null
+  selectedGarageId.value = ''
+  garageText.value = ''
+  garageQuery.value = ''
+
+  resetSlotState()
+}
+
+function resetSlotState()
+{
+  slotNo.value = ''
+  slotNoText.value = ''
+  slotQuery.value = ''
+  currentSlotNo.value = null
+  occupiedSlotList.value = []
+}
+
+function setPegasusGarageState()
+{
+  selectedGarage.value = null
+  selectedGarageId.value = ''
+  garageText.value = '페가수스'
+  garageQuery.value = ''
+
+  slotNo.value = ''
+  slotNoText.value = '-'
+  slotQuery.value = ''
+  currentSlotNo.value = null
+  occupiedSlotList.value = []
+
+  showGarageDropdown.value = false
+  showSlotDropdown.value = false
+}
+
+function setFormValue(row)
+{
+  remark.value = row?.remark || ''
+  decal.value = row?.decal || ''
+}
+
+function setGarageValue(garage)
+{
+  selectedGarage.value = garage
+  selectedGarageId.value = garage.garageId
+  garageText.value = String(garage.garageName || '').trim()
+  garageQuery.value = ''
+}
+
+function setSlotValue(slot)
+{
+  if (Number.isFinite(slot) && slot > 0) {
+    slotNo.value = String(slot)
+    slotNoText.value = String(slot)
+    currentSlotNo.value = slot
+    return
+  }
+
+  slotNo.value = ''
+  slotNoText.value = ''
+  currentSlotNo.value = null
+}
+
+function getCurrentSlot(row)
+{
+  if (!row?.slot || row?.slot === '-') {
+    return null
+  }
+
+  const currentSlot = Number(row.slot)
+
+  if (!Number.isFinite(currentSlot)) {
+    return null
+  }
+
+  return currentSlot
+}
+
+function findGarageById(garageId)
+{
+  if (!garageId || !Array.isArray(props.garageList)) {
+    return null
+  }
+
+  return props.garageList.find((garage) => {
+    return Number(garage?.garageId) === Number(garageId)
+  }) || null
+}
+
+function addModalEvents()
+{
+  document.addEventListener('keydown', onDocKeyDown)
+  document.addEventListener('mousedown', onDocMouseDownCapture, true)
+}
+
+function removeModalEvents()
+{
+  document.removeEventListener('keydown', onDocKeyDown)
+  document.removeEventListener('mousedown', onDocMouseDownCapture, true)
+}
 
 function closeModal()
 {
@@ -638,11 +607,9 @@ function onTransportInput(e)
 }
 
 const filteredTransportList = computed(() => {
-
   const kw = transportDisplay.value.toLowerCase()
 
   return props.transportList.filter((t) => {
-
     const name = getTransportDisplayText(t).toLowerCase()
 
     return name.includes(kw)
@@ -745,6 +712,7 @@ const slotOptions = computed(() => {
       occupied: occupiedSet.has(i)
     })
   }
+
   return list
 })
 
@@ -763,10 +731,18 @@ function getUpgradeTypeDisplayText(upgradeType)
 
   const labels = upgradeType
     .split(',')
-    .map(v => v.trim())
-    .filter(v => v !== '')
-    .map(v => map[v] ?? '')
-    .filter(v => v !== '')
+    .map((v) => {
+      return v.trim()
+    })
+    .filter((v) => {
+      return v !== ''
+    })
+    .map((v) => {
+      return map[v] ?? ''
+    })
+    .filter((v) => {
+      return v !== ''
+    })
 
   return labels.join(' / ')
 }
@@ -809,19 +785,7 @@ function selectTransport(t)
   showTransportDropdown.value = false
 
   if (isPegasusTransport(t)) {
-    selectedGarage.value = null
-    selectedGarageId.value = ''
-    garageText.value = '페가수스'
-    garageQuery.value = ''
-
-    slotNo.value = ''
-    slotNoText.value = '-'
-    slotQuery.value = ''
-    currentSlotNo.value = null
-    occupiedSlotList.value = []
-
-    showGarageDropdown.value = false
-    showSlotDropdown.value = false
+    setPegasusGarageState()
     return
   }
 
@@ -832,71 +796,51 @@ function selectTransport(t)
     return
   }
 
-  garageText.value = ''
-  garageQuery.value = ''
-  selectedGarage.value = null
-  selectedGarageId.value = ''
-
-  slotNo.value = ''
-  slotNoText.value = ''
-  slotQuery.value = ''
-  currentSlotNo.value = null
-  occupiedSlotList.value = []
+  resetGarageState()
 }
 
 async function handleSubmit()
 {
   if (isEditMode.value) {
-
-    const ownedId = props.initialRow?.id
-
-    if (!ownedId) {
-      return
-    }
-
-    const hasGarage = !!selectedGarageId.value
-    const hasSlot = !!slotNo.value
-
-    if (!isPegasusSelected.value) {
-      if (hasGarage && !hasSlot) {
-        alert('차고를 선택한 경우 슬롯은 필수입니다.')
-        return
-      }
-
-      if (!hasGarage && hasSlot) {
-        alert('차고를 선택하지 않으면 슬롯을 선택할 수 없습니다.')
-        return
-      }
-    }
-
-    const storageType = isPegasusSelected.value
-      ? 'PEGASUS'
-      : (selectedGarageId.value ? 'GARAGE' : 'UNASSIGNED')
-
-    const uploadedImageUrl = await uploadImageIfNeeded()
-
-    const imageUrl = removeImageYn.value
-      ? ''
-      : (uploadedImageUrl || props.initialRow?.imageUrl || null)
-    
-    emit('update', {
-      ownedId: ownedId,
-      storageType: storageType,
-      garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
-      slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
-      remark: remark.value,
-      imageUrl: imageUrl,
-      primaryColor: primaryColor.value,
-      pearlescentColor: pearlescentColor.value,
-      secondaryColor: secondaryColor.value,
-      trimColor: trimColor.value,
-      accentColor: accentColor.value,
-      decal: decal.value
-    })
-
+    await updateOwnedTransport()
     return
   }
 
+  await createOwnedTransport()
+}
+
+async function updateOwnedTransport()
+{
+  const ownedId = props.initialRow?.id
+
+  if (!ownedId) {
+    return
+  }
+
+  if (!validateGarageSlot()) {
+    return
+  }
+
+  const storageType = getStorageType()
+  const uploadedImageUrl = await uploadImageIfNeeded()
+
+  const imageUrl = removeImageYn.value
+    ? ''
+    : (uploadedImageUrl || props.initialRow?.imageUrl || null)
+
+  emit('update', {
+    ownedId: ownedId,
+    storageType: storageType,
+    garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
+    slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
+    remark: remark.value,
+    imageUrl: imageUrl,
+    decal: decal.value
+  })
+}
+
+async function createOwnedTransport()
+{
   if (!selectedTransport.value) {
     alert('이동수단은 목록에서 선택해야 합니다.')
     return
@@ -913,25 +857,11 @@ async function handleSubmit()
     return
   }
 
-  const hasGarage = !!selectedGarageId.value
-  const hasSlot = !!slotNo.value
-
-  if (!isPegasusSelected.value) {
-    if (hasGarage && !hasSlot) {
-      alert('차고를 선택한 경우 슬롯은 필수입니다.')
-      return
-    }
-
-    if (!hasGarage && hasSlot) {
-      alert('차고를 선택하지 않으면 슬롯을 선택할 수 없습니다.')
-      return
-    }
+  if (!validateGarageSlot()) {
+    return
   }
 
-  const storageType = isPegasusSelected.value
-    ? 'PEGASUS'
-    : (selectedGarageId.value ? 'GARAGE' : 'UNASSIGNED')
-
+  const storageType = getStorageType()
   const imageUrl = await uploadImageIfNeeded()
 
   emit('created', {
@@ -941,13 +871,43 @@ async function handleSubmit()
     slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
     remark: remark.value,
     imageUrl: imageUrl,
-    primaryColor: primaryColor.value,
-    pearlescentColor: pearlescentColor.value,
-    secondaryColor: secondaryColor.value,
-    trimColor: trimColor.value,
-    accentColor: accentColor.value,
     decal: decal.value
   })
+}
+
+function validateGarageSlot()
+{
+  const hasGarage = !!selectedGarageId.value
+  const hasSlot = !!slotNo.value
+
+  if (isPegasusSelected.value) {
+    return true
+  }
+
+  if (hasGarage && !hasSlot) {
+    alert('차고를 선택한 경우 슬롯은 필수입니다.')
+    return false
+  }
+
+  if (!hasGarage && hasSlot) {
+    alert('차고를 선택하지 않으면 슬롯을 선택할 수 없습니다.')
+    return false
+  }
+
+  return true
+}
+
+function getStorageType()
+{
+  if (isPegasusSelected.value) {
+    return 'PEGASUS'
+  }
+
+  if (selectedGarageId.value) {
+    return 'GARAGE'
+  }
+
+  return 'UNASSIGNED'
 }
 
 function handleDeleteClick()
@@ -1014,36 +974,49 @@ function onDocMouseDownCapture(e)
     return
   }
 
-  if (showTransportDropdown.value) {
-    const transportEl = transportWrapRef.value
+  closeTransportDropdownIfOutside(e)
+  closeGarageDropdownIfOutside(e)
+  closeSlotDropdownIfOutside(e)
+}
 
-    if (!transportEl) {
-      showTransportDropdown.value = false
-    } else if (!transportEl.contains(e.target)) {
-      showTransportDropdown.value = false
-    }
+function closeTransportDropdownIfOutside(e)
+{
+  if (!showTransportDropdown.value) {
+    return
   }
 
-  if (showGarageDropdown.value) {
-    const garageEl = garageWrapRef.value
+  const transportEl = transportWrapRef.value
 
-    if (!garageEl) {
-      showGarageDropdown.value = false
-    } else if (!garageEl.contains(e.target)) {
-      showGarageDropdown.value = false
-      garageQuery.value = ''
-    }
+  if (!transportEl || !transportEl.contains(e.target)) {
+    showTransportDropdown.value = false
+  }
+}
+
+function closeGarageDropdownIfOutside(e)
+{
+  if (!showGarageDropdown.value) {
+    return
   }
 
-  if (showSlotDropdown.value) {
-    const slotEl = slotWrapRef.value
+  const garageEl = garageWrapRef.value
 
-    if (!slotEl) {
-      showSlotDropdown.value = false
-    } else if (!slotEl.contains(e.target)) {
-      showSlotDropdown.value = false
-      slotQuery.value = ''
-    }
+  if (!garageEl || !garageEl.contains(e.target)) {
+    showGarageDropdown.value = false
+    garageQuery.value = ''
+  }
+}
+
+function closeSlotDropdownIfOutside(e)
+{
+  if (!showSlotDropdown.value) {
+    return
+  }
+
+  const slotEl = slotWrapRef.value
+
+  if (!slotEl || !slotEl.contains(e.target)) {
+    showSlotDropdown.value = false
+    slotQuery.value = ''
   }
 }
 
@@ -1123,7 +1096,7 @@ function onGarageInput(e)
   if (isGarageDisabled.value) {
     return
   }
-  
+
   const value = String(e?.target?.value || '')
 
   garageText.value = value
@@ -1144,9 +1117,7 @@ function onGarageInput(e)
 
 async function selectGarage(g)
 {
-  selectedGarage.value = g
-  selectedGarageId.value = g.garageId
-  garageText.value = String(g.garageName || '').trim()
+  setGarageValue(g)
 
   slotNo.value = ''
   slotNoText.value = ''
@@ -1194,20 +1165,13 @@ function clearTransport()
   selectedTransport.value = null
   transportDisplay.value = ''
   upgradeUnavailableYn.value = false
+
+  decal.value = ''
 }
 
 function clearGarage()
 {
-  selectedGarage.value = null
-  selectedGarageId.value = ''
-  garageText.value = ''
-  garageQuery.value = ''
-
-  slotNo.value = ''
-  slotNoText.value = ''
-  slotQuery.value = ''
-  currentSlotNo.value = null
-  occupiedSlotList.value = []
+  resetGarageState()
 }
 
 function handleImageChange(e)
@@ -1223,7 +1187,7 @@ function handleImageChange(e)
   if (!allowedTypes.includes(file.type)) {
     alert('PNG 또는 JPEG 이미지만 업로드 가능합니다.')
 
-    e.target.value = ''       // input 초기화
+    e.target.value = ''
     imageFile.value = null
     previewUrl.value = ''
     return
@@ -1271,7 +1235,6 @@ function removeImage()
 }
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', onDocKeyDown)
-  document.removeEventListener('mousedown', onDocMouseDownCapture, true)
+  removeModalEvents()
 })
 </script>

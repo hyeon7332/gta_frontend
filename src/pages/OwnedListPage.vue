@@ -1441,11 +1441,6 @@ async function handleUpdate(payload)
       slotNo: payload.slotNo,
       remark: payload.remark,
       imageUrl: payload.imageUrl,
-      primaryColor: payload.primaryColor,
-      secondaryColor: payload.secondaryColor,
-      trimColor: payload.trimColor,
-      accentColor: payload.accentColor,
-      pearlescentColor: payload.pearlescentColor,
       decal: payload.decal
     })
 
