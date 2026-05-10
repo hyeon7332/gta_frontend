@@ -99,7 +99,7 @@
           </div>
 
           <!-- 1차 색상 -->
-          <div v-if="!isUpgradeUnavailable">
+          <div v-if="!upgradeUnavailableYn">
             <div class="text-xs text-neutral-400 mb-1">1차 색상</div>
             <input
               v-model="primaryColor"
@@ -111,7 +111,7 @@
           </div>
 
           <!-- 펄 광택 -->
-          <div v-if="!isUpgradeUnavailable">
+          <div v-if="!upgradeUnavailableYn">
             <div class="text-xs text-neutral-400 mb-1">펄 광택</div>
             <input
               v-model="pearlescentColor"
@@ -123,7 +123,7 @@
           </div>
 
           <!-- 2차 색상 -->
-          <div v-if="!isUpgradeUnavailable">
+          <div v-if="!upgradeUnavailableYn">
             <div class="text-xs text-neutral-400 mb-1">2차 색상</div>
             <input
               v-model="secondaryColor"
@@ -135,7 +135,7 @@
           </div>
 
           <!-- 트림 색상 -->
-          <div v-if="!isUpgradeUnavailable">
+          <div v-if="!upgradeUnavailableYn">
             <div class="text-xs text-neutral-400 mb-1">트림 색상</div>
             <input
               v-model="trimColor"
@@ -147,7 +147,7 @@
           </div>
 
           <!-- 액센트 색상 -->
-          <div v-if="!isUpgradeUnavailable">
+          <div v-if="!upgradeUnavailableYn">
             <div class="text-xs text-neutral-400 mb-1">액센트 색상</div>
             <input
               v-model="accentColor"
@@ -159,7 +159,7 @@
           </div>
 
           <!-- 상징 -->
-          <div v-if="!isUpgradeUnavailable">
+          <div v-if="!upgradeUnavailableYn">
             <div class="text-xs text-neutral-400 mb-1">상징</div>
             <input
               v-model="decal"
@@ -440,6 +440,7 @@ const secondaryColor = ref('')
 const trimColor = ref('')
 const accentColor = ref('')
 const decal = ref('')
+const upgradeUnavailableYn = ref(false)
 const imageFile = ref(null)
 const previewUrl = ref('')
 
@@ -455,6 +456,8 @@ watch(() => props.open, async (v) => {
     removeImageYn.value = false
 
     if (isEditMode.value) {
+      updateUpgradeUnavailableYn(props.initialRow)
+      
       // 수정
       if (props.initialRow?.storageType === 'PEGASUS') {
         selectedTransport.value = props.initialRow
@@ -549,6 +552,7 @@ watch(() => props.open, async (v) => {
       }
     // 등록
     } else {
+      upgradeUnavailableYn.value = false
 
       selectedTransport.value = null
       transportDisplay.value = ''
@@ -669,17 +673,23 @@ const isPegasusSelected = computed(() => {
   return isPegasusTransport(selectedTransport.value)
 })
 
-const isUpgradeUnavailable = computed(() => {
-  const target = isEditMode.value
-    ? props.initialRow
-    : selectedTransport.value
-
+function updateUpgradeUnavailableYn(target)
+{
   if (!target) {
-    return false
+    upgradeUnavailableYn.value = false
+    return
   }
 
-  return !String(target?.upgradeLocation || '').trim()
-})
+  const upgradeType = String(
+    target.upgradeType ??
+    target.upgrade_type ??
+    ''
+  )
+    .replace(/\s/g, '')
+    .trim()
+
+  upgradeUnavailableYn.value = upgradeType.includes('개조불가')
+}
 
 const isSlotEnabled = computed(() => {
   if (isEditMode.value && props.initialRow?.storageType === 'PEGASUS') {
@@ -792,6 +802,8 @@ function isPegasusTransport(t)
 
 function selectTransport(t)
 {
+  updateUpgradeUnavailableYn(t)
+
   selectedTransport.value = t
   transportDisplay.value = getTransportDisplayText(t)
   showTransportDropdown.value = false
@@ -1181,6 +1193,7 @@ function clearTransport()
 {
   selectedTransport.value = null
   transportDisplay.value = ''
+  upgradeUnavailableYn.value = false
 }
 
 function clearGarage()
