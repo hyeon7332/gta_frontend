@@ -674,6 +674,10 @@ const isUpgradeUnavailable = computed(() => {
     ? props.initialRow
     : selectedTransport.value
 
+  if (!target) {
+    return false
+  }
+
   return !String(target?.upgradeLocation || '').trim()
 })
 
