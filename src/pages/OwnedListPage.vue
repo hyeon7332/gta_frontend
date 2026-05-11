@@ -259,12 +259,6 @@
                               <span class="truncate">
                                 {{ row.name }}
                               </span>
-                              <span
-                                v-if="formatUpgradeType(row.upgradeType)"
-                                class="upgrade-badge shrink-0"
-                              >
-                                {{ formatUpgradeType(row.upgradeType) }}
-                              </span>
                             </div>
                           </td>
                           <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.category }}</td>
@@ -306,12 +300,6 @@
                             <div class="flex items-baseline gap-1.5 min-w-0">
                               <span class="truncate">
                                 {{ row.name }}
-                              </span>
-                              <span
-                                v-if="formatUpgradeType(row.upgradeType)"
-                                class="upgrade-badge shrink-0"
-                              >
-                                {{ formatUpgradeType(row.upgradeType) }}
                               </span>
                             </div>
                           </td>
@@ -460,7 +448,6 @@ import {
   normalizeGarage,
   normalizeTransportModel
 } from '@/utils/transportDataMapper'
-import { formatUpgradeType } from '@/utils/format'
 
 // 보유 이동수단 목록 데이터
 const rows = ref([])

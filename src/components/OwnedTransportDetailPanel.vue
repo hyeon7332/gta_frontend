@@ -10,13 +10,6 @@
             <div class="text-[18px] font-semibold text-white leading-tight break-words min-w-0">
               {{ getDetailTitle(row) }}
             </div>
-
-            <span
-              v-if="formatUpgradeType(row?.upgradeType)"
-              class="upgrade-badge shrink-0"
-            >
-              {{ formatUpgradeType(row?.upgradeType) }}
-            </span>
           </div>
 
           <div
@@ -290,7 +283,7 @@
 <script setup>
 import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
 import { X } from 'lucide-vue-next'
-import { formatDate, formatCurrencyUSD, formatSpeed, formatUpgradeType } from '@/utils/format'
+import { formatDate, formatCurrencyUSD, formatSpeed } from '@/utils/format'
 import { resolveImageUrl } from '@/utils/format'
 
 const props = defineProps({

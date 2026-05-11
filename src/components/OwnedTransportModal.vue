@@ -87,7 +87,7 @@
           </div>
 
           <!-- 상징 -->
-          <div v-if="!upgradeUnavailableYn">
+          <div>
             <div class="text-xs text-neutral-400 mb-1">상징</div>
 
             <input
@@ -377,7 +377,6 @@ const garageText = ref('')
 const slotNoText = ref('')
 const remark = ref('')
 const decal = ref('')
-const upgradeUnavailableYn = ref(false)
 const imageFile = ref(null)
 const previewUrl = ref('')
 
@@ -412,8 +411,6 @@ async function initModalState()
 async function initEditMode()
 {
   const row = props.initialRow
-
-  updateUpgradeUnavailableYn(row)
 
   if (row?.storageType === 'PEGASUS') {
     selectedTransport.value = row
@@ -466,7 +463,6 @@ function resetCreateState()
 {
   selectedTransport.value = null
   transportDisplay.value = ''
-  upgradeUnavailableYn.value = false
 
   remark.value = ''
   decal.value = ''
@@ -640,24 +636,6 @@ const isPegasusSelected = computed(() => {
   return isPegasusTransport(selectedTransport.value)
 })
 
-function updateUpgradeUnavailableYn(target)
-{
-  if (!target) {
-    upgradeUnavailableYn.value = false
-    return
-  }
-
-  const upgradeType = String(
-    target.upgradeType ??
-    target.upgrade_type ??
-    ''
-  )
-    .replace(/\s/g, '')
-    .trim()
-
-  upgradeUnavailableYn.value = upgradeType.includes('개조불가')
-}
-
 const isSlotEnabled = computed(() => {
   if (isEditMode.value && props.initialRow?.storageType === 'PEGASUS') {
     return false
@@ -716,48 +694,16 @@ const slotOptions = computed(() => {
   return list
 })
 
-function getUpgradeTypeDisplayText(upgradeType)
-{
-  if (!upgradeType || upgradeType.trim() === '') {
-    return ''
-  }
-
-  const map = {
-    'HSW': 'HSW',
-    '드리프트': 'Drift',
-    '아레나': 'Arena',
-    '베니즈 커스텀': "Benny's"
-  }
-
-  const labels = upgradeType
-    .split(',')
-    .map((v) => {
-      return v.trim()
-    })
-    .filter((v) => {
-      return v !== ''
-    })
-    .map((v) => {
-      return map[v] ?? ''
-    })
-    .filter((v) => {
-      return v !== ''
-    })
-
-  return labels.join(' / ')
-}
-
 function getTransportDisplayText(t)
 {
   const manufacturer = String(t?.manufacturer || '').trim()
   const name = String(t?.name || '').trim()
-  const upgradeTypeText = getUpgradeTypeDisplayText(t?.upgradeType)
 
-  const baseText = manufacturer === '미분류'
-    ? `${name}`
-    : `${manufacturer} ${name}`
+  if (manufacturer === '미분류') {
+    return name
+  }
 
-  return `${baseText} ${upgradeTypeText}`.trim()
+  return `${manufacturer} ${name}`.trim()
 }
 
 function isPegasusTransport(t)
@@ -778,8 +724,6 @@ function isPegasusTransport(t)
 
 function selectTransport(t)
 {
-  updateUpgradeUnavailableYn(t)
-
   selectedTransport.value = t
   transportDisplay.value = getTransportDisplayText(t)
   showTransportDropdown.value = false
@@ -1164,7 +1108,6 @@ function clearTransport()
 {
   selectedTransport.value = null
   transportDisplay.value = ''
-  upgradeUnavailableYn.value = false
 
   decal.value = ''
 }

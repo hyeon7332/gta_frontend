@@ -65,20 +65,6 @@
           </div>
 
           <div>
-            <label class="block mb-1 text-sm text-neutral-300">개조 유형</label>
-            <select v-model="form.upgradeType" class="input-style">
-              <option value="">선택하세요</option>
-              <option
-                v-for="type in upgradeTypeOptions"
-                :key="type"
-                :value="type"
-              >
-                {{ type }}
-              </option>
-            </select>
-          </div>
-
-          <div>
             <label class="block mb-1 text-sm text-neutral-300">개조 위치</label>
 
             <div ref="upgradeLocationBoxRef" class="relative">
@@ -249,14 +235,6 @@
 import { reactive, watch, onMounted, onBeforeUnmount, ref, computed } from 'vue'
 import { http } from '@/api/http'
 import '@/assets/css/modal-form.css'
-import {
-  manufacturerOptions,
-  transportCategoryOptions,
-  transportSourceOptions,
-  upgradeLocationOptions,
-  upgradeTypeOptions,
-  featureOptions
-} from '@/constants/transportOptions'
 
 const props = defineProps({
   open: {
@@ -283,7 +261,6 @@ const form = reactive({
   manufacturer: '',
   name: '',
   transportCategory: '',
-  upgradeType: '',
   upgradeLocation: '',
   lapTime: '',
   topSpeed: '',
@@ -304,6 +281,12 @@ const showUpgradeLocationDropdown = ref(false)
 const selectedUpgradeLocations = ref([])
 const upgradeLocationBoxRef = ref(null)
 const selectedFeatureOptions = ref([])
+
+const manufacturerOptions = ref([])
+const transportCategoryOptions = ref([])
+const transportSourceOptions = ref([])
+const upgradeLocationOptions = ref([])
+const featureOptions = ref([])
 
 const upgradeLocationLabel = computed(() => {
   if (selectedUpgradeLocations.value.length === 0) {
@@ -368,12 +351,40 @@ function toggleFeature(option)
   }
 }
 
+async function loadCommonCodes()
+{
+  try {
+    const groups = [
+      ['MANUFACTURER', manufacturerOptions],
+      ['TRANSPORT_CATEGORY', transportCategoryOptions],
+      ['TRANSPORT_SOURCE', transportSourceOptions],
+      ['UPGRADE_LOCATION', upgradeLocationOptions],
+      ['FEATURE', featureOptions]
+    ]
+
+    await Promise.all(
+      groups.map(async ([groupCode, target]) => {
+        const res = await http.get('/common-codes', {
+          params: {
+            groupCode
+          }
+        })
+
+        target.value = res.data.map((item) => {
+          return item.codeName
+        })
+      })
+    )
+  } catch (err) {
+    console.error('공통코드 조회 실패:', err)
+  }
+}
+
 function resetForm()
 {
   form.manufacturer = ''
   form.name = ''
   form.transportCategory = ''
-  form.upgradeType = ''
   form.upgradeLocation = []
   form.lapTime = ''
   form.topSpeed = ''
@@ -399,7 +410,6 @@ function fillForm()
   form.manufacturer = props.model?.manufacturer ?? ''
   form.name = props.model?.name ?? ''
   form.transportCategory = props.model?.transportCategory ?? ''
-  form.upgradeType = props.model?.upgradeType ?? ''
   form.upgradeLocation = props.model?.upgradeLocation ?? ''
   form.lapTime = props.model?.lapTime ?? ''
   form.topSpeed = props.model?.topSpeed ?? ''
@@ -499,7 +509,6 @@ async function handleSave()
       manufacturer: form.manufacturer,
       name: form.name,
       transportCategory: form.transportCategory,
-      upgradeType: form.upgradeType,
 
       upgradeLocation: upgradeLocationOptions
         .filter((location) => {
@@ -570,6 +579,7 @@ watch(
 )
 
 onMounted(() => {
+  loadCommonCodes()
   window.addEventListener('keydown', handleEsc)
   document.addEventListener('click', handleDocumentClick)
 })

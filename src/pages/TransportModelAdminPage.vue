@@ -217,60 +217,6 @@
                 </div>
               </div>
 
-              <!-- 개조유형 -->
-              <div class="relative" ref="upgradeTypeDropdownRef">
-                <button
-                  type="button"
-                  class="h-8 w-[250px] px-3 rounded-md flex items-center justify-between
-                        bg-neutral-800/60 border border-neutral-600
-                        text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
-                  @click="toggleUpgradeTypeDropdown"
-                >
-                  <span class="truncate">{{ upgradeTypeFilterLabel }}</span>
-                  <ChevronDown class="w-4 h-4 text-neutral-400" />
-                </button>
-
-                <div
-                  v-if="showUpgradeTypeDropdown"
-                  class="absolute left-0 top-10 z-20 w-[250px] max-h-[260px] overflow-auto
-                        rounded-md border border-neutral-600 bg-neutral-800 shadow-lg p-1"
-                >
-                  <button
-                    type="button"
-                    class="w-full flex items-center justify-between px-2 py-2 rounded
-                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
-                    @click="selectUpgradeType('')"
-                  >
-                    <span>전체</span>
-                    <span
-                      v-if="upgradeTypeFilter === ''"
-                      class="text-[11px] text-neutral-400"
-                    >
-                      선택됨
-                    </span>
-                  </button>
-
-                  <div class="mx-2 border-t border-neutral-700"></div>
-
-                  <button
-                    v-for="item in upgradeTypeOptionsList"
-                    :key="item"
-                    type="button"
-                    class="w-full flex items-center justify-between px-2 py-2 rounded
-                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
-                    @click="selectUpgradeType(item)"
-                  >
-                    <span class="truncate">{{ item }}</span>
-                    <span
-                      v-if="upgradeTypeFilter === item"
-                      class="text-[11px] text-neutral-400"
-                    >
-                      선택됨
-                    </span>
-                  </button>
-                </div>
-              </div>
-
               <!-- 개조위치 -->
               <div class="relative" ref="upgradeLocationDropdownRef">
                 <button
@@ -456,7 +402,6 @@
                       </button>
                     </th>
 
-                    <th class="px-3 py-2 text-left w-[130px] border-b border-r border-neutral-700">개조유형</th>
                     <th class="px-3 py-2 text-left w-[400px] border-b border-r border-neutral-700">개조위치</th>
 
                     <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">
@@ -532,10 +477,6 @@
                         {{ displayValue(row.transportCategory) }}
                       </td>
 
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">
-                        {{ displayValue(row.upgradeType) }}
-                      </td>
-
                       <td 
                         class="px-3 py-2 text-left border-b border-neutral-700 truncate"
                         :title="row.upgradeLocation"
@@ -574,7 +515,7 @@
                     </template>
 
                     <template v-else>
-                      <td colspan="14" class="h-[40px]"></td>
+                      <td colspan="13" class="h-[40px]"></td>
                     </template>
                   </tr>
                 </tbody>
@@ -651,14 +592,6 @@ import { Plus, X, RotateCcw, ChevronDown } from 'lucide-vue-next'
 import { http } from '@/api/http'
 import * as format from '@/utils/format'
 import TransportModelModal from '@/components/TransportModelModal.vue'
-import {
-  manufacturerOptions,
-  transportCategoryOptions,
-  transportSourceOptions,
-  upgradeLocationOptions,
-  upgradeTypeOptions,
-  featureOptions
-} from '@/constants/transportOptions'
 
 const rows = ref([])
 const keyword = ref('')
@@ -671,7 +604,6 @@ const listCardRef = ref(null)
 
 const manufacturerFilter = ref('')
 const categoryFilter = ref('')
-const upgradeTypeFilter = ref('')
 const sourceFilter = ref('')
 
 const upgradeLocationFilters = ref([])
@@ -683,18 +615,18 @@ const showFeatureDropdown = ref(false)
 const upgradeLocationDropdownRef = ref(null)
 const featureDropdownRef = ref(null)
 
-const categoryOptions = transportCategoryOptions
-const upgradeTypeOptionsList = upgradeTypeOptions
-const sourceOptionsList = transportSourceOptions
+const manufacturerOptions = ref([])
+const categoryOptions = ref([])
+const sourceOptionsList = ref([])
+const upgradeLocationOptions = ref([])
+const featureOptions = ref([])
 
 const showManufacturerDropdown = ref(false)
 const showCategoryDropdown = ref(false)
-const showUpgradeTypeDropdown = ref(false)
 const showSourceDropdown = ref(false)
 
 const manufacturerDropdownRef = ref(null)
 const categoryDropdownRef = ref(null)
-const upgradeTypeDropdownRef = ref(null)
 const sourceDropdownRef = ref(null)
 
 const page = ref(1)
@@ -730,10 +662,6 @@ const categoryFilterLabel = computed(() => {
   return categoryFilter.value || '분류'
 })
 
-const upgradeTypeFilterLabel = computed(() => {
-  return upgradeTypeFilter.value || '개조유형'
-})
-
 const sourceFilterLabel = computed(() => {
   return sourceFilter.value || '획득처'
 })
@@ -746,7 +674,6 @@ async function load()
         keyword: keyword.value,
         manufacturer: manufacturerFilter.value,
         category: categoryFilter.value,
-        upgradeType: upgradeTypeFilter.value,
         source: sourceFilter.value,
         upgradeLocations: upgradeLocationFilters.value,
         features: featureFilters.value,
@@ -790,6 +717,35 @@ async function load()
   }
 }
 
+async function loadCommonCodes()
+{
+  try {
+    const groups = [
+      ['MANUFACTURER', manufacturerOptions],
+      ['TRANSPORT_CATEGORY', categoryOptions],
+      ['TRANSPORT_SOURCE', sourceOptionsList],
+      ['UPGRADE_LOCATION', upgradeLocationOptions],
+      ['FEATURE', featureOptions]
+    ]
+
+    await Promise.all(
+      groups.map(async ([groupCode, target]) => {
+        const res = await http.get('/common-codes', {
+          params: {
+            groupCode
+          }
+        })
+
+        target.value = res.data.map((item) => {
+          return item.codeName
+        })
+      })
+    )
+  } catch (err) {
+    console.error('공통코드 조회 실패:', err)
+  }
+}
+
 function changePage(newPage)
 {
   if (newPage < 1 || newPage > totalPages.value) {
@@ -813,7 +769,6 @@ function resetFilters()
 
   manufacturerFilter.value = ''
   categoryFilter.value = ''
-  upgradeTypeFilter.value = ''
   sourceFilter.value = ''
   upgradeLocationFilters.value = []
   featureFilters.value = []
@@ -887,7 +842,6 @@ function closeSingleFilterDropdowns()
 {
   showManufacturerDropdown.value = false
   showCategoryDropdown.value = false
-  showUpgradeTypeDropdown.value = false
   showSourceDropdown.value = false
 }
 
@@ -907,15 +861,6 @@ function toggleCategoryDropdown()
   showUpgradeLocationDropdown.value = false
   showFeatureDropdown.value = false
   showCategoryDropdown.value = next
-}
-
-function toggleUpgradeTypeDropdown()
-{
-  const next = !showUpgradeTypeDropdown.value
-  closeSingleFilterDropdowns()
-  showUpgradeLocationDropdown.value = false
-  showFeatureDropdown.value = false
-  showUpgradeTypeDropdown.value = next
 }
 
 function toggleSourceDropdown()
@@ -938,13 +883,6 @@ function selectCategory(value)
 {
   categoryFilter.value = value
   showCategoryDropdown.value = false
-  applyFilterChange()
-}
-
-function selectUpgradeType(value)
-{
-  upgradeTypeFilter.value = value
-  showUpgradeTypeDropdown.value = false
   applyFilterChange()
 }
 
@@ -1184,10 +1122,6 @@ function handleDocumentClick(event)
     showCategoryDropdown.value = false
   }
 
-  if (upgradeTypeDropdownRef.value && !upgradeTypeDropdownRef.value.contains(target)) {
-    showUpgradeTypeDropdown.value = false
-  }
-
   if (sourceDropdownRef.value && !sourceDropdownRef.value.contains(target)) {
     showSourceDropdown.value = false
   }
@@ -1222,6 +1156,7 @@ function displayValue(value)
 }
 
 onMounted(() => {
+  loadCommonCodes()
   load()
   document.addEventListener('click', handleDocumentClick)
 })

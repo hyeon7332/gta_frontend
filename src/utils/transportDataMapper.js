@@ -23,7 +23,6 @@ export function normalizeOwnedTransport(x)
     remark: x.remark ?? x.memo ?? x.note ?? '',
     manufacturer: x.manufacturer ?? x.maker ?? x.brand ?? x.manufacturerName ?? '-',
     name: x.name ?? x.modelName ?? x.transportName ?? '-',
-    upgradeType: x.upgradeType ?? x.upgrade_type ?? '',
     upgradeLocation: x.upgradeLocation ?? x.upgrade_location ?? '',
     category: x.category ?? x.transportCategory ?? x.className ?? x.class ?? '-',
     price: x.price ?? x.priceNumber ?? x.cost ?? null,
@@ -69,7 +68,6 @@ export function normalizeTransportModel(x)
     modelId: x.modelId ?? x.model_id ?? x.id ?? null,
     manufacturer: x.manufacturer ?? x.maker ?? x.brand ?? '',
     name: x.name ?? x.modelName ?? x.transportName ?? '',
-    upgradeType: x.upgradeType ?? x.upgrade_type ?? '',
     features: x.features ?? ''
   }
 }
