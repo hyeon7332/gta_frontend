@@ -378,7 +378,7 @@ function resetForm()
   form.lapTime = ''
   form.topSpeed = ''
   form.price = ''
-  form.releaseDate = ''
+  form.releaseDate = '2013-09-17'
   form.source = ''
   form.weight = ''
   form.driveTrain = ''
