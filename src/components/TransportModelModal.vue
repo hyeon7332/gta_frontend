@@ -30,7 +30,7 @@
           </button>
         </div>
 
-        <div class="p-5 overflow-y-auto max-h-[calc(90vh-138px)] grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="px-5 pt-3 pb-5 overflow-y-auto max-h-[calc(90vh-138px)] grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block mb-1 text-sm text-neutral-300">제조사</label>
             <select v-model="form.manufacturer" class="input-style">
@@ -150,16 +150,35 @@
 
           <div>
             <label class="block mb-1 text-sm text-neutral-300">획득처</label>
-            <select v-model="form.source" class="input-style">
-              <option value="">선택하세요</option>
-              <option
-                v-for="source in transportSourceOptions"
-                :key="source"
-                :value="source"
+
+            <div ref="sourceBoxRef" class="relative">
+              <div
+                class="input-style flex items-center cursor-pointer"
+                @click="showSourceDropdown = !showSourceDropdown"
               >
-                {{ source }}
-              </option>
-            </select>
+                <span class="truncate">
+                  {{ sourceLabel || '선택하세요' }}
+                </span>
+              </div>
+
+              <div
+                v-if="showSourceDropdown"
+                class="absolute left-0 right-0 mt-1 bg-neutral-800 border border-neutral-700 rounded-md z-20 p-2 max-h-72 overflow-y-auto"
+              >
+                <label
+                  v-for="source in transportSourceOptions"
+                  :key="source"
+                  class="flex items-center gap-2 px-2 py-1 text-sm text-neutral-200 hover:bg-neutral-700 rounded cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="selectedSources.includes(source)"
+                    @change="toggleSource(source)"
+                  />
+                  {{ source }}
+                </label>
+              </div>
+            </div>
           </div>
 
           <div>
@@ -189,15 +208,18 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-2">
                 <label
                   v-for="option in featureOptions"
-                  :key="option"
+                  :key="option.codeValue"
                   class="flex items-center gap-2 min-w-0 text-sm text-neutral-200 cursor-pointer"
                 >
                   <input
                     type="checkbox"
-                    :checked="selectedFeatureOptions.includes(option)"
-                    @change="toggleFeature(option)"
+                    :checked="selectedFeatureOptions.includes(option.codeValue)"
+                    @change="toggleFeature(option.codeValue)"
                   />
-                  <span class="break-words">{{ option }}</span>
+
+                  <span class="break-words">
+                    {{ option.codeName }}
+                  </span>
                 </label>
               </div>
             </div>
@@ -278,6 +300,9 @@ const lapTimeSeconds = ref('')
 const lapTimeMillis = ref('')
 
 const showUpgradeLocationDropdown = ref(false)
+const showSourceDropdown = ref(false)
+const selectedSources = ref([])
+const sourceBoxRef = ref(null)
 const selectedUpgradeLocations = ref([])
 const upgradeLocationBoxRef = ref(null)
 const selectedFeatureOptions = ref([])
@@ -293,12 +318,35 @@ const upgradeLocationLabel = computed(() => {
     return ''
   }
 
-  const sorted = upgradeLocationOptions.filter((location) => {
+  const sorted = upgradeLocationOptions.value.filter((location) => {
     return selectedUpgradeLocations.value.includes(location)
   })
 
   return sorted.join(', ')
 })
+
+const sourceLabel = computed(() => {
+  if (selectedSources.value.length === 0) {
+    return ''
+  }
+
+  const sorted = transportSourceOptions.value.filter((source) => {
+    return selectedSources.value.includes(source)
+  })
+
+  return sorted.join(', ')
+})
+
+function toggleSource(source)
+{
+  const index = selectedSources.value.indexOf(source)
+
+  if (index === -1) {
+    selectedSources.value.push(source)
+  } else {
+    selectedSources.value.splice(index, 1)
+  }
+}
 
 function buildLapTimeMs()
 {
@@ -370,9 +418,14 @@ async function loadCommonCodes()
           }
         })
 
-        target.value = res.data.map((item) => {
-          return item.codeName
-        })
+        if (groupCode === 'FEATURE') {
+          target.value = res.data
+        } else {
+          target.value = res.data.map((item) => {
+            return item.codeName
+          })
+        }
+
       })
     )
   } catch (err) {
@@ -395,6 +448,8 @@ function resetForm()
   form.driveTrain = ''
   form.seats = ''
   form.features = ''
+  selectedSources.value = []
+  showSourceDropdown.value = false
 
   selectedUpgradeLocations.value = []
   selectedFeatureOptions.value = []
@@ -438,15 +493,39 @@ function fillForm()
     : []  
 
   selectedFeatureOptions.value = form.features
-    ? form.features.split(',').map(v => v.trim())
+    ? form.features
+        .split(',')
+        .map((value) => {
+          return value.trim()
+        })
+        .map((value) => {
+          const matched = featureOptions.value.find((option) => {
+            return option.codeValue === value || option.codeName === value
+          })
+
+          return matched ? matched.codeValue : value
+        })
+        .filter((value, index, array) => {
+          return value !== '' && array.indexOf(value) === index
+        })
     : []
 
+  selectedSources.value = form.source
+    ? form.source.split(',').map(v => v.trim())
+    : []  
+
   showUpgradeLocationDropdown.value = false
+  showSourceDropdown.value = false
 }
 
 function handleEsc(e)
 {
   if (e.key !== 'Escape') {
+    return
+  }
+
+  if (showSourceDropdown.value) {
+    showSourceDropdown.value = false
     return
   }
 
@@ -477,6 +556,14 @@ function handleDocumentClick(e)
     !upgradeLocationBoxRef.value.contains(target)
   ) {
     showUpgradeLocationDropdown.value = false
+  }
+
+  if (
+    showSourceDropdown.value &&
+    sourceBoxRef.value &&
+    !sourceBoxRef.value.contains(target)
+  ) {
+    showSourceDropdown.value = false
   }
 }
 
@@ -510,7 +597,7 @@ async function handleSave()
       name: form.name,
       transportCategory: form.transportCategory,
 
-      upgradeLocation: upgradeLocationOptions
+      upgradeLocation: upgradeLocationOptions.value
         .filter((location) => {
           return selectedUpgradeLocations.value.includes(location)
         })
@@ -520,16 +607,17 @@ async function handleSave()
       topSpeed: form.topSpeed === '' ? null : Number(form.topSpeed),
       price: form.price === '' ? null : Number(form.price),
       releaseDate: form.releaseDate === '' ? null : form.releaseDate,
-      source: form.source,
       weight: form.weight === '' ? null : Number(form.weight),
       driveTrain: form.driveTrain,
       seats: form.seats === '' ? null : Number(form.seats),
 
-      features: featureOptions
-        .filter((option) => {
-          return selectedFeatureOptions.value.includes(option)
+      source: transportSourceOptions.value
+        .filter((source) => {
+          return selectedSources.value.includes(source)
         })
-        .join(', ')
+        .join(', '),
+
+      features: selectedFeatureOptions.value.join(', ')
     }
 
     if (isEditMode.value) {

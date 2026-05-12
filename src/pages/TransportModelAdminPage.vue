@@ -348,17 +348,17 @@
 
                   <label
                     v-for="item in featureOptions"
-                    :key="item"
+                    :key="item.codeValue"
                     class="flex items-center gap-2 px-2 py-2 rounded cursor-pointer
                           text-[13px] text-neutral-200 hover:bg-neutral-700/70"
                   >
                     <input
                       type="checkbox"
-                      :value="item"
-                      :checked="featureFilters.includes(item)"
-                      @change="toggleMultiFilter('feature', item)"
+                      :value="item.codeValue"
+                      :checked="featureFilters.includes(item.codeValue)"
+                      @change="toggleMultiFilter('feature', item.codeValue)"
                     />
-                    <span class="truncate">{{ item }}</span>
+                    <span class="truncate">{{ item.codeName }}</span>
                   </label>
                 </div>
               </div>
@@ -507,9 +507,9 @@
 
                       <td
                         class="px-3 py-2 text-left border-b border-neutral-700 truncate"
-                        :title="displayValue(row.features)"
+                        :title="displayFeatureNames(row.features)"
                       >
-                        {{ displayValue(row.features) }}
+                        {{ displayFeatureNames(row.features) }}
                       </td>
                       
                     </template>
@@ -736,9 +736,14 @@ async function loadCommonCodes()
           }
         })
 
-        target.value = res.data.map((item) => {
-          return item.codeName
-        })
+        if (groupCode === 'FEATURE') {
+          target.value = res.data
+        } else {
+          target.value = res.data.map((item) => {
+            return item.codeName
+          })
+        }
+
       })
     )
   } catch (err) {
@@ -1153,6 +1158,30 @@ function displayValue(value)
   }
 
   return value
+}
+
+function displayFeatureNames(features)
+{
+  if (!features || features.trim() === '') {
+    return '-'
+  }
+
+  return features
+    .split(',')
+    .map((value) => {
+      return value.trim()
+    })
+    .map((value) => {
+      const matched = featureOptions.value.find((option) => {
+        return option.codeValue === value || option.codeName === value
+      })
+
+      return matched ? matched.codeName : value
+    })
+    .filter((value) => {
+      return value !== ''
+    })
+    .join(', ')
 }
 
 onMounted(() => {

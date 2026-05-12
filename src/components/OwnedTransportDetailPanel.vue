@@ -10,6 +10,14 @@
             <div class="text-[18px] font-semibold text-white leading-tight break-words min-w-0">
               {{ getDetailTitle(row) }}
             </div>
+
+            <span
+              v-for="badge in formatFeatureBadges(row?.features)"
+              :key="badge"
+              class="relative top-[2px] px-2 py-[2px] rounded-md border border-neutral-700/70 bg-neutral-800/60 text-[11px] text-neutral-200 whitespace-nowrap"
+            >
+              {{ badge }}
+            </span>
           </div>
 
           <div
@@ -259,7 +267,7 @@
             class="flex flex-wrap gap-4 pr-1"
           >
             <span
-              v-for="feature in row.features.split(',')"
+              v-for="feature in displayFeatureNames(row.features)"
               :key="feature"
               class="px-2.5 py-1 rounded-md border border-neutral-700/70 bg-neutral-800/50 text-[12px] text-neutral-200 whitespace-nowrap"
             >
@@ -281,9 +289,10 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
+import { ref, watch, nextTick, onBeforeUnmount, onMounted } from 'vue'
 import { X } from 'lucide-vue-next'
-import { formatDate, formatCurrencyUSD, formatSpeed } from '@/utils/format'
+import { formatDate, formatCurrencyUSD, formatSpeed, formatFeatureBadges } from '@/utils/format'
+import { http } from '@/api/http'
 import { resolveImageUrl } from '@/utils/format'
 
 const props = defineProps({
@@ -292,6 +301,7 @@ const props = defineProps({
 
 const animatedLapWidth = ref(0)
 const animatedTopSpeedWidth = ref(0)
+const featureOptions = ref([])
 
 let animationTimer = null
 
@@ -420,6 +430,44 @@ function getRankClass(rank)
   return 'text-neutral-100 font-medium'
 }
 
+async function loadFeatureCodes()
+{
+  try {
+    const res = await http.get('/common-codes', {
+      params: {
+        groupCode: 'FEATURE'
+      }
+    })
+
+    featureOptions.value = res.data
+  } catch (err) {
+    console.error('특징 코드 조회 실패:', err)
+  }
+}
+
+function displayFeatureNames(features)
+{
+  if (!features || features.trim() === '') {
+    return []
+  }
+
+  return features
+    .split(',')
+    .map((value) => {
+      return value.trim()
+    })
+    .map((value) => {
+      const matched = featureOptions.value.find((option) => {
+        return option.codeValue === value || option.codeName === value
+      })
+
+      return matched ? matched.codeName : value
+    })
+    .filter((value) => {
+      return value !== ''
+    })
+}
+
 watch(
   () => props.row,
   () => {
@@ -433,5 +481,9 @@ onBeforeUnmount(() => {
     clearTimeout(animationTimer)
     animationTimer = null
   }
+})
+
+onMounted(() => {
+  loadFeatureCodes()
 })
 </script>

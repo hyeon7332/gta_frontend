@@ -67,3 +67,31 @@ export function resolveImageUrl(imageUrl)
 
   return import.meta.env.VITE_FILE_BASE_URL + imageUrl
 }
+
+/** 특징 코드 배지 표시명 매핑 */
+export const featureBadgeDisplayMap = {
+  HSW: 'HSW',
+  DRF: 'Drift',
+  ARE: 'Arena',
+  BEN: "Benny's"
+}
+
+/** 특징 코드에서 리스트/상세용 배지 목록 생성 */
+export function formatFeatureBadges(features)
+{
+  if (!features || features.trim() === '') {
+    return []
+  }
+
+  return features
+    .split(',')
+    .map((item) => {
+      return item.trim()
+    })
+    .filter((item) => {
+      return featureBadgeDisplayMap[item]
+    })
+    .map((item) => {
+      return featureBadgeDisplayMap[item]
+    })
+}
