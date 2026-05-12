@@ -89,7 +89,7 @@
           <span class="text-[13px] text-neutral-400">개조위치</span>
 
           <span
-            class="block truncate text-[13px] text-right max-w-[280px]"
+            class="block truncate text-[13px] text-right max-w-[350px]"
             :class="row?.upgradeLocation?.trim() ? 'font-medium text-neutral-100' : 'text-neutral-500'"
             :title="row?.upgradeLocation"
           >
