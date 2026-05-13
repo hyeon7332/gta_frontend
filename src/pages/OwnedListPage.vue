@@ -263,7 +263,12 @@
                               <span
                                 v-for="badge in formatFeatureBadges(row.features)"
                                 :key="badge"
-                                class="shrink-0 text-[11px] text-neutral-300"
+                                :class="[
+                                  'shrink-0 text-[11px]',
+                                  row.type === 'unassigned'
+                                    ? 'relative top-[1px] px-2 py-[2px] rounded-md border border-neutral-700/70 bg-neutral-800/60 text-neutral-200 whitespace-nowrap'
+                                    : 'text-neutral-300'
+                                ]"
                               >
                                 {{ badge }}
                               </span>
