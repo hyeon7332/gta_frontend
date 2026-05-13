@@ -617,7 +617,14 @@ async function handleSave()
         })
         .join(', '),
 
-      features: selectedFeatureOptions.value.join(', ')
+      features: featureOptions.value
+        .filter((option) => {
+          return selectedFeatureOptions.value.includes(option.codeValue)
+        })
+        .map((option) => {
+          return option.codeValue
+        })
+        .join(', ')
     }
 
     if (isEditMode.value) {
