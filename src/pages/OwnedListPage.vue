@@ -191,11 +191,26 @@
                         :draggable="canDragRow(row)"
                         :class="[
                           'h-[40px]',
-                          row && row.type === 'slot' && !row.isEmpty ? 'hover:bg-neutral-700/40 transition cursor-pointer' : '',
-                          row && row.type === 'slot' && row.isEmpty ? 'text-neutral-500' : '',
-                          draggingRow && row && row.type === 'slot' && row.isEmpty ? 'hover:bg-neutral-700/20' : '',
-                          isDropTarget(row) ? 'bg-green-900/20' : '',
-                          draggingRow && row && draggingRow.ownedId === row.id ? 'opacity-50' : ''
+                          row && (
+                            (row.type === 'slot' && !row.isEmpty) ||
+                            row.type === 'unassigned' ||
+                            row.type === 'pegasus' ||
+                            row.type === 'hangar'
+                          )
+                            ? 'hover:bg-neutral-700/40 transition cursor-pointer'
+                            : '',
+                          row && row.type === 'slot' && row.isEmpty
+                            ? 'text-neutral-500'
+                            : '',
+                          draggingRow && row && row.type === 'slot' && row.isEmpty
+                            ? 'hover:bg-neutral-700/20'
+                            : '',
+                          isDropTarget(row)
+                            ? 'bg-green-900/20'
+                            : '',
+                          draggingRow && row && draggingRow.ownedId === row.id
+                            ? 'opacity-50'
+                            : ''
                         ]"
                         @click="handleRowClick(row)"
                         @dblclick="handleSlotDoubleClick(row)"
@@ -227,7 +242,29 @@
                                 <span class="truncate">
                                   {{ row.alias ? row.alias : row.garage }}
                                 </span>
-  
+
+                                <!-- 격납고 사용량 -->
+                                <span
+                                  v-if="String(row.garage || '').includes('격납고')"
+                                  class="text-[11px] text-neutral-400 tabular-nums"
+                                >
+                                  <template v-if="hangarUsage.small > 0">
+                                    소형 {{ hangarUsage.small }}
+                                  </template>
+
+                                  <template v-if="hangarUsage.medium > 0">
+                                    중형 {{ hangarUsage.medium }}
+                                  </template>
+
+                                  <template v-if="hangarUsage.large > 0">
+                                    대형 {{ hangarUsage.large }}
+                                  </template>
+
+                                  <template v-if="hangarUsage.xlarge > 0">
+                                    초대형 {{ hangarUsage.xlarge }}
+                                  </template>
+                                </span>
+
                                 <span
                                   v-if="row.description"
                                   class="text-[11px] text-neutral-400 ml-2"
@@ -251,7 +288,11 @@
                         </template>
                         
                         <!-- 특수 보관 행 (미배치 / 페가수스) -->
-                        <template v-else-if="row && (row.type === 'unassigned' || row.type === 'pegasus')">
+                        <template v-else-if="row && (
+                          row.type === 'unassigned' ||
+                          row.type === 'pegasus' ||
+                          row.type === 'hangar'
+                        )">
                           <td :class="[tdBaseClass, getRowHighlightClass(row)]">-</td>
                           <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
                           <td :class="[tdBaseClass, getRowHighlightClass(row)]">
@@ -582,7 +623,11 @@ const slotRowMap = computed(() => {
   const map = new Map()
 
   rows.value.forEach((row) => {
-    if (!row.garageId || !row.slot) {
+    if (
+      !row.garageId ||
+      !row.slot ||
+      row.storageType === 'HANGAR'
+    ) {
       return
     }
 
@@ -611,6 +656,14 @@ const slotRows = computed(() => {
       alias: garage.alias ?? null,
       description: garage.description ?? null
     })
+
+    // 격납고는 일반 슬롯 구조 대신 리스트형으로 표시
+    const isHangarGarage = String(garageName || '').includes('격납고')
+
+    if (isHangarGarage) {
+      result.push(...hangarRows.value)
+      return
+    }
 
     if (collapsedGarageIds.value.has(garageId)) {
       return
@@ -694,6 +747,53 @@ const pegasusRows = computed(() => {
 // 페가수스 건수
 const pegasusCount = computed(() => {
   return pegasusRows.value.length
+})
+
+// 격납고 행 목록
+const hangarRows = computed(() => {
+  return rows.value
+    .filter((row) => {
+      return row.storageType === 'HANGAR'
+    })
+    .map((row) => ({
+      ...row,
+      type: 'hangar'
+    }))
+})
+
+// 격납고 크기별 사용 수
+const hangarUsage = computed(() => {
+  const usage = {
+    small: 0,
+    medium: 0,
+    large: 0,
+    xlarge: 0
+  }
+
+  hangarRows.value.forEach((row) => {
+    const features = String(row.features || '')
+
+    if (features.includes('HGX')) {
+      usage.xlarge += 1
+      return
+    }
+
+    if (features.includes('HGL')) {
+      usage.large += 1
+      return
+    }
+
+    if (features.includes('HGM')) {
+      usage.medium += 1
+      return
+    }
+
+    if (features.includes('HGS')) {
+      usage.small += 1
+    }
+  })
+
+  return usage
 })
 
 // 미배치 표시용 행 목록
@@ -1033,6 +1133,10 @@ function handleSlotDoubleClick(row)
     return
   }
 
+  if (String(row.garage || '').includes('격납고')) {
+    return
+  }
+
   // 빈 슬롯만 등록 모달 허용
   if (!row.isEmpty) {
     return
@@ -1074,7 +1178,10 @@ function handleRowClick(row)
 // 행이 드래그 가능한지 여부
 function canDragRow(row)
 {
-  return !!row && row.type === 'slot' && !row.isEmpty
+  return !!row &&
+        row.type === 'slot' &&
+        !row.isEmpty &&
+        row.storageType !== 'HANGAR'
 }
 
 // 행이 드롭 가능한지 여부
@@ -1110,6 +1217,10 @@ function getRowHighlightKey(row)
 
   if (row.type === 'pegasus') {
     return `pegasus-${row.id}`
+  }
+
+  if (row.type === 'hangar') {
+    return `hangar-${row.id}`
   }
 
   return ''
@@ -1421,6 +1532,8 @@ async function handleDrop(row)
 // 보유 이동수단 등록 요청 처리
 async function handleCreated(payload)
 {
+  console.log('등록 payload:', payload)
+
   try {
     await http.post('/owned-transports', payload)
     await handleOwnedTransportSuccess('등록 완료')
@@ -1517,7 +1630,17 @@ async function handleGarageSettingSuccess(successMessage)
 function handleWriteFail(errorMessage, err)
 {
   console.error(errorMessage, err)
-  showToast(errorMessage, 'error')
+
+  const responseMessage =
+    err?.response?.data?.message ||
+    err?.response?.data?.error ||
+    err?.message
+
+  const finalMessage = responseMessage
+    ? `${errorMessage} - ${responseMessage}`
+    : errorMessage
+
+  showToast(finalMessage, 'error')
 }
 
 // 풋터 미배치/페가수스 빠른 필터 적용

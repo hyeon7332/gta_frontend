@@ -11,7 +11,7 @@
       class="inline-block w-2 h-2 rounded-full"
       :class="isSuccess ? 'bg-green-400' : 'bg-red-400'"
     ></span>
-    <span class="block whitespace-nowrap overflow-hidden text-ellipsis max-w-[320px]">
+    <span class="block whitespace-nowrap">
       {{ text }}
     </span>
   </div>

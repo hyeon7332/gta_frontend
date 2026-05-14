@@ -645,6 +645,10 @@ const isSlotEnabled = computed(() => {
     return false
   }
 
+  if (isHangarGarage(selectedGarage.value)) {
+    return false
+  }
+
   return !!selectedGarage.value
 })
 
@@ -722,6 +726,13 @@ function isPegasusTransport(t)
     .includes('페가수스')
 }
 
+function isHangarGarage(garage)
+{
+  const garageName = String(garage?.garageName || '').trim()
+
+  return garageName.includes('격납고')
+}
+
 function selectTransport(t)
 {
   selectedTransport.value = t
@@ -775,7 +786,7 @@ async function updateOwnedTransport()
   emit('update', {
     ownedId: ownedId,
     storageType: storageType,
-    garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
+    garageId: storageType === 'GARAGE' || storageType === 'HANGAR' ? selectedGarageId.value : null,
     slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
     remark: remark.value,
     imageUrl: imageUrl,
@@ -811,7 +822,7 @@ async function createOwnedTransport()
   emit('created', {
     modelId: Number(modelId),
     storageType: storageType,
-    garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
+    garageId: storageType === 'GARAGE' || storageType === 'HANGAR' ? selectedGarageId.value : null,
     slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
     remark: remark.value,
     imageUrl: imageUrl,
@@ -826,6 +837,10 @@ function validateGarageSlot()
 
   if (isPegasusSelected.value) {
     return true
+  }
+
+  if (isHangarGarage(selectedGarage.value)) {
+    return hasGarage
   }
 
   if (hasGarage && !hasSlot) {
@@ -845,6 +860,10 @@ function getStorageType()
 {
   if (isPegasusSelected.value) {
     return 'PEGASUS'
+  }
+
+  if (isHangarGarage(selectedGarage.value)) {
+    return 'HANGAR'
   }
 
   if (selectedGarageId.value) {
