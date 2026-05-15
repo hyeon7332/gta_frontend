@@ -185,35 +185,27 @@
                     type="button"
                     class="w-full flex items-center justify-between px-2 py-2 rounded
                           text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
-                    @click="selectCategory('')"
+                    @click="clearMultiFilter('category')"
                   >
                     <span>전체</span>
-                    <span
-                      v-if="categoryFilter === ''"
-                      class="text-[11px] text-neutral-400"
-                    >
-                      선택됨
-                    </span>
                   </button>
 
                   <div class="mx-2 border-t border-neutral-700"></div>
 
-                  <button
+                  <label
                     v-for="item in categoryOptions"
                     :key="item"
-                    type="button"
-                    class="w-full flex items-center justify-between px-2 py-2 rounded
-                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
-                    @click="selectCategory(item)"
+                    class="flex items-center gap-2 px-2 py-2 rounded cursor-pointer
+                          text-[13px] text-neutral-200 hover:bg-neutral-700/70"
                   >
+                    <input
+                      type="checkbox"
+                      :value="item"
+                      :checked="categoryFilters.includes(item)"
+                      @change="toggleMultiFilter('category', item)"
+                    />
                     <span class="truncate">{{ item }}</span>
-                    <span
-                      v-if="categoryFilter === item"
-                      class="text-[11px] text-neutral-400"
-                    >
-                      선택됨
-                    </span>
-                  </button>
+                  </label>
                 </div>
               </div>
 
@@ -595,7 +587,7 @@ const selectedRow = ref(null)
 const listCardRef = ref(null)
 
 const manufacturerFilter = ref('')
-const categoryFilter = ref('')
+const categoryFilters = ref([])
 const sourceFilters = ref([])
 
 const upgradeLocationFilters = ref([])
@@ -651,7 +643,7 @@ const manufacturerFilterLabel = computed(() => {
 })
 
 const categoryFilterLabel = computed(() => {
-  return categoryFilter.value || '분류'
+  return getMultiFilterLabel('분류', categoryFilters.value)
 })
 
 const sourceFilterLabel = computed(() => {
@@ -665,7 +657,7 @@ async function load()
       params: {
         keyword: keyword.value,
         manufacturer: manufacturerFilter.value,
-        category: categoryFilter.value,
+        categories: categoryFilters.value,
         sources: sourceFilters.value,
         upgradeLocations: upgradeLocationFilters.value,
         features: featureFilters.value,
@@ -765,7 +757,7 @@ function resetFilters()
   sort.value = 'default'
 
   manufacturerFilter.value = ''
-  categoryFilter.value = ''
+  categoryFilters.value = []
   sourceFilters.value = []
   upgradeLocationFilters.value = []
   featureFilters.value = []
@@ -876,13 +868,6 @@ function selectManufacturer(value)
   applyFilterChange()
 }
 
-function selectCategory(value)
-{
-  categoryFilter.value = value
-  showCategoryDropdown.value = false
-  applyFilterChange()
-}
-
 function clearMultiFilter(type)
 {
   if (type === 'upgradeLocation') {
@@ -891,6 +876,9 @@ function clearMultiFilter(type)
   } else if (type === 'source') {
     sourceFilters.value = []
     showSourceDropdown.value = false
+  } else if (type === 'category') {
+    categoryFilters.value = []
+    showCategoryDropdown.value = false
   } else {
     featureFilters.value = []
     showFeatureDropdown.value = false
@@ -923,6 +911,8 @@ function toggleMultiFilter(type, value)
     target = upgradeLocationFilters
   } else if (type === 'source') {
     target = sourceFilters
+  } else if (type === 'category') {
+    target = categoryFilters
   }
 
   const current = [...target.value]

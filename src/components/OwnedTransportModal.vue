@@ -423,7 +423,10 @@ async function initEditMode()
 
   const currentGarageId = row?.garageId ?? null
   const currentSlot = getCurrentSlot(row)
-  const matched = findGarageById(currentGarageId)
+
+  const matched =
+    findGarageById(currentGarageId) ||
+    findGarageByStorageType(row?.storageType)
 
   if (matched) {
     setGarageValue(matched)
@@ -564,6 +567,7 @@ function getCurrentSlot(row)
   return currentSlot
 }
 
+// 차고 ID 기준 차고 조회
 function findGarageById(garageId)
 {
   if (!garageId || !Array.isArray(props.garageList)) {
@@ -573,6 +577,36 @@ function findGarageById(garageId)
   return props.garageList.find((garage) => {
     return Number(garage?.garageId) === Number(garageId)
   }) || null
+}
+
+// 차고명 기준 차고 조회
+function findGarageByName(garageName)
+{
+  if (!garageName || !Array.isArray(props.garageList)) {
+    return null
+  }
+
+  return props.garageList.find((garage) => {
+    return garage?.garageName === garageName
+  }) || null
+}
+
+// storageType 기준 격납고 차고 조회
+function findGarageByStorageType(storageType)
+{
+  if (storageType === 'HANGAR') {
+    return findGarageByName('격납고 격납층')
+  }
+
+  if (storageType === 'HANGAR_STORAGE') {
+    return findGarageByName('격납고 저장소')
+  }
+
+  if (storageType === 'HANGAR_VINEWOOD') {
+    return findGarageByName('격납고 바인우드 클럽 보관소')
+  }
+
+  return null
 }
 
 function addModalEvents()
@@ -645,7 +679,7 @@ const isSlotEnabled = computed(() => {
     return false
   }
 
-  if (isHangarGarage(selectedGarage.value)) {
+  if (isHangarRelatedGarage(selectedGarage.value)) {
     return false
   }
 
@@ -726,11 +760,32 @@ function isPegasusTransport(t)
     .includes('페가수스')
 }
 
-function isHangarGarage(garage)
+function isHangarFloorGarage(garage)
 {
   const garageName = String(garage?.garageName || '').trim()
 
-  return garageName.includes('격납고')
+  return garageName === '격납고 격납층'
+}
+
+function isHangarStorageGarage(garage)
+{
+  const garageName = String(garage?.garageName || '').trim()
+
+  return garageName === '격납고 저장소'
+}
+
+function isHangarVinewoodGarage(garage)
+{
+  const garageName = String(garage?.garageName || '').trim()
+
+  return garageName === '격납고 바인우드 클럽 보관소'
+}
+
+function isHangarRelatedGarage(garage)
+{
+  return isHangarFloorGarage(garage)
+    || isHangarStorageGarage(garage)
+    || isHangarVinewoodGarage(garage)
 }
 
 function selectTransport(t)
@@ -786,7 +841,7 @@ async function updateOwnedTransport()
   emit('update', {
     ownedId: ownedId,
     storageType: storageType,
-    garageId: storageType === 'GARAGE' || storageType === 'HANGAR' ? selectedGarageId.value : null,
+    garageId: storageType === 'GARAGE' ? selectedGarageId.value : null,
     slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
     remark: remark.value,
     imageUrl: imageUrl,
@@ -822,7 +877,7 @@ async function createOwnedTransport()
   emit('created', {
     modelId: Number(modelId),
     storageType: storageType,
-    garageId: storageType === 'GARAGE' || storageType === 'HANGAR' ? selectedGarageId.value : null,
+    garageId: storageType === 'GARAGE'? selectedGarageId.value : null,
     slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
     remark: remark.value,
     imageUrl: imageUrl,
@@ -839,7 +894,7 @@ function validateGarageSlot()
     return true
   }
 
-  if (isHangarGarage(selectedGarage.value)) {
+  if (isHangarRelatedGarage(selectedGarage.value)) {
     return hasGarage
   }
 
@@ -862,8 +917,16 @@ function getStorageType()
     return 'PEGASUS'
   }
 
-  if (isHangarGarage(selectedGarage.value)) {
+  if (isHangarFloorGarage(selectedGarage.value)) {
     return 'HANGAR'
+  }
+
+  if (isHangarStorageGarage(selectedGarage.value)) {
+    return 'HANGAR_STORAGE'
+  }
+
+  if (isHangarVinewoodGarage(selectedGarage.value)) {
+    return 'HANGAR_VINEWOOD'
   }
 
   if (selectedGarageId.value) {

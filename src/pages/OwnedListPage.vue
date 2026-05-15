@@ -195,7 +195,9 @@
                             (row.type === 'slot' && !row.isEmpty) ||
                             row.type === 'unassigned' ||
                             row.type === 'pegasus' ||
-                            row.type === 'hangar'
+                            row.type === 'hangar' ||
+                            row.type === 'hangarStorage' ||
+                            row.type === 'hangarVinewood'
                           )
                             ? 'hover:bg-neutral-700/40 transition cursor-pointer'
                             : '',
@@ -245,7 +247,7 @@
 
                                 <!-- 격납고 사용량 -->
                                 <span
-                                  v-if="String(row.garage || '').includes('격납고')"
+                                  v-if="row.garage === '격납고 격납층'"
                                   class="text-[11px] text-neutral-400 tabular-nums"
                                 >
                                   <template v-if="hangarUsage.small > 0">
@@ -291,7 +293,9 @@
                         <template v-else-if="row && (
                           row.type === 'unassigned' ||
                           row.type === 'pegasus' ||
-                          row.type === 'hangar'
+                          row.type === 'hangar' ||
+                          row.type === 'hangarStorage' ||
+                          row.type === 'hangarVinewood'
                         )">
                           <td :class="[tdBaseClass, getRowHighlightClass(row)]">-</td>
                           <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
@@ -657,15 +661,31 @@ const slotRows = computed(() => {
       description: garage.description ?? null
     })
 
-    // 격납고는 일반 슬롯 구조 대신 리스트형으로 표시
-    const isHangarGarage = String(garageName || '').includes('격납고')
+    if (collapsedGarageIds.value.has(garageId)) {
+      return
+    }
 
-    if (isHangarGarage) {
+    // 격납고 격납층은 일반 슬롯 구조 대신 리스트형으로 표시
+    const isHangarFloorGarage = garageName === '격납고 격납층'
+
+    if (isHangarFloorGarage) {
       result.push(...hangarRows.value)
       return
     }
 
-    if (collapsedGarageIds.value.has(garageId)) {
+    // 격납고 저장소는 슬롯 없이 리스트형으로 표시
+    const isHangarStorageGarage = garageName === '격납고 저장소'
+
+    if (isHangarStorageGarage) {
+      result.push(...hangarStorageRows.value)
+      return
+    }
+
+    // 격납고 바인우드 클럽 보관소는 슬롯 없이 리스트형으로 표시
+    const isHangarVinewoodGarage = garageName === '격납고 바인우드 클럽 보관소'
+
+    if (isHangarVinewoodGarage) {
+      result.push(...hangarVinewoodRows.value)
       return
     }
 
@@ -758,6 +778,30 @@ const hangarRows = computed(() => {
     .map((row) => ({
       ...row,
       type: 'hangar'
+    }))
+})
+
+// 격납고 저장소 행 목록
+const hangarStorageRows = computed(() => {
+  return rows.value
+    .filter((row) => {
+      return row.storageType === 'HANGAR_STORAGE'
+    })
+    .map((row) => ({
+      ...row,
+      type: 'hangarStorage'
+    }))
+})
+
+// 격납고 바인우드 클럽 보관소 행 목록
+const hangarVinewoodRows = computed(() => {
+  return rows.value
+    .filter((row) => {
+      return row.storageType === 'HANGAR_VINEWOOD'
+    })
+    .map((row) => ({
+      ...row,
+      type: 'hangarVinewood'
     }))
 })
 
@@ -997,6 +1041,16 @@ function moveToSearchResult(row)
   applySearchResult(row)
 }
 
+// 차고명 기준 차고 ID 조회
+function findGarageIdByName(garageName)
+{
+  const matched = garageList.value.find((garage) => {
+    return garage.garageName === garageName
+  })
+
+  return matched?.garageId ?? null
+}
+
 // 검색 결과를 화면 상태(차고/선택/상세패널)에 반영
 function applySearchResult(row)
 {
@@ -1004,6 +1058,18 @@ function applySearchResult(row)
     selectedGarageIds.value = ['pegasus']
   } else if (row.storageType === 'UNASSIGNED' || (!row.storageType && !row.garageId)) {
     selectedGarageIds.value = ['unassigned']
+  } else if (row.storageType === 'HANGAR') {
+    const garageId = findGarageIdByName('격납고 격납층')
+
+    selectedGarageIds.value = garageId ? [String(garageId)] : []
+  } else if (row.storageType === 'HANGAR_STORAGE') {
+    const garageId = findGarageIdByName('격납고 저장소')
+
+    selectedGarageIds.value = garageId ? [String(garageId)] : []
+  } else if (row.storageType === 'HANGAR_VINEWOOD') {
+    const garageId = findGarageIdByName('격납고 바인우드 클럽 보관소')
+
+    selectedGarageIds.value = garageId ? [String(garageId)] : []
   } else {
     selectedGarageIds.value = [String(row.garageId)]
 
@@ -1178,16 +1244,29 @@ function handleRowClick(row)
 // 행이 드래그 가능한지 여부
 function canDragRow(row)
 {
-  return !!row &&
-        row.type === 'slot' &&
-        !row.isEmpty &&
-        row.storageType !== 'HANGAR'
+  if (!row) {
+    return false
+  }
+
+  if (row.type === 'hangar') {
+    return true
+  }
+
+  return row.type === 'slot' && !row.isEmpty
 }
 
 // 행이 드롭 가능한지 여부
 function canDropToRow(row)
 {
-  return !!row && row.type === 'slot'
+  if (!row) {
+    return false
+  }
+
+  if (draggingRow.value?.type === 'hangar') {
+    return row.type === 'hangar'
+  }
+
+  return row.type === 'slot'
 }
 
 // 차고ID-슬롯번호 조합 키 생성
@@ -1195,6 +1274,10 @@ function getSlotKey(row)
 {
   if (!row) {
     return ''
+  }
+
+  if (row.type === 'hangar') {
+    return `hangar-${row.id}`
   }
 
   return `${row.garageId}-${row.slot}`
@@ -1221,6 +1304,14 @@ function getRowHighlightKey(row)
 
   if (row.type === 'hangar') {
     return `hangar-${row.id}`
+  }
+
+  if (row.type === 'hangarStorage') {
+    return `hangar-storage-${row.id}`
+  }
+
+  if (row.type === 'hangarVinewood') {
+    return `hangar-vinewood-${row.id}`
   }
 
   return ''
@@ -1260,6 +1351,7 @@ function handleDragStart(row)
   }
 
   draggingRow.value = {
+    type: row.type,
     ownedId: row.id,
     garageId: row.garageId,
     slotNo: row.slot
@@ -1485,6 +1577,13 @@ async function handleDrop(row)
   }
 
   const source = draggingRow.value
+
+  // 격납층 내부 순서 변경
+  if (source.type === 'hangar') {
+    await handleHangarDrop(source, row)
+    return
+  }
+
   const targetGarageId = row.garageId
   const targetSlotNo = row.slot
 
@@ -1526,6 +1625,61 @@ async function handleDrop(row)
     draggingRow.value = null      // 드래그 상태 초기화
     activeDropSlotKey.value = ''  // 드롭 타겟 하이라이트 초기화
     dropLoading.value = false     // 드롭 로딩 상태 초기화
+  }
+}
+
+// 격납층 내부 드래그 순서 변경 처리
+async function handleHangarDrop(source, target)
+{
+  if (!target || target.type !== 'hangar') {
+    draggingRow.value = null
+    activeDropSlotKey.value = ''
+    return
+  }
+
+  if (Number(source.ownedId) === Number(target.id)) {
+    draggingRow.value = null
+    activeDropSlotKey.value = ''
+    return
+  }
+
+  try {
+    dropLoading.value = true
+
+    const currentList = [...hangarRows.value]
+
+    const sourceIndex = currentList.findIndex((item) => {
+      return Number(item.id) === Number(source.ownedId)
+    })
+
+    const targetIndex = currentList.findIndex((item) => {
+      return Number(item.id) === Number(target.id)
+    })
+
+    if (sourceIndex < 0 || targetIndex < 0) {
+      return
+    }
+
+    const moved = currentList.splice(sourceIndex, 1)[0]
+    currentList.splice(targetIndex, 0, moved)
+
+    const payload = currentList.map((item, index) => {
+      return {
+        ownedId: item.id,
+        hangarSortOrder: index + 1
+      }
+    })
+
+    await http.patch('/owned-transports/hangar/order', payload)
+
+    showToast('격납층 순서 변경 완료')
+    await load()
+  } catch (err) {
+    handleWriteFail('격납층 순서 변경 실패', err)
+  } finally {
+    draggingRow.value = null
+    activeDropSlotKey.value = ''
+    dropLoading.value = false
   }
 }
 
