@@ -364,7 +364,7 @@
                       </button>
                     </th>
 
-                    <th class="px-3 py-2 text-left w-[200px] border-b border-r border-neutral-700">
+                    <th class="px-3 py-2 text-left w-[250px] border-b border-r border-neutral-700">
                       <button
                         type="button"
                         class="flex items-center gap-1 font-medium hover:text-white transition"
@@ -410,7 +410,7 @@
                       </button>
                     </th>
 
-                    <th class="px-3 py-2 text-left w-[120px] border-b border-r border-neutral-700">
+                    <th class="px-3 py-2 text-left w-[100px] border-b border-r border-neutral-700">
                       <button
                         type="button"
                         class="flex items-center gap-1 font-medium hover:text-white transition"
