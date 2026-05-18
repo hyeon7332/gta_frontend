@@ -57,9 +57,22 @@
                           hover:bg-neutral-100"
                     @click="selectTransport(t)"
                   >
-                    <span class="truncate">
-                      {{ getTransportDisplayText(t) }}
-                    </span>
+                    <div class="flex items-center gap-1.5 min-w-0">
+                      <span class="truncate text-neutral-900">
+                        {{ getTransportDisplayText(t) }}
+                      </span>
+
+                      <span
+                        v-for="badge in format.formatFeatureBadges(t.features)"
+                        :key="badge"
+                        class="shrink-0 relative top-[1px] px-2 py-[2px]
+                              rounded-md border border-neutral-300
+                              bg-neutral-100 text-[11px]
+                              text-neutral-700 whitespace-nowrap"
+                      >
+                        {{ badge }}
+                      </span>
+                    </div>
 
                     <span
                       v-if="isPegasusTransport(t)"
@@ -74,14 +87,26 @@
 
             <!-- 수정 모드 -->
             <template v-else>
+              <div
+                class="w-full h-10 px-3 rounded-md border border-neutral-300
+                      bg-neutral-100 text-sm flex items-center
+                      gap-1.5 min-w-0"
+              >
+                <span class="truncate text-neutral-900">
+                  {{ `${initialRow?.manufacturer ?? ''} ${initialRow?.name ?? ''}` }}
+                </span>
 
-              <input
-                type="text"
-                class="w-full h-10 px-3 rounded-md border border-neutral-300 bg-neutral-100 text-sm"
-                :value="`${initialRow?.manufacturer ?? ''} ${initialRow?.name ?? ''}`"
-                readonly
-              />
-
+                <span
+                  v-for="badge in format.formatFeatureBadges(initialRow?.features)"
+                  :key="badge"
+                  class="shrink-0 relative top-[1px] px-2 py-[2px]
+                        rounded-md border border-neutral-300
+                        bg-white text-[11px]
+                        text-neutral-700 whitespace-nowrap"
+                >
+                  {{ badge }}
+                </span>
+              </div>
             </template>
 
           </div>
@@ -222,7 +247,7 @@
             <div class="relative h-[260px] rounded-md border border-neutral-700 bg-neutral-800/40 overflow-hidden">
               <img
                 v-if="!removeImageYn && (previewUrl || props.initialRow?.imageUrl)"
-                :src="previewUrl || resolveImageUrl(props.initialRow?.imageUrl)"
+                :src="previewUrl || format.resolveImageUrl(props.initialRow?.imageUrl)"
                 class="w-full h-full object-cover"
               />
 
@@ -329,7 +354,7 @@
 import { ref, computed, watch, onUnmounted } from 'vue'
 import { X, Trash2 } from 'lucide-vue-next'
 import { http } from '@/api/http'
-import { resolveImageUrl } from '@/utils/format'
+import * as format from '@/utils/format'
 
 const props = defineProps({
   open: Boolean,

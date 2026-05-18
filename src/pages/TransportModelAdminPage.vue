@@ -453,8 +453,23 @@
                         {{ displayValue(row.manufacturer) }}
                       </td>
 
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">
-                        {{ displayValue(row.name) }}
+                      <td class="px-3 py-2 text-left border-b border-neutral-700">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                          <span class="truncate">
+                            {{ displayValue(row.name) }}
+                          </span>
+
+                          <span
+                            v-for="badge in format.formatFeatureBadges(row.features)"
+                            :key="badge"
+                            class="shrink-0 relative top-[1px] px-2 py-[2px]
+                                  rounded-md border border-neutral-700/70
+                                  bg-neutral-800/60 text-[11px]
+                                  text-neutral-200 whitespace-nowrap"
+                          >
+                            {{ badge }}
+                          </span>
+                        </div>
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">
