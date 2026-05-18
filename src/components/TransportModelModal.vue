@@ -256,7 +256,6 @@
 <script setup>
 import { reactive, watch, onMounted, onBeforeUnmount, ref, computed } from 'vue'
 import { http } from '@/api/http'
-import '@/assets/css/modal-form.css'
 
 const props = defineProps({
   open: {

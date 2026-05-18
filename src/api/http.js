@@ -36,8 +36,9 @@ http.interceptors.response.use(
       localStorage.removeItem('loginId')
       localStorage.removeItem('userId')
       localStorage.removeItem('userRole')
+      localStorage.removeItem('nickname')
 
-      window.location.href = '/login'
+      window.location.href = '/#/login'
     }
 
     return Promise.reject(error)

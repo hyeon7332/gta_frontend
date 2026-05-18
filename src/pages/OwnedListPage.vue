@@ -300,22 +300,32 @@
                           <td :class="[tdBaseClass, getRowHighlightClass(row)]">-</td>
                           <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
                           <td :class="[tdBaseClass, getRowHighlightClass(row)]">
-                            <div class="flex items-baseline gap-1.5 min-w-0">
-                              <span class="truncate">
-                                {{ row.name }}
-                              </span>
+                            <div class="flex items-center justify-between gap-2 min-w-0">
+                              <div class="flex items-baseline gap-1.5 min-w-0">
+                                <span class="truncate">
+                                  {{ row.name }}
+                                </span>
+
+                                <span
+                                  v-for="badge in formatFeatureBadges(row.features)"
+                                  :key="badge"
+                                  :class="[
+                                    'shrink-0 text-[11px]',
+                                    row.type === 'unassigned'
+                                      ? 'relative top-[1px] px-2 py-[2px] rounded-md border border-neutral-700/70 bg-neutral-800/60 text-neutral-200 whitespace-nowrap'
+                                      : 'text-neutral-300'
+                                  ]"
+                                >
+                                  {{ badge }}
+                                </span>
+                              </div>
 
                               <span
-                                v-for="badge in formatFeatureBadges(row.features)"
-                                :key="badge"
-                                :class="[
-                                  'shrink-0 text-[11px]',
-                                  row.type === 'unassigned'
-                                    ? 'relative top-[1px] px-2 py-[2px] rounded-md border border-neutral-700/70 bg-neutral-800/60 text-neutral-200 whitespace-nowrap'
-                                    : 'text-neutral-300'
-                                ]"
+                                v-if="!row.imageUrl"
+                                class="shrink-0 text-[12px] opacity-70"
+                                title="이미지 없음"
                               >
-                                {{ badge }}
+                                📷❌
                               </span>
                             </div>
                           </td>
@@ -355,17 +365,27 @@
                           </td>
                           <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
                           <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 align-middle', getRowHighlightClass(row)]">
-                            <div class="flex items-center gap-1.5 min-w-0">
-                              <span class="truncate">
-                                {{ row.name }}
-                              </span>
+                            <div class="flex items-center justify-between gap-2 min-w-0">
+                              <div class="flex items-center gap-1.5 min-w-0">
+                                <span class="truncate">
+                                  {{ row.name }}
+                                </span>
+
+                                <span
+                                  v-for="badge in formatFeatureBadges(row.features)"
+                                  :key="badge"
+                                  class="shrink-0 relative top-[1px] px-2 py-[2px] rounded-md border border-neutral-700/70 bg-neutral-800/60 text-[11px] text-neutral-200 whitespace-nowrap"
+                                >
+                                  {{ badge }}
+                                </span>
+                              </div>
 
                               <span
-                                v-for="badge in formatFeatureBadges(row.features)"
-                                :key="badge"
-                                class="shrink-0 relative top-[1px] px-2 py-[2px] rounded-md border border-neutral-700/70 bg-neutral-800/60 text-[11px] text-neutral-200 whitespace-nowrap"
+                                v-if="!row.isEmpty && !row.imageUrl"
+                                class="shrink-0 text-[12px] opacity-70"
+                                title="이미지 없음"
                               >
-                                {{ badge }}
+                                📷❌
                               </span>
                             </div>
                           </td>
@@ -508,12 +528,7 @@ import GarageSettingModal from '@/components/GarageSettingModal.vue'
 import Toast from '@/components/Toast.vue'
 import OwnedTransportDetailPanel from '@/components/OwnedTransportDetailPanel.vue'
 import OwnedTransportSearchResultModal from '@/components/OwnedTransportSearchResultModal.vue'
-import {
-  extractList,
-  normalizeOwnedTransport,
-  normalizeGarage,
-  normalizeTransportModel
-} from '@/utils/transportDataMapper'
+import * as transportDataMapper from '@/utils/transportDataMapper'
 import { formatFeatureBadges } from '@/utils/format'
 
 // 보유 이동수단 목록 데이터
@@ -1171,18 +1186,6 @@ function openEdit(row)
   showModal.value = true
 }
 
-// 행 하이라이트 적용
-function highlightRow(row)
-{
-  const key = getRowHighlightKey(row)
-
-  if (!key) {
-    return
-  }
-
-  activeRowKey.value = key
-}
-
 // 슬롯 더블클릭 동작 처리
 function handleSlotDoubleClick(row)
 {
@@ -1481,10 +1484,10 @@ async function load()
 {
   try {
     const res = await http.get('/owned-transports')
-    const list = extractList(res.data)
+    const list = transportDataMapper.extractList(res.data)
 
     rows.value = list.map((item) => {
-      return normalizeOwnedTransport(item)
+      return transportDataMapper.normalizeOwnedTransport(item)
     })
   } catch (err) {
     handleLoadFail('목록 조회 실패:', rows, [], err)
@@ -1499,10 +1502,10 @@ async function loadGarages(preserveCollapsedState = false)
 
     const res = await http.get('/garages')
     const data = res.data
-    const list = extractList(data)
+    const list = transportDataMapper.extractList(data)
 
     garageList.value = list.map((item) => {
-      return normalizeGarage(item)
+      return transportDataMapper.normalizeGarage(item)
     })
 
     if (preserveCollapsedState) {
@@ -1544,10 +1547,10 @@ async function loadTransportModels()
   try {
     const res = await http.get('/transport-models/options')
     const data = res.data
-    const list = extractList(data)
+    const list = transportDataMapper.extractList(data)
 
     transportList.value = list.map((item) => {
-      return normalizeTransportModel(item)
+      return transportDataMapper.normalizeTransportModel(item)
     })
   } catch (err) {
     handleLoadFail('이동수단 목록 조회 실패:', transportList, [], err)
