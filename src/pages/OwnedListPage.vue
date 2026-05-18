@@ -247,7 +247,7 @@
 
                                 <!-- 격납고 사용량 -->
                                 <span
-                                  v-if="row.garage === '격납고 격납층'"
+                                  v-if="row.garage === getHangarGarageName('HANGAR')"
                                   class="text-[11px] text-neutral-400 tabular-nums"
                                 >
                                   <template v-if="hangarUsage.small > 0">
@@ -600,6 +600,13 @@ const selectedGarageSettingRow = ref(null)
 // 테이블 셀 기본 스타일
 const tdBaseClass = 'px-3 py-2 border-b border-neutral-700'
 
+// 격납고 특수 차고명 상수
+const HANGAR_GARAGE_NAMES = Object.freeze({
+  HANGAR: '격납고 격납층',
+  HANGAR_STORAGE: '격납고 저장소',
+  HANGAR_VINEWOOD: '격납고 바인우드 클럽 보관소'
+})
+
 // 토스트 상태 및 타입
 const toast = ref({ open: false, text: '', type: 'success' })
 
@@ -681,7 +688,7 @@ const slotRows = computed(() => {
     }
 
     // 격납고 격납층은 일반 슬롯 구조 대신 리스트형으로 표시
-    const isHangarFloorGarage = garageName === '격납고 격납층'
+    const isHangarFloorGarage = garageName === getHangarGarageName('HANGAR')
 
     if (isHangarFloorGarage) {
       result.push(...hangarRows.value)
@@ -689,7 +696,7 @@ const slotRows = computed(() => {
     }
 
     // 격납고 저장소는 슬롯 없이 리스트형으로 표시
-    const isHangarStorageGarage = garageName === '격납고 저장소'
+    const isHangarStorageGarage = garageName === getHangarGarageName('HANGAR_STORAGE')
 
     if (isHangarStorageGarage) {
       result.push(...hangarStorageRows.value)
@@ -697,7 +704,7 @@ const slotRows = computed(() => {
     }
 
     // 격납고 바인우드 클럽 보관소는 슬롯 없이 리스트형으로 표시
-    const isHangarVinewoodGarage = garageName === '격납고 바인우드 클럽 보관소'
+    const isHangarVinewoodGarage = garageName === getHangarGarageName('HANGAR_VINEWOOD')
 
     if (isHangarVinewoodGarage) {
       result.push(...hangarVinewoodRows.value)
@@ -1056,6 +1063,12 @@ function moveToSearchResult(row)
   applySearchResult(row)
 }
 
+// storageType 기준 차고명 반환
+function getHangarGarageName(storageType)
+{
+  return HANGAR_GARAGE_NAMES[storageType] ?? ''
+}
+
 // 차고명 기준 차고 ID 조회
 function findGarageIdByName(garageName)
 {
@@ -1066,6 +1079,19 @@ function findGarageIdByName(garageName)
   return matched?.garageId ?? null
 }
 
+// 특정 차고 펼침 처리
+function expandGarage(garageId)
+{
+  if (!garageId) {
+    return
+  }
+
+  const next = new Set(collapsedGarageIds.value)
+  next.delete(garageId)
+
+  collapsedGarageIds.value = next
+}
+
 // 검색 결과를 화면 상태(차고/선택/상세패널)에 반영
 function applySearchResult(row)
 {
@@ -1074,17 +1100,26 @@ function applySearchResult(row)
   } else if (row.storageType === 'UNASSIGNED' || (!row.storageType && !row.garageId)) {
     selectedGarageIds.value = ['unassigned']
   } else if (row.storageType === 'HANGAR') {
-    const garageId = findGarageIdByName('격납고 격납층')
+    const garageId = findGarageIdByName(
+      getHangarGarageName('HANGAR')
+    )
 
     selectedGarageIds.value = garageId ? [String(garageId)] : []
+    expandGarage(garageId)
   } else if (row.storageType === 'HANGAR_STORAGE') {
-    const garageId = findGarageIdByName('격납고 저장소')
+    const garageId = findGarageIdByName(
+      getHangarGarageName('HANGAR_STORAGE')
+    )
 
     selectedGarageIds.value = garageId ? [String(garageId)] : []
+    expandGarage(garageId)
   } else if (row.storageType === 'HANGAR_VINEWOOD') {
-    const garageId = findGarageIdByName('격납고 바인우드 클럽 보관소')
+    const garageId = findGarageIdByName(
+      getHangarGarageName('HANGAR_VINEWOOD')
+    )
 
     selectedGarageIds.value = garageId ? [String(garageId)] : []
+    expandGarage(garageId)
   } else {
     selectedGarageIds.value = [String(row.garageId)]
 
@@ -1695,8 +1730,6 @@ async function handleHangarDrop(source, target)
 // 보유 이동수단 등록 요청 처리
 async function handleCreated(payload)
 {
-  console.log('등록 payload:', payload)
-
   try {
     await http.post('/owned-transports', payload)
     await handleOwnedTransportSuccess('등록 완료')
@@ -1754,10 +1787,22 @@ async function handleOwnedTransportSuccess(successMessage)
     })
 
     if (refreshedRow) {
-      selectedDetailRow.value = refreshedRow
-      showDetailPanel.value = true
+      const refreshedDisplayRow = displayRows.value.find((row) => {
+        return row && Number(row.id) === Number(selectedId)
+      })
+
+      if (refreshedDisplayRow) {
+        selectedDetailRow.value = refreshedDisplayRow
+        activeRowKey.value = getRowHighlightKey(refreshedDisplayRow)
+        showDetailPanel.value = true
+      } else {
+        selectedDetailRow.value = null
+        activeRowKey.value = ''
+        showDetailPanel.value = false
+      }
     } else {
       selectedDetailRow.value = null
+      activeRowKey.value = ''
       showDetailPanel.value = false
     }
   }
