@@ -99,13 +99,12 @@
 
           <div>
             <label class="block mb-1 text-sm text-neutral-300">랩 타임</label>
-
-            <div class="flex items-center gap-2">
+            <div class="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-2 w-full">
               <input
                 v-model="lapTimeMinutes"
                 type="number"
                 min="0"
-                class="input-style w-[90px]"
+                class="input-style w-full"
                 placeholder="min"
               />
 
@@ -116,7 +115,7 @@
                 type="number"
                 min="0"
                 max="59"
-                class="input-style w-[90px]"
+                class="input-style w-full"
                 placeholder="sec"
               />
 
@@ -127,7 +126,7 @@
                 type="number"
                 min="0"
                 max="999"
-                class="input-style w-[110px]"
+                class="input-style w-full"
                 placeholder="ms"
               />
             </div>

@@ -394,7 +394,7 @@
                         class="flex items-center gap-1 font-medium hover:text-white transition"
                         @click="toggleSort('lapTime')"
                       >
-                        랩타임
+                        랩 타임
                         <span class="text-[11px] text-neutral-400">{{ getSortMark('lapTime') }}</span>
                       </button>
                     </th>
