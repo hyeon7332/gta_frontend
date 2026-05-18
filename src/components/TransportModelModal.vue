@@ -134,7 +134,7 @@
 
           <div>
             <label class="block mb-1 text-sm text-neutral-300">최고속도</label>
-            <input v-model="form.topSpeed" type="number" step="0.01" class="input-style" />
+            <input ref="topSpeedInputRef" v-model="form.topSpeed" type="number" step="0.01" class="input-style" />
           </div>
 
           <div>
@@ -296,6 +296,7 @@ const form = reactive({
 const lapTimeMinutes = ref('')
 const lapTimeSeconds = ref('')
 const lapTimeMillis = ref('')
+const topSpeedInputRef = ref(null)
 
 const showUpgradeLocationDropdown = ref(false)
 const showSourceDropdown = ref(false)
@@ -587,6 +588,16 @@ async function handleSave()
   if (Number.isNaN(lapTimeMs)) {
     alert('랩 타임은 min / sec / ms 형식으로 입력하세요.')
     return
+  }
+
+  if (form.topSpeed !== '') {
+    const topSpeed = Number(form.topSpeed)
+
+    if (!Number.isFinite(topSpeed) || topSpeed > 9999.99) {
+      alert('최고속도는 9999.99 이하로 입력해주세요.')
+      topSpeedInputRef.value?.focus()
+      return
+    }
   }
   
   try {
