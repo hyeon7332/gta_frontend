@@ -1357,7 +1357,10 @@ function handleDragStart(row)
     type: row.type,
     ownedId: row.id,
     garageId: row.garageId,
-    slotNo: row.slot
+    slotNo: row.slot,
+    remark: row.remark,
+    imageUrl: row.imageUrl,
+    decal: row.decal
   }
 }
 
@@ -1607,7 +1610,10 @@ async function handleDrop(row)
       await http.patch(`/owned-transports/${source.ownedId}`, {
         storageType: 'GARAGE',
         garageId: targetGarageId,
-        slotNo: targetSlotNo
+        slotNo: targetSlotNo,
+        remark: source.remark,
+        imageUrl: source.imageUrl,
+        decal: source.decal
       })
 
       showToast('슬롯 이동 완료')
