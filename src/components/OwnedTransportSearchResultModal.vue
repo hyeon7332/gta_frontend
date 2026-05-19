@@ -5,7 +5,7 @@
   >
     <div
       class="max-h-[620px] bg-neutral-900 border border-neutral-700 rounded-lg shadow-xl overflow-hidden"
-      style="width: 520px;"
+      style="width: 620px;"
     >
       <!-- header -->
       <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-700">
@@ -45,7 +45,7 @@
                 </div>
               </div>
 
-              <div class="shrink-0 w-[140px] text-right text-[12px] text-neutral-400 truncate">
+              <div class="shrink-0 w-[180px] text-right text-[12px] text-neutral-400 truncate">
                 {{ getLocationLabel(row) }}
               </div>
             </div>
