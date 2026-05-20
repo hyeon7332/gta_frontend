@@ -124,8 +124,33 @@
             />
           </div>
 
+          <!-- 획득 여부 -->
+          <div>
+            <div class="text-xs text-neutral-400 mb-1">획득 여부</div>
+
+            <div class="h-10 flex items-center gap-4 px-3 rounded-md border border-neutral-600 bg-neutral-800/60">
+              <label class="flex items-center gap-2 text-sm text-neutral-200">
+                <input
+                  v-model="acquiredYn"
+                  type="radio"
+                  value="Y"
+                />
+                <span>획득</span>
+              </label>
+
+              <label class="flex items-center gap-2 text-sm text-neutral-200">
+                <input
+                  v-model="acquiredYn"
+                  type="radio"
+                  value="N"
+                />
+                <span>미획득</span>
+              </label>
+            </div>
+          </div>
+
           <!-- 비고 -->
-          <div class="col-span-2">
+          <div>
             <div class="text-xs text-neutral-400 mb-1">비고</div>
 
             <input
@@ -402,6 +427,7 @@ const garageText = ref('')
 const slotNoText = ref('')
 const remark = ref('')
 const decal = ref('')
+const acquiredYn = ref('Y')
 const imageFile = ref(null)
 const previewUrl = ref('')
 
@@ -494,6 +520,7 @@ function resetCreateState()
 
   remark.value = ''
   decal.value = ''
+  acquiredYn.value = 'Y'
 
   resetGarageState()
 }
@@ -553,6 +580,7 @@ function setFormValue(row)
 {
   remark.value = row?.remark || ''
   decal.value = row?.decal || ''
+  acquiredYn.value = row?.acquiredYn || 'Y'
 }
 
 function setGarageValue(garage)
@@ -870,7 +898,8 @@ async function updateOwnedTransport()
     slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
     remark: remark.value,
     imageUrl: imageUrl,
-    decal: decal.value
+    decal: decal.value,
+    acquiredYn: acquiredYn.value
   })
 }
 
@@ -906,7 +935,8 @@ async function createOwnedTransport()
     slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
     remark: remark.value,
     imageUrl: imageUrl,
-    decal: decal.value
+    decal: decal.value,
+    acquiredYn: acquiredYn.value
   })
 }
 

@@ -44,6 +44,7 @@ export function normalizeOwnedTransport(x)
     features: x.features ?? '',
     imageUrl: x.imageUrl ?? x.image_url ?? null,
     decal: x.decal ?? '',
+    acquiredYn: x.acquiredYn ?? x.acquired_yn ?? 'Y',
   }
 }
 

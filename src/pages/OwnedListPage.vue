@@ -336,6 +336,13 @@
                                 {{ row.remark || '-' }}
                               </span>
 
+                              <span
+                                v-if="row.acquiredYn === 'N'"
+                                class="shrink-0 px-2 py-[2px] rounded-md border border-red-500/40 bg-red-900/20 text-[11px] text-red-300 whitespace-nowrap"
+                              >
+                                미획득
+                              </span>
+
                               <button
                                 type="button"
                                 class="shrink-0 p-1 rounded hover:bg-neutral-600/40 transition"
@@ -394,6 +401,13 @@
                             <div class="flex items-center justify-between gap-2 min-w-0">
                               <span class="block truncate">
                                 {{ row.remark || '-' }}
+                              </span>
+
+                              <span
+                                v-if="row.acquiredYn === 'N'"
+                                class="shrink-0 px-2 py-[2px] rounded-md border border-red-500/40 bg-red-900/20 text-[11px] text-red-300 whitespace-nowrap"
+                              >
+                                미획득
                               </span>
 
                               <button
