@@ -2,28 +2,29 @@
   <teleport to="body">
     <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center">
 
-      <!-- dim -->
+      <!-- 배경 딤 처리 -->
       <div class="absolute inset-0 bg-black/60"></div>
 
+      <!-- 모달 박스 -->
       <div
         ref="modalBoxRef"
         class="relative w-[620px] max-h-[90vh] bg-neutral-900 border border-neutral-700 rounded-lg shadow-xl overflow-hidden flex flex-col"
       >
-        <!-- header -->
+        <!-- 모달 헤더 -->
         <div class="px-4 py-3 border-b border-neutral-700">
           <div class="text-[15px] font-semibold text-neutral-100">
             {{ isEditMode ? '보유 이동수단 수정' : '보유 이동수단 등록' }}
           </div>
         </div>
 
-        <!-- body -->
+        <!-- 모달 본문 -->
         <div class="grid grid-cols-2 gap-4 p-4 overflow-y-auto scroll-dark flex-1 min-h-0">
 
-          <!-- 이동수단 -->
+          <!-- 이동수단 선택 영역 -->
           <div>
             <div class="text-xs text-neutral-400 mb-1">이동수단</div>
 
-            <!-- 등록 모드 -->
+            <!-- 등록 모드: 이동수단 검색/선택 -->
             <template v-if="!isEditMode">
 
               <div class="relative min-w-0" ref="transportWrapRef">
@@ -85,7 +86,7 @@
               </div>
             </template>
 
-            <!-- 수정 모드 -->
+            <!-- 수정 모드: 이동수단명 표시 전용 -->
             <template v-else>
               <div
                 class="w-full h-10 px-3 rounded-md border border-neutral-300
@@ -108,7 +109,6 @@
                 </span>
               </div>
             </template>
-
           </div>
 
           <!-- 상징 -->
@@ -265,7 +265,7 @@
             </div>
           </div>
 
-          <!-- 이미지 -->
+          <!-- 이미지 업로드 / 미리보기 -->
           <div class="col-span-2">
             <div class="text-xs text-neutral-400 mb-1">이미지</div>
 
@@ -310,9 +310,8 @@
 
         </div>
 
-        <!-- buttons -->
+        <!-- 모달 하단 버튼 영역 -->
         <div class="flex justify-end gap-2 px-4 py-3 border-t border-neutral-700 bg-neutral-900/80">
-
           <button
             class="h-8 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
             @click="closeModal"
@@ -334,13 +333,13 @@
           >
             {{ isEditMode ? '수정' : '등록' }}
           </button>
-
         </div>
 
       </div>
     </div>
   </teleport>
 
+  <!-- 삭제 확인 모달 -->
   <teleport to="body">
     <div v-if="showDeleteConfirm" class="fixed inset-0 z-[60] flex items-center justify-center">
       <div class="absolute inset-0 bg-black/50"></div>
@@ -380,7 +379,9 @@ import { ref, computed, watch, onUnmounted } from 'vue'
 import { X, Trash2 } from 'lucide-vue-next'
 import { http } from '@/api/http'
 import * as format from '@/utils/format'
+import * as transportDataMapper from '@/utils/transportDataMapper'
 
+// 모달 입력 데이터
 const props = defineProps({
   open: Boolean,
   mode: String,
@@ -389,6 +390,7 @@ const props = defineProps({
   garageList: Array
 })
 
+// 부모 이벤트 emit
 const emit = defineEmits([
   'update:open',
   'created',
@@ -396,44 +398,87 @@ const emit = defineEmits([
   'delete'
 ])
 
+// 수정 모드 여부
 const isEditMode = computed(() => props.mode === 'edit')
 
+// 선택된 이동수단
 const selectedTransport = ref(null)
+
+// 이동수단 검색 입력값
 const transportDisplay = ref('')
+
+// 이동수단 드롭다운 표시 여부
 const showTransportDropdown = ref(false)
 
+// 선택된 차고 ID
 const selectedGarageId = ref('')
+
+// 선택된 슬롯 번호
 const slotNo = ref('')
 
+// 선택된 차고 정보
+const selectedGarage = ref(null)
+
+// 사용중 슬롯 목록
+const occupiedSlotList = ref([])
+
+// 현재 수정중 슬롯 번호
+const currentSlotNo = ref(null)
+
+// 차고 입력값
+const garageText = ref('')
+
+// 슬롯 입력값
+const slotNoText = ref('')
+
+// 차고 검색어
+const garageQuery = ref('')
+
+// 슬롯 검색어
+const slotQuery = ref('')
+
+// 차고 드롭다운 표시 여부
+const showGarageDropdown = ref(false)
+
+// 슬롯 드롭다운 표시 여부
+const showSlotDropdown = ref(false)
+
+// 비고
+const remark = ref('')
+
+// 상징
+const decal = ref('')
+
+// 획득 여부
+const acquiredYn = ref('Y')
+
+// 업로드 이미지 파일
+const imageFile = ref(null)
+
+// 이미지 미리보기 URL
+const previewUrl = ref('')
+
+// 이미지 삭제 여부
+const removeImageYn = ref(false)
+
+// 삭제 확인 모달 표시 여부
+const showDeleteConfirm = ref(false)
+
+// 모달 박스
 const modalBoxRef = ref(null)
+
+// 이동수단 영역
 const transportWrapRef = ref(null)
 
+// 차고 영역
 const garageWrapRef = ref(null)
 const garageInputRef = ref(null)
+
+// 슬롯 영역
 const slotWrapRef = ref(null)
 const slotInputRef = ref(null)
 
-const showGarageDropdown = ref(false)
-const showSlotDropdown = ref(false)
-
-const garageQuery = ref('')
-const slotQuery = ref('')
-
-const selectedGarage = ref(null)
-const occupiedSlotList = ref([])
-const currentSlotNo = ref(null)
-
-const garageText = ref('')
-const slotNoText = ref('')
-const remark = ref('')
-const decal = ref('')
-const acquiredYn = ref('Y')
-const imageFile = ref(null)
-const previewUrl = ref('')
-
-const showDeleteConfirm = ref(false)
-const removeImageYn = ref(false)
-
+// 모달 열림/닫힘 상태 처리
 watch(() => props.open, async (v) => {
   if (v) {
     await initModalState()
@@ -445,6 +490,109 @@ watch(() => props.open, async (v) => {
   removeModalEvents()
 })
 
+// 이동수단 검색 결과
+const filteredTransportList = computed(() => {
+  const kw = transportDisplay.value.toLowerCase()
+
+  return props.transportList.filter((t) => {
+    const name = getTransportDisplayText(t).toLowerCase()
+
+    return name.includes(kw)
+  })
+})
+
+// 차고 검색 결과
+const filteredGarageList = computed(() => {
+  const kwRaw = String(garageQuery.value || '').trim().toLowerCase()
+
+  if (kwRaw === '') {
+    return Array.isArray(props.garageList) ? props.garageList : []
+  }
+
+  const tokens = kwRaw.split(/\s+/).filter(Boolean)
+
+  return (Array.isArray(props.garageList) ? props.garageList : []).filter((g) => {
+    const garageName = String(g?.garageName || '').toLowerCase()
+    const type = String(g?.type || '').toLowerCase()
+    const hay = `${garageName} ${type}`
+
+    return tokens.every((tok) => {
+      return hay.includes(tok)
+    })
+  })
+})
+
+// 페가수스 선택 여부
+const isPegasusSelected = computed(() => {
+  return isPegasusTransport(selectedTransport.value)
+})
+
+// 슬롯 활성화 여부
+const isSlotEnabled = computed(() => {
+  if (isEditMode.value && props.initialRow?.storageType === 'PEGASUS') {
+    return false
+  }
+
+  if (isPegasusSelected.value) {
+    return false
+  }
+
+  if (isHangarRelatedGarage(selectedGarage.value)) {
+    return false
+  }
+
+  return !!selectedGarage.value
+})
+
+// 차고 비활성화 여부
+const isGarageDisabled = computed(() => {
+  if (!isEditMode.value) {
+    return isPegasusSelected.value
+  }
+
+  return props.initialRow?.storageType === 'PEGASUS'
+})
+
+// 슬롯 옵션 목록
+const slotOptions = computed(() => {
+  const g = selectedGarage.value
+
+  if (!g) {
+    return []
+  }
+
+  const cap = Number(g.slotCount)
+
+  if (!Number.isFinite(cap) || cap <= 0) {
+    return []
+  }
+
+  const occupiedSet = new Set(
+    (Array.isArray(occupiedSlotList.value) ? occupiedSlotList.value : [])
+      .map((v) => {
+        return Number(v)
+      })
+      .filter((n) => {
+        return Number.isFinite(n)
+      })
+      .filter((n) => {
+        return n !== Number(currentSlotNo.value)
+      })
+  )
+
+  const list = []
+
+  for (let i = 1; i <= cap; i++) {
+    list.push({
+      no: i,
+      occupied: occupiedSet.has(i)
+    })
+  }
+
+  return list
+})
+
+// 모달 상태 초기화
 async function initModalState()
 {
   resetImageState()
@@ -459,6 +607,7 @@ async function initModalState()
   resetDropdownState()
 }
 
+// 수정 모드 초기화
 async function initEditMode()
 {
   const row = props.initialRow
@@ -492,6 +641,7 @@ async function initEditMode()
   setFormValue(row)
 }
 
+// 등록 모드 초기화
 async function initCreateMode()
 {
   resetCreateState()
@@ -513,6 +663,7 @@ async function initCreateMode()
   }
 }
 
+// 등록 상태 초기화
 function resetCreateState()
 {
   selectedTransport.value = null
@@ -525,6 +676,7 @@ function resetCreateState()
   resetGarageState()
 }
 
+// 이미지 상태 초기화
 function resetImageState()
 {
   imageFile.value = null
@@ -532,6 +684,7 @@ function resetImageState()
   removeImageYn.value = false
 }
 
+// 드롭다운 상태 초기화
 function resetDropdownState()
 {
   showTransportDropdown.value = false
@@ -540,6 +693,7 @@ function resetDropdownState()
   showDeleteConfirm.value = false
 }
 
+// 차고 상태 초기화
 function resetGarageState()
 {
   selectedGarage.value = null
@@ -550,6 +704,7 @@ function resetGarageState()
   resetSlotState()
 }
 
+// 슬롯 상태 초기화
 function resetSlotState()
 {
   slotNo.value = ''
@@ -559,6 +714,7 @@ function resetSlotState()
   occupiedSlotList.value = []
 }
 
+// 페가수스 상태 세팅
 function setPegasusGarageState()
 {
   selectedGarage.value = null
@@ -576,6 +732,7 @@ function setPegasusGarageState()
   showSlotDropdown.value = false
 }
 
+// 입력값 세팅
 function setFormValue(row)
 {
   remark.value = row?.remark || ''
@@ -583,6 +740,7 @@ function setFormValue(row)
   acquiredYn.value = row?.acquiredYn || 'Y'
 }
 
+// 차고값 세팅
 function setGarageValue(garage)
 {
   selectedGarage.value = garage
@@ -591,6 +749,7 @@ function setGarageValue(garage)
   garageQuery.value = ''
 }
 
+// 슬롯값 세팅
 function setSlotValue(slot)
 {
   if (Number.isFinite(slot) && slot > 0) {
@@ -605,6 +764,7 @@ function setSlotValue(slot)
   currentSlotNo.value = null
 }
 
+// 현재 슬롯 번호 반환
 function getCurrentSlot(row)
 {
   if (!row?.slot || row?.slot === '-') {
@@ -662,129 +822,7 @@ function findGarageByStorageType(storageType)
   return null
 }
 
-function addModalEvents()
-{
-  document.addEventListener('keydown', onDocKeyDown)
-  document.addEventListener('mousedown', onDocMouseDownCapture, true)
-}
-
-function removeModalEvents()
-{
-  document.removeEventListener('keydown', onDocKeyDown)
-  document.removeEventListener('mousedown', onDocMouseDownCapture, true)
-}
-
-function closeModal()
-{
-  emit('update:open', false)
-}
-
-function openTransportDropdown()
-{
-  showTransportDropdown.value = true
-}
-
-function onTransportInput(e)
-{
-  transportDisplay.value = e.target.value
-}
-
-const filteredTransportList = computed(() => {
-  const kw = transportDisplay.value.toLowerCase()
-
-  return props.transportList.filter((t) => {
-    const name = getTransportDisplayText(t).toLowerCase()
-
-    return name.includes(kw)
-  })
-})
-
-const filteredGarageList = computed(() => {
-  const kwRaw = String(garageQuery.value || '').trim().toLowerCase()
-
-  if (kwRaw === '') {
-    return Array.isArray(props.garageList) ? props.garageList : []
-  }
-
-  const tokens = kwRaw.split(/\s+/).filter(Boolean)
-
-  return (Array.isArray(props.garageList) ? props.garageList : []).filter((g) => {
-    const garageName = String(g?.garageName || '').toLowerCase()
-    const type = String(g?.type || '').toLowerCase()
-    const hay = `${garageName} ${type}`
-
-    return tokens.every((tok) => {
-      return hay.includes(tok)
-    })
-  })
-})
-
-const isPegasusSelected = computed(() => {
-  return isPegasusTransport(selectedTransport.value)
-})
-
-const isSlotEnabled = computed(() => {
-  if (isEditMode.value && props.initialRow?.storageType === 'PEGASUS') {
-    return false
-  }
-
-  if (isPegasusSelected.value) {
-    return false
-  }
-
-  if (isHangarRelatedGarage(selectedGarage.value)) {
-    return false
-  }
-
-  return !!selectedGarage.value
-})
-
-const isGarageDisabled = computed(() => {
-  if (!isEditMode.value) {
-    return isPegasusSelected.value
-  }
-
-  return props.initialRow?.storageType === 'PEGASUS'
-})
-
-const slotOptions = computed(() => {
-  const g = selectedGarage.value
-
-  if (!g) {
-    return []
-  }
-
-  const cap = Number(g.slotCount)
-
-  if (!Number.isFinite(cap) || cap <= 0) {
-    return []
-  }
-
-  const occupiedSet = new Set(
-    (Array.isArray(occupiedSlotList.value) ? occupiedSlotList.value : [])
-      .map((v) => {
-        return Number(v)
-      })
-      .filter((n) => {
-        return Number.isFinite(n)
-      })
-      .filter((n) => {
-        return n !== Number(currentSlotNo.value)
-      })
-  )
-
-  const list = []
-
-  for (let i = 1; i <= cap; i++) {
-    list.push({
-      no: i,
-      occupied: occupiedSet.has(i)
-    })
-  }
-
-  return list
-})
-
+// 이동수단 표시명 생성
 function getTransportDisplayText(t)
 {
   const manufacturer = String(t?.manufacturer || '').trim()
@@ -797,6 +835,7 @@ function getTransportDisplayText(t)
   return `${manufacturer} ${name}`.trim()
 }
 
+// 페가수스 이동수단 여부
 function isPegasusTransport(t)
 {
   const features = String(t?.features || '').trim()
@@ -813,34 +852,7 @@ function isPegasusTransport(t)
     .includes('페가수스')
 }
 
-function isHangarFloorGarage(garage)
-{
-  const garageName = String(garage?.garageName || '').trim()
-
-  return garageName === '격납고 격납층'
-}
-
-function isHangarStorageGarage(garage)
-{
-  const garageName = String(garage?.garageName || '').trim()
-
-  return garageName === '격납고 저장소'
-}
-
-function isHangarVinewoodGarage(garage)
-{
-  const garageName = String(garage?.garageName || '').trim()
-
-  return garageName === '격납고 바인우드 클럽 보관소'
-}
-
-function isHangarRelatedGarage(garage)
-{
-  return isHangarFloorGarage(garage)
-    || isHangarStorageGarage(garage)
-    || isHangarVinewoodGarage(garage)
-}
-
+// 이동수단 선택 처리
 function selectTransport(t)
 {
   selectedTransport.value = t
@@ -862,6 +874,207 @@ function selectTransport(t)
   resetGarageState()
 }
 
+// 이동수단 검색 입력 처리
+function onTransportInput(e)
+{
+  transportDisplay.value = e.target.value
+}
+
+// 이동수단 드롭다운 열기
+function openTransportDropdown()
+{
+  showTransportDropdown.value = true
+}
+
+// 이동수단 선택 초기화
+function clearTransport()
+{
+  selectedTransport.value = null
+  transportDisplay.value = ''
+
+  decal.value = ''
+}
+
+// 격납층 여부
+function isHangarFloorGarage(garage)
+{
+  const garageName = String(garage?.garageName || '').trim()
+
+  return garageName === '격납고 격납층'
+}
+
+// 격납고 저장소 여부
+function isHangarStorageGarage(garage)
+{
+  const garageName = String(garage?.garageName || '').trim()
+
+  return garageName === '격납고 저장소'
+}
+
+// 바인우드 보관소 여부
+function isHangarVinewoodGarage(garage)
+{
+  const garageName = String(garage?.garageName || '').trim()
+
+  return garageName === '격납고 바인우드 클럽 보관소'
+}
+
+// 격납고 관련 차고 여부
+function isHangarRelatedGarage(garage)
+{
+  return isHangarFloorGarage(garage)
+    || isHangarStorageGarage(garage)
+    || isHangarVinewoodGarage(garage)
+}
+
+// 점유 슬롯 조회
+async function loadOccupiedSlots(garageId)
+{
+  if (!garageId) {
+    occupiedSlotList.value = []
+    return
+  }
+
+  const requestedGarageId = Number(garageId)
+
+  try {
+    const res = await http.get(`/garages/${garageId}/occupied-slots`)
+    const data = res.data
+    const list = transportDataMapper.extractList(data)
+
+    if (Number(selectedGarageId.value) !== requestedGarageId) {
+      return
+    }
+
+    occupiedSlotList.value = list
+      .map((v) => {
+        return Number(v)
+      })
+      .filter((n) => {
+        return Number.isFinite(n)
+      })
+      .sort((a, b) => {
+        return a - b
+      })
+  } catch (err) {
+    console.error('점유 슬롯 조회 실패:', err)
+
+    if (Number(selectedGarageId.value) !== requestedGarageId) {
+      return
+    }
+
+    occupiedSlotList.value = []
+  }
+}
+
+// 차고 드롭다운 열기
+function openGarageDropdown()
+{
+  if (isGarageDisabled.value) {
+    return
+  }
+
+  showTransportDropdown.value = false
+  showSlotDropdown.value = false
+
+  garageQuery.value = garageText.value
+  showGarageDropdown.value = true
+}
+
+// 차고 드롭다운 닫기
+function closeGarageDropdown()
+{
+  showGarageDropdown.value = false
+  garageQuery.value = ''
+
+  const el = garageInputRef.value
+
+  if (el && typeof el.blur === 'function') {
+    el.blur()
+  }
+}
+
+// 차고 입력 처리
+function onGarageInput(e)
+{
+  if (isGarageDisabled.value) {
+    return
+  }
+
+  const value = String(e?.target?.value || '')
+
+  garageText.value = value
+  garageQuery.value = value
+
+  selectedGarage.value = null
+  selectedGarageId.value = ''
+  occupiedSlotList.value = []
+
+  slotNo.value = ''
+  slotNoText.value = ''
+  slotQuery.value = ''
+  currentSlotNo.value = null
+
+  showSlotDropdown.value = false
+  showGarageDropdown.value = true
+}
+
+// 차고 선택
+async function selectGarage(g)
+{
+  setGarageValue(g)
+
+  slotNo.value = ''
+  slotNoText.value = ''
+  slotQuery.value = ''
+  currentSlotNo.value = null
+
+  await loadOccupiedSlots(g.garageId)
+  closeGarageDropdown()
+}
+
+// 차고 선택 초기화
+function clearGarage()
+{
+  resetGarageState()
+}
+
+// 슬롯 드롭다운 열기
+function openSlotDropdown()
+{
+  if (!isSlotEnabled.value) {
+    return
+  }
+
+  showTransportDropdown.value = false
+  showGarageDropdown.value = false
+
+  slotQuery.value = ''
+  showSlotDropdown.value = true
+}
+
+// 슬롯 드롭다운 닫기
+function closeSlotDropdown()
+{
+  showSlotDropdown.value = false
+  slotQuery.value = ''
+
+  const el = slotInputRef.value
+
+  if (el && typeof el.blur === 'function') {
+    el.blur()
+  }
+}
+
+// 슬롯 선택
+function selectSlot(no)
+{
+  slotNo.value = String(no)
+  slotNoText.value = String(no)
+  closeSlotDropdown()
+}
+
+// 등록/수정 저장 처리
 async function handleSubmit()
 {
   if (isEditMode.value) {
@@ -872,6 +1085,60 @@ async function handleSubmit()
   await createOwnedTransport()
 }
 
+// 차고/슬롯 입력 검증
+function validateGarageSlot()
+{
+  const hasGarage = !!selectedGarageId.value
+  const hasSlot = !!slotNo.value
+
+  if (isPegasusSelected.value) {
+    return true
+  }
+
+  if (isHangarRelatedGarage(selectedGarage.value)) {
+    return hasGarage
+  }
+
+  if (hasGarage && !hasSlot) {
+    alert('차고를 선택한 경우 슬롯은 필수입니다.')
+    return false
+  }
+
+  if (!hasGarage && hasSlot) {
+    alert('차고를 선택하지 않으면 슬롯을 선택할 수 없습니다.')
+    return false
+  }
+
+  return true
+}
+
+// storageType 반환
+function getStorageType()
+{
+  if (isPegasusSelected.value) {
+    return 'PEGASUS'
+  }
+
+  if (isHangarFloorGarage(selectedGarage.value)) {
+    return 'HANGAR'
+  }
+
+  if (isHangarStorageGarage(selectedGarage.value)) {
+    return 'HANGAR_STORAGE'
+  }
+
+  if (isHangarVinewoodGarage(selectedGarage.value)) {
+    return 'HANGAR_VINEWOOD'
+  }
+
+  if (selectedGarageId.value) {
+    return 'GARAGE'
+  }
+
+  return 'UNASSIGNED'
+}
+
+// 보유 이동수단 수정
 async function updateOwnedTransport()
 {
   const ownedId = props.initialRow?.id
@@ -903,6 +1170,7 @@ async function updateOwnedTransport()
   })
 }
 
+// 보유 이동수단 등록
 async function createOwnedTransport()
 {
   if (!selectedTransport.value) {
@@ -940,62 +1208,13 @@ async function createOwnedTransport()
   })
 }
 
-function validateGarageSlot()
-{
-  const hasGarage = !!selectedGarageId.value
-  const hasSlot = !!slotNo.value
-
-  if (isPegasusSelected.value) {
-    return true
-  }
-
-  if (isHangarRelatedGarage(selectedGarage.value)) {
-    return hasGarage
-  }
-
-  if (hasGarage && !hasSlot) {
-    alert('차고를 선택한 경우 슬롯은 필수입니다.')
-    return false
-  }
-
-  if (!hasGarage && hasSlot) {
-    alert('차고를 선택하지 않으면 슬롯을 선택할 수 없습니다.')
-    return false
-  }
-
-  return true
-}
-
-function getStorageType()
-{
-  if (isPegasusSelected.value) {
-    return 'PEGASUS'
-  }
-
-  if (isHangarFloorGarage(selectedGarage.value)) {
-    return 'HANGAR'
-  }
-
-  if (isHangarStorageGarage(selectedGarage.value)) {
-    return 'HANGAR_STORAGE'
-  }
-
-  if (isHangarVinewoodGarage(selectedGarage.value)) {
-    return 'HANGAR_VINEWOOD'
-  }
-
-  if (selectedGarageId.value) {
-    return 'GARAGE'
-  }
-
-  return 'UNASSIGNED'
-}
-
+// 삭제 버튼 클릭 처리
 function handleDeleteClick()
 {
   showDeleteConfirm.value = true
 }
 
+// 삭제 확정 처리
 function confirmDelete()
 {
   const id = props.initialRow?.id
@@ -1009,6 +1228,90 @@ function confirmDelete()
   emit('delete', id)
 }
 
+// 모달 닫기
+function closeModal()
+{
+  emit('update:open', false)
+}
+
+// 이미지 선택 처리
+function handleImageChange(e)
+{
+  const file = e.target.files?.[0]
+
+  if (!file) {
+    return
+  }
+
+  const allowedTypes = ['image/png', 'image/jpeg']
+
+  if (!allowedTypes.includes(file.type)) {
+    alert('PNG 또는 JPEG 이미지만 업로드 가능합니다.')
+
+    e.target.value = ''
+    imageFile.value = null
+    previewUrl.value = ''
+    return
+  }
+
+  const maxSize = 2 * 1024 * 1024
+
+  if (file.size > maxSize) {
+    alert('이미지는 2MB 이하만 업로드 가능합니다.')
+
+    e.target.value = ''
+    imageFile.value = null
+    previewUrl.value = ''
+    return
+  }
+
+  imageFile.value = file
+  previewUrl.value = URL.createObjectURL(file)
+  removeImageYn.value = false
+}
+
+// 이미지 업로드 처리
+async function uploadImageIfNeeded()
+{
+  if (!imageFile.value) {
+    return null
+  }
+
+  const formData = new FormData()
+  formData.append('file', imageFile.value)
+
+  const res = await http.post('/uploads/owned-transport', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+
+  return res.data?.imageUrl || null
+}
+
+// 이미지 제거 처리
+function removeImage()
+{
+  imageFile.value = null
+  previewUrl.value = ''
+  removeImageYn.value = true
+}
+
+// 모달 전역 이벤트 등록
+function addModalEvents()
+{
+  document.addEventListener('keydown', onDocKeyDown)
+  document.addEventListener('mousedown', onDocMouseDownCapture, true)
+}
+
+// 모달 전역 이벤트 제거
+function removeModalEvents()
+{
+  document.removeEventListener('keydown', onDocKeyDown)
+  document.removeEventListener('mousedown', onDocMouseDownCapture, true)
+}
+
+// ESC 키 처리
 function onDocKeyDown(e)
 {
   if (!props.open) {
@@ -1045,6 +1348,7 @@ function onDocKeyDown(e)
   closeModal()
 }
 
+// 외부 클릭 처리
 function onDocMouseDownCapture(e)
 {
   if (!props.open) {
@@ -1060,6 +1364,7 @@ function onDocMouseDownCapture(e)
   closeSlotDropdownIfOutside(e)
 }
 
+// 이동수단 드롭다운 외부 클릭 처리
 function closeTransportDropdownIfOutside(e)
 {
   if (!showTransportDropdown.value) {
@@ -1073,6 +1378,7 @@ function closeTransportDropdownIfOutside(e)
   }
 }
 
+// 차고 드롭다운 외부 클릭 처리
 function closeGarageDropdownIfOutside(e)
 {
   if (!showGarageDropdown.value) {
@@ -1087,6 +1393,7 @@ function closeGarageDropdownIfOutside(e)
   }
 }
 
+// 슬롯 드롭다운 닫기
 function closeSlotDropdownIfOutside(e)
 {
   if (!showSlotDropdown.value) {
@@ -1101,219 +1408,7 @@ function closeSlotDropdownIfOutside(e)
   }
 }
 
-async function loadOccupiedSlots(garageId)
-{
-  if (!garageId) {
-    occupiedSlotList.value = []
-    return
-  }
-
-  const requestedGarageId = Number(garageId)
-
-  try {
-    const res = await http.get(`/garages/${garageId}/occupied-slots`)
-    const data = res.data
-
-    const list =
-      (Array.isArray(data?.items) && data.items) ||
-      (Array.isArray(data?.list) && data.list) ||
-      (Array.isArray(data?.content) && data.content) ||
-      (Array.isArray(data?.data) && data.data) ||
-      (Array.isArray(data) && data) ||
-      []
-
-    if (Number(selectedGarageId.value) !== requestedGarageId) {
-      return
-    }
-
-    occupiedSlotList.value = list
-      .map((v) => {
-        return Number(v)
-      })
-      .filter((n) => {
-        return Number.isFinite(n)
-      })
-      .sort((a, b) => {
-        return a - b
-      })
-  } catch (err) {
-    console.error('점유 슬롯 조회 실패:', err)
-
-    if (Number(selectedGarageId.value) !== requestedGarageId) {
-      return
-    }
-
-    occupiedSlotList.value = []
-  }
-}
-
-function openGarageDropdown()
-{
-  if (isGarageDisabled.value) {
-    return
-  }
-
-  showTransportDropdown.value = false
-  showSlotDropdown.value = false
-
-  garageQuery.value = garageText.value
-  showGarageDropdown.value = true
-}
-
-function closeGarageDropdown()
-{
-  showGarageDropdown.value = false
-  garageQuery.value = ''
-
-  const el = garageInputRef.value
-
-  if (el && typeof el.blur === 'function') {
-    el.blur()
-  }
-}
-
-function onGarageInput(e)
-{
-  if (isGarageDisabled.value) {
-    return
-  }
-
-  const value = String(e?.target?.value || '')
-
-  garageText.value = value
-  garageQuery.value = value
-
-  selectedGarage.value = null
-  selectedGarageId.value = ''
-  occupiedSlotList.value = []
-
-  slotNo.value = ''
-  slotNoText.value = ''
-  slotQuery.value = ''
-  currentSlotNo.value = null
-
-  showSlotDropdown.value = false
-  showGarageDropdown.value = true
-}
-
-async function selectGarage(g)
-{
-  setGarageValue(g)
-
-  slotNo.value = ''
-  slotNoText.value = ''
-  slotQuery.value = ''
-  currentSlotNo.value = null
-
-  await loadOccupiedSlots(g.garageId)
-  closeGarageDropdown()
-}
-
-function openSlotDropdown()
-{
-  if (!isSlotEnabled.value) {
-    return
-  }
-
-  showTransportDropdown.value = false
-  showGarageDropdown.value = false
-
-  slotQuery.value = ''
-  showSlotDropdown.value = true
-}
-
-function closeSlotDropdown()
-{
-  showSlotDropdown.value = false
-  slotQuery.value = ''
-
-  const el = slotInputRef.value
-
-  if (el && typeof el.blur === 'function') {
-    el.blur()
-  }
-}
-
-function selectSlot(no)
-{
-  slotNo.value = String(no)
-  slotNoText.value = String(no)
-  closeSlotDropdown()
-}
-
-function clearTransport()
-{
-  selectedTransport.value = null
-  transportDisplay.value = ''
-
-  decal.value = ''
-}
-
-function clearGarage()
-{
-  resetGarageState()
-}
-
-function handleImageChange(e)
-{
-  const file = e.target.files?.[0]
-
-  if (!file) {
-    return
-  }
-
-  const allowedTypes = ['image/png', 'image/jpeg']
-
-  if (!allowedTypes.includes(file.type)) {
-    alert('PNG 또는 JPEG 이미지만 업로드 가능합니다.')
-
-    e.target.value = ''
-    imageFile.value = null
-    previewUrl.value = ''
-    return
-  }
-
-  const maxSize = 2 * 1024 * 1024
-
-  if (file.size > maxSize) {
-    alert('이미지는 2MB 이하만 업로드 가능합니다.')
-
-    e.target.value = ''
-    imageFile.value = null
-    previewUrl.value = ''
-    return
-  }
-
-  imageFile.value = file
-  previewUrl.value = URL.createObjectURL(file)
-  removeImageYn.value = false
-}
-
-async function uploadImageIfNeeded()
-{
-  if (!imageFile.value) {
-    return null
-  }
-
-  const formData = new FormData()
-  formData.append('file', imageFile.value)
-
-  const res = await http.post('/uploads/owned-transport', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  })
-
-  return res.data?.imageUrl || null
-}
-
-function removeImage()
-{
-  imageFile.value = null
-  previewUrl.value = ''
-  removeImageYn.value = true
-}
-
+// 컴포넌트 종료 시 이벤트 제거
 onUnmounted(() => {
   removeModalEvents()
 })
