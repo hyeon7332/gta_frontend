@@ -1773,7 +1773,8 @@ async function handleUpdate(payload)
       slotNo: payload.slotNo,
       remark: payload.remark,
       imageUrl: payload.imageUrl,
-      decal: payload.decal
+      decal: payload.decal,
+      acquiredYn: payload.acquiredYn
     })
 
     await handleOwnedTransportSuccess('수정 완료')

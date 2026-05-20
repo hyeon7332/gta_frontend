@@ -67,18 +67,6 @@
           </span>
         </div>
 
-        <!-- 획득 여부 -->
-        <div
-          v-if="row?.acquiredYn === 'N'"
-          class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700"
-        >
-          <span class="text-[13px] text-neutral-400">획득 여부</span>
-
-          <span class="inline-flex items-center px-2 py-[2px] rounded-md border border-red-500/40 bg-red-900/20 text-[11px] text-red-300 whitespace-nowrap">
-            미획득
-          </span>
-        </div>
-
         <!-- 상징 -->
         <div
           v-if="row?.decal && row.decal.trim()"
