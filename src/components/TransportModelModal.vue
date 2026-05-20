@@ -4,10 +4,7 @@
       v-if="open"
       class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
     >
-      <div
-        class="absolute inset-0 bg-black/60"
-        @click="handleClose"
-      ></div>
+      <div class="absolute inset-0 bg-black/60"></div>
 
       <div
         class="relative z-10 w-full max-w-[980px] max-h-[90vh]
