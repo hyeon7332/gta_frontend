@@ -644,6 +644,11 @@ const displayRows = computed(() => {
 })
 
 const pageNumbers = computed(() => {
+  const blockSize = 10
+  const currentBlock = Math.floor((page.value - 1) / blockSize)
+  const startPage = currentBlock * blockSize + 1
+  const endPage = Math.min(startPage + blockSize - 1, totalPages.value)
+  
   const pages = []
 
   for (let i = 1; i <= totalPages.value; i++) {
