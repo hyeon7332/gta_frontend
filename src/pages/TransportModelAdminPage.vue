@@ -651,7 +651,7 @@ const pageNumbers = computed(() => {
   
   const pages = []
 
-  for (let i = 1; i <= totalPages.value; i++) {
+  for (let i = startPage; i <= endPage; i++) {
     pages.push(i)
   }
 
