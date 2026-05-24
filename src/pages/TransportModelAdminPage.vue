@@ -514,7 +514,7 @@
                     </template>
 
                     <template v-else>
-                      <td colspan="13" class="h-[40px]"></td>
+                      <td colspan="13" class="h-[40px] border-b border-neutral-700 bg-neutral-800/10"></td>
                     </template>
                   </tr>
                 </tbody>
