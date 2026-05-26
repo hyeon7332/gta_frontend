@@ -310,7 +310,7 @@
                         text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
                   @click="toggleFeatureDropdown"
                 >
-                  <span class="truncate">{{ getMultiFilterLabel('특징', featureFilters) }}</span>
+                  <span class="truncate">{{ featureFilterLabel }}</span>
                   <ChevronDown class="w-4 h-4 text-neutral-400" />
                 </button>
 
@@ -668,6 +668,22 @@ const categoryFilterLabel = computed(() => {
 
 const sourceFilterLabel = computed(() => {
   return getMultiFilterLabel('획득처', sourceFilters.value)
+})
+
+const featureFilterLabel = computed(() => {
+  if (!featureFilters.value || featureFilters.value.length === 0) {
+    return '특징'
+  }
+
+  if (featureFilters.value.length > 1) {
+    return `특징 ${featureFilters.value.length}개`
+  }
+
+  const matched = featureOptions.value.find((option) => {
+    return option.codeValue === featureFilters.value[0]
+  })
+
+  return matched ? matched.codeName : featureFilters.value[0]
 })
 
 async function load()
