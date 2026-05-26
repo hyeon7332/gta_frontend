@@ -79,7 +79,7 @@
                       v-if="isPegasusTransport(t)"
                       class="ml-2 shrink-0 text-[11px] text-amber-600"
                     >
-                      보관 불가
+                      페가수스
                     </span>
                   </button>
                 </div>
@@ -847,14 +847,17 @@ function isPegasusTransport(t)
   return features
     .split(',')
     .map((v) => {
-      return v.trim()
+      return v.trim().toUpperCase()
     })
-    .includes('페가수스')
+    .includes('PEG')
 }
 
 // 이동수단 선택 처리
 function selectTransport(t)
 {
+  console.log(t)
+  console.log(t.features)
+
   selectedTransport.value = t
   transportDisplay.value = getTransportDisplayText(t)
   showTransportDropdown.value = false
