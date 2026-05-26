@@ -441,8 +441,22 @@
                 </thead>
 
                 <tbody class="text-[13px] text-neutral-200 border-b border-neutral-700">
+                  <!-- 검색 결과 없음 -->
+                  <tr v-if="rows.length === 0">
+                    <td
+                      colspan="13"
+                      class="h-[500px] text-center align-middle
+                            text-[14px] text-neutral-500
+                            border-b border-neutral-700"
+                    >
+                      검색 결과가 없습니다.
+                    </td>
+                  </tr>
+
+                  <!-- 데이터 목록 -->
                   <tr
                     v-for="(row, index) in displayRows"
+                    v-else
                     :key="row ? row.id ?? row.transportModelId ?? `${row.manufacturer}-${row.name}-${index}` : `empty-${index}`"
                     :class="row ? `${getRowClass(row)} group transition cursor-pointer` : ''"
                     @click="selectRow(row)"
