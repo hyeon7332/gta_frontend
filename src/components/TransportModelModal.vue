@@ -247,11 +247,14 @@
       </div>
     </div>
   </teleport>
+
+  <GlobalLoading :visible="loading" />
 </template>
 
 <script setup>
 import { reactive, watch, onMounted, onBeforeUnmount, ref, computed } from 'vue'
 import { http } from '@/api/http'
+import GlobalLoading from '@/components/GlobalLoading.vue'
 
 const props = defineProps({
   open: {
@@ -308,6 +311,9 @@ const transportCategoryOptions = ref([])
 const transportSourceOptions = ref([])
 const upgradeLocationOptions = ref([])
 const featureOptions = ref([])
+
+const loading = ref(false)
+let loadingTimer = null
 
 const upgradeLocationLabel = computed(() => {
   if (selectedUpgradeLocations.value.length === 0) {
@@ -596,6 +602,12 @@ async function handleSave()
       return
     }
   }
+
+  clearTimeout(loadingTimer)
+
+  loadingTimer = setTimeout(() => {
+    loading.value = true
+  }, 700)
   
   try {
     const payload = {
@@ -661,6 +673,10 @@ async function handleSave()
       console.error('이동수단 모델 등록 실패:', err)
       alert(message)
     }
+  } finally {
+    clearTimeout(loadingTimer)
+    loadingTimer = null
+    loading.value = false
   }
 }
 
@@ -686,6 +702,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  clearTimeout(loadingTimer)
   window.removeEventListener('keydown', handleEsc)
   document.removeEventListener('click', handleDocumentClick)
 })

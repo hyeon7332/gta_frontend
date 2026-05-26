@@ -597,6 +597,8 @@
     @close="showEdit = false; editTarget = null"
     @saved="load()"
   />
+
+  <GlobalLoading :visible="loading" />
 </template>
 
 <script setup>
@@ -605,6 +607,7 @@ import { Plus, X, RotateCcw, ChevronDown } from 'lucide-vue-next'
 import { http } from '@/api/http'
 import * as format from '@/utils/format'
 import TransportModelModal from '@/components/TransportModelModal.vue'
+import GlobalLoading from '@/components/GlobalLoading.vue'
 
 const rows = ref([])
 const keyword = ref('')
@@ -614,6 +617,8 @@ const showEdit = ref(false)
 const editTarget = ref(null)
 const selectedRow = ref(null)
 const listCardRef = ref(null)
+const loading = ref(false)
+let loadingTimer = null
 
 const manufacturerFilter = ref('')
 const categoryFilters = ref([])
@@ -702,6 +707,12 @@ const featureFilterLabel = computed(() => {
 
 async function load()
 {
+  clearTimeout(loadingTimer)
+
+  loadingTimer = setTimeout(() => {
+    loading.value = true
+  }, 700)
+
   try {
     const res = await http.get('/transport-models', {
       params: {
@@ -748,6 +759,10 @@ async function load()
     total.value = 0
     totalPages.value = 1
     selectedRow.value = null
+  } finally {
+    clearTimeout(loadingTimer)
+    loadingTimer = null
+    loading.value = false
   }
 }
 
@@ -1226,6 +1241,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  clearTimeout(loadingTimer)
   document.removeEventListener('click', handleDocumentClick)
 })
 </script>
