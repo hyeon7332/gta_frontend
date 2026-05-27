@@ -460,20 +460,20 @@
                   </div>
   
                   <div class="flex items-center gap-4 text-[13px] text-neutral-400">
-                    <!-- 미배치 빠른 필터 -->
+                    <!-- 격납고 빠른 필터 -->
                     <div
                       class="flex items-center gap-1 cursor-pointer px-2 py-1 rounded transition"
-                      :class="isActiveSpecialFilter('unassigned')
+                      :class="isActiveSpecialFilter('hangar')
                         ? 'bg-neutral-700/60 text-white'
                         : 'hover:bg-neutral-700/40'"
-                      @click="applySpecialFilter('unassigned')"
+                      @click="applySpecialFilter('hangar')"
                     >
-                      <span>미배치</span>
+                      <span>격납고</span>
                       <span class="font-semibold text-white">
-                        {{ unassignedCount }}
+                        {{ hangarTotalCount }}
                       </span>
                     </div>
-
+                    
                     <!-- 페가수스 빠른 필터 -->
                     <div
                       class="flex items-center gap-1 cursor-pointer px-2 py-1 rounded transition"
@@ -487,8 +487,21 @@
                         {{ pegasusCount }}
                       </span>
                     </div>
-                  </div>
 
+                    <!-- 미배치 빠른 필터 -->
+                    <div
+                      class="flex items-center gap-1 cursor-pointer px-2 py-1 rounded transition"
+                      :class="isActiveSpecialFilter('unassigned')
+                        ? 'bg-neutral-700/60 text-white'
+                        : 'hover:bg-neutral-700/40'"
+                      @click="applySpecialFilter('unassigned')"
+                    >
+                      <span>미배치</span>
+                      <span class="font-semibold text-white">
+                        {{ unassignedCount }}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -688,6 +701,15 @@ const slotRows = computed(() => {
     const displayGarageName = garage.alias ? garage.alias : garage.garageName
     const slotCount = Number(garage.slotCount ?? 0)
 
+    // 격납고 특수 보관 3종은 일반 차고 리스트에서 제외
+    if (
+      garageName === getHangarGarageName('HANGAR') ||
+      garageName === getHangarGarageName('HANGAR_STORAGE') ||
+      garageName === getHangarGarageName('HANGAR_VINEWOOD')
+    ) {
+      return
+    }
+
     result.push({
       id: `garage-header-${garageId}`,
       type: 'garageHeader',
@@ -698,30 +720,6 @@ const slotRows = computed(() => {
     })
 
     if (collapsedGarageIds.value.has(garageId)) {
-      return
-    }
-
-    // 격납고 격납층은 일반 슬롯 구조 대신 리스트형으로 표시
-    const isHangarFloorGarage = garageName === getHangarGarageName('HANGAR')
-
-    if (isHangarFloorGarage) {
-      result.push(...hangarRows.value)
-      return
-    }
-
-    // 격납고 저장소는 슬롯 없이 리스트형으로 표시
-    const isHangarStorageGarage = garageName === getHangarGarageName('HANGAR_STORAGE')
-
-    if (isHangarStorageGarage) {
-      result.push(...hangarStorageRows.value)
-      return
-    }
-
-    // 격납고 바인우드 클럽 보관소는 슬롯 없이 리스트형으로 표시
-    const isHangarVinewoodGarage = garageName === getHangarGarageName('HANGAR_VINEWOOD')
-
-    if (isHangarVinewoodGarage) {
-      result.push(...hangarVinewoodRows.value)
       return
     }
 
@@ -803,6 +801,13 @@ const pegasusRows = computed(() => {
 // 페가수스 건수
 const pegasusCount = computed(() => {
   return pegasusRows.value.length
+})
+
+// 격납고 3종 전체 보관 건수
+const hangarTotalCount = computed(() => {
+  return hangarRows.value.length +
+         hangarStorageRows.value.length +
+         hangarVinewoodRows.value.length
 })
 
 // 격납고 행 목록
@@ -908,6 +913,46 @@ const pegasusDisplayRows = computed(() => {
   ]
 })
 
+// 격납고 3종 표시용 행 목록
+const hangarDisplayRows = computed(() => {
+  const result = []
+
+  // 격납고 격납층 표시
+  if (hangarRows.value.length > 0) {
+    result.push({
+      id: 'hangar-header',
+      type: 'garageHeader',
+      garage: getHangarGarageName('HANGAR')
+    })
+
+    result.push(...hangarRows.value)
+  }
+
+  // 격납고 저장소 표시
+  if (hangarStorageRows.value.length > 0) {
+    result.push({
+      id: 'hangar-storage-header',
+      type: 'garageHeader',
+      garage: getHangarGarageName('HANGAR_STORAGE')
+    })
+
+    result.push(...hangarStorageRows.value)
+  }
+
+  // 격납고 바인우드 클럽 보관소 표시
+  if (hangarVinewoodRows.value.length > 0) {
+    result.push({
+      id: 'hangar-vinewood-header',
+      type: 'garageHeader',
+      garage: getHangarGarageName('HANGAR_VINEWOOD')
+    })
+
+    result.push(...hangarVinewoodRows.value)
+  }
+
+  return result
+})
+
 // 테이블에 최종 표시할 행 목록
 const displayRows = computed(() => {
   if (selectedGarageIds.value.includes('unassigned')) {
@@ -916,6 +961,11 @@ const displayRows = computed(() => {
 
   if (selectedGarageIds.value.includes('pegasus')) {
     return pegasusDisplayRows.value
+  }
+
+  // 격납고 필터 선택 시 격납고 전용 목록 표시
+  if (selectedGarageIds.value.includes('hangar')) {
+    return hangarDisplayRows.value
   }
 
   const minRows = 15
@@ -933,6 +983,7 @@ const garageFilterOptions = computed(() => {
     { garageId: 'all', garageName: '전체' },
     { garageId: 'unassigned', garageName: '미배치' },
     { garageId: 'pegasus', garageName: '페가수스' },
+    { garageId: 'hangar', garageName: '격납고' },
     ...garageList.value.map((garage) => ({
       garageId: String(garage.garageId),
       garageName: garage.alias ? garage.alias : garage.garageName
@@ -1007,7 +1058,7 @@ function toggleGarageFilter(garageId)
   const targetId = String(garageId)
   const exists = selectedGarageIds.value.includes(targetId)
 
-  if (targetId === 'unassigned' || targetId === 'pegasus') {
+  if (targetId === 'unassigned' || targetId === 'pegasus' || targetId === 'hangar') {
     if (exists) {
       selectedGarageIds.value = []
     } else {
@@ -1022,7 +1073,7 @@ function toggleGarageFilter(garageId)
     })
   } else {
     selectedGarageIds.value = selectedGarageIds.value.filter((id) => {
-      return id !== 'unassigned' && id !== 'pegasus'
+      return id !== 'unassigned' && id !== 'pegasus' && id !== 'hangar'
     })
     selectedGarageIds.value = [...selectedGarageIds.value, targetId]
   }
@@ -1868,9 +1919,14 @@ function handleWriteFail(errorMessage, err)
   showToast(finalMessage, 'error')
 }
 
-// 풋터 미배치/페가수스 빠른 필터 적용
+// 풋터 미배치/페가수스/격납고 빠른 필터 적용
 function applySpecialFilter(type)
 {
+  if (type === 'hangar') {
+    selectedGarageIds.value = ['hangar']
+    return
+  }
+
   if (type === 'unassigned') {
     selectedGarageIds.value = ['unassigned']
     return
@@ -1882,7 +1938,7 @@ function applySpecialFilter(type)
   }
 }
 
-// 현재 선택된 특수 필터인지 여부
+// 현재 선택된 특수 보관 필터(미배치/페가수스/격납고) 여부
 function isActiveSpecialFilter(type)
 {
   return selectedGarageIds.value.length === 1 &&
