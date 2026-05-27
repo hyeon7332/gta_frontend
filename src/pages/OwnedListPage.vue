@@ -1409,7 +1409,8 @@ function handleDragStart(row)
     slotNo: row.slot,
     remark: row.remark,
     imageUrl: row.imageUrl,
-    decal: row.decal
+    decal: row.decal,
+    acquiredYn: row.acquiredYn
   }
 }
 
@@ -1662,7 +1663,8 @@ async function handleDrop(row)
         slotNo: targetSlotNo,
         remark: source.remark,
         imageUrl: source.imageUrl,
-        decal: source.decal
+        decal: source.decal,
+        acquiredYn: source.acquiredYn
       })
 
       showToast('슬롯 이동 완료')
