@@ -53,7 +53,7 @@
           </a>
           <!-- 이미지 위 테두리 -->
           <div
-            class="pointer-events-none absolute inset-0 rounded-md border-2 border-white/80"
+            class="pointer-events-none absolute inset-0 rounded-md border-[1px] border-white/80"
           ></div>
         </div>
       </div>
