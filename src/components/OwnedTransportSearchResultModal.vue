@@ -36,8 +36,18 @@
           >
             <div class="flex items-start justify-between gap-3 min-w-0">
               <div class="min-w-0">
-                <div class="text-[13px] text-neutral-100 truncate">
-                  {{ row.manufacturer }} {{ row.name }}
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="text-[13px] text-neutral-100 truncate">
+                    {{ row.manufacturer }} {{ row.name }}
+                  </span>
+
+                  <span
+                    v-for="badge in formatFeatureBadges(row.features)"
+                    :key="badge"
+                    class="shrink-0 relative top-[1px] px-2 py-[2px] rounded-md border border-neutral-700/70 bg-neutral-800/60 text-[11px] text-neutral-200 whitespace-nowrap"
+                  >
+                    {{ badge }}
+                  </span>
                 </div>
 
                 <div class="mt-1 text-[12px] text-neutral-400 truncate">
@@ -87,6 +97,7 @@
 
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { formatFeatureBadges } from '@/utils/format'
 
 const props = defineProps({
   open: Boolean,
