@@ -169,9 +169,9 @@
                     <colgroup>
                       <col class="w-[7%]" />   <!-- 슬롯 -->
                       <col class="w-[17%]" />  <!-- 제조사 -->
-                      <col class="w-[27%]" />  <!-- 모델명 -->
+                      <col class="w-[35%]" />  <!-- 모델명 -->
                       <col class="w-[17%]" />  <!-- 분류 -->
-                      <col class="w-[32%]" />  <!-- 비고 -->
+                      <col class="w-[16%]" />  <!-- 액션 -->
                     </colgroup>
                     <thead>
                       <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap">
@@ -179,7 +179,7 @@
                         <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">제조사</th>
                         <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">모델명</th>
                         <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">분류</th>
-                        <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-neutral-700">비고</th>
+                        <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-neutral-700"></th>
                       </tr>
                     </thead>
   
@@ -327,12 +327,19 @@
                               >
                                 📷❌
                               </span>
+
                             </div>
                           </td>
                           <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.category }}</td>
                           <td :class="[tdBaseClass, getRowHighlightClass(row)]">
-                            <div class="flex items-center justify-between gap-2 min-w-0">
-                              <span class="block min-w-[48px]"></span>
+                            <div class="flex items-center justify-end gap-2 min-w-0">
+                              <!-- 맨션 위치 배지 -->
+                              <span
+                                v-if="getMansionPositionLabel(row)"
+                                class="shrink-0 px-2 py-[2px] rounded-md border border-blue-500/40 bg-blue-900/20 text-[11px] text-blue-300 whitespace-nowrap"
+                              >
+                                {{ getMansionPositionLabel(row) }}
+                              </span>
 
                               <span
                                 v-if="row.acquiredYn === 'N'"
@@ -396,8 +403,14 @@
                           </td>
                           <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.category }}</td>
                           <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 align-middle', getRowHighlightClass(row)]">
-                            <div class="flex items-center justify-between gap-2 min-w-0">
-                              <span class="block min-w-[48px]"></span>
+                            <div class="flex items-center justify-end gap-2 min-w-0">
+                              <!-- 맨션 위치 배지 -->
+                              <span
+                                v-if="getMansionPositionLabel(row)"
+                                class="shrink-0 px-2 py-[2px] rounded-md border border-blue-500/40 bg-blue-900/20 text-[11px] text-blue-300 whitespace-nowrap"
+                              >
+                                {{ getMansionPositionLabel(row) }}
+                              </span>
 
                               <span
                                 v-if="row.acquiredYn === 'N'"
@@ -1457,7 +1470,8 @@ function handleDragStart(row)
     remark: row.remark,
     imageUrl: row.imageUrl,
     decal: row.decal,
-    acquiredYn: row.acquiredYn
+    acquiredYn: row.acquiredYn,
+    mansionPosition: row.mansionPosition
   }
 }
 
@@ -1542,6 +1556,26 @@ function getOfficeSectionLabel(row)
 
   if (slot >= 14 && slot <= 20) {
     return `${officeNo}C`
+  }
+
+  return ''
+}
+
+// 맨션 위치 표시명 반환
+function getMansionPositionLabel(row)
+{
+  const mansionPosition = String(row?.mansionPosition || '').trim()
+
+  if (mansionPosition === 'PODIUM') {
+    return '포디움'
+  }
+
+  if (mansionPosition === 'D1') {
+    return '진입로1'
+  }
+
+  if (mansionPosition === 'D2') {
+    return '진입로2'
   }
 
   return ''
@@ -1711,7 +1745,8 @@ async function handleDrop(row)
         remark: source.remark,
         imageUrl: source.imageUrl,
         decal: source.decal,
-        acquiredYn: source.acquiredYn
+        acquiredYn: source.acquiredYn,
+        mansionPosition: source.mansionPosition
       })
 
       showToast('슬롯 이동 완료')
@@ -1823,7 +1858,8 @@ async function handleUpdate(payload)
       remark: payload.remark,
       imageUrl: payload.imageUrl,
       decal: payload.decal,
-      acquiredYn: payload.acquiredYn
+      acquiredYn: payload.acquiredYn,
+      mansionPosition: payload.mansionPosition
     })
 
     await handleOwnedTransportSuccess('수정 완료')

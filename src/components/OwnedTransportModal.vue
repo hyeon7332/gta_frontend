@@ -252,6 +252,49 @@
             </div>
           </div>
 
+          <!-- 맨션 위치 -->
+          <div class="col-span-2" v-if="showMansionPosition">
+            <div class="text-xs text-neutral-400 mb-1">맨션 위치</div>
+
+            <div class="h-10 flex items-center gap-4 px-3 rounded-md border border-neutral-600 bg-neutral-800/60">
+              <label class="flex items-center gap-2 text-sm text-neutral-200">
+                <input
+                  v-model="mansionPosition"
+                  type="radio"
+                  value=""
+                />
+                <span>없음</span>
+              </label>
+
+              <label class="flex items-center gap-2 text-sm text-neutral-200">
+                <input
+                  v-model="mansionPosition"
+                  type="radio"
+                  value="PODIUM"
+                />
+                <span>포디움</span>
+              </label>
+
+              <label class="flex items-center gap-2 text-sm text-neutral-200">
+                <input
+                  v-model="mansionPosition"
+                  type="radio"
+                  value="D1"
+                />
+                <span>진입로1</span>
+              </label>
+
+              <label class="flex items-center gap-2 text-sm text-neutral-200">
+                <input
+                  v-model="mansionPosition"
+                  type="radio"
+                  value="D2"
+                />
+                <span>진입로2</span>
+              </label>
+            </div>
+          </div>
+
           <!-- 비고 -->
           <div class="col-span-2">
             <div class="text-xs text-neutral-400 mb-1">비고</div>
@@ -452,6 +495,9 @@ const decal = ref('')
 // 획득 여부
 const acquiredYn = ref('Y')
 
+// 맨션 위치
+const mansionPosition = ref('')
+
 // 업로드 이미지 파일
 const imageFile = ref(null)
 
@@ -551,6 +597,11 @@ const isGarageDisabled = computed(() => {
   }
 
   return props.initialRow?.storageType === 'PEGASUS'
+})
+
+// 맨션 위치 선택 가능 여부
+const showMansionPosition = computed(() => {
+  return isMansionGarage(selectedGarage.value)
 })
 
 // 슬롯 옵션 목록
@@ -672,6 +723,7 @@ function resetCreateState()
   remark.value = ''
   decal.value = ''
   acquiredYn.value = 'Y'
+  mansionPosition.value = ''
 
   resetGarageState()
 }
@@ -700,6 +752,7 @@ function resetGarageState()
   selectedGarageId.value = ''
   garageText.value = ''
   garageQuery.value = ''
+  mansionPosition.value = ''
 
   resetSlotState()
 }
@@ -727,6 +780,7 @@ function setPegasusGarageState()
   slotQuery.value = ''
   currentSlotNo.value = null
   occupiedSlotList.value = []
+  mansionPosition.value = ''
 
   showGarageDropdown.value = false
   showSlotDropdown.value = false
@@ -738,6 +792,7 @@ function setFormValue(row)
   remark.value = row?.remark || ''
   decal.value = row?.decal || ''
   acquiredYn.value = row?.acquiredYn || 'Y'
+  mansionPosition.value = row?.mansionPosition || ''
 }
 
 // 차고값 세팅
@@ -894,6 +949,7 @@ function clearTransport()
 {
   selectedTransport.value = null
   transportDisplay.value = ''
+  mansionPosition.value = ''
 
   decal.value = ''
 }
@@ -928,6 +984,16 @@ function isHangarRelatedGarage(garage)
   return isHangarFloorGarage(garage)
     || isHangarStorageGarage(garage)
     || isHangarVinewoodGarage(garage)
+}
+
+// 맨션 차고 여부
+function isMansionGarage(garage)
+{
+  const garageName = String(garage?.garageName || '').trim()
+
+  return garageName === '통바 에스테이트'
+    || garageName === '리치맨 빌라'
+    || garageName === '바인우드 레지던스'
 }
 
 // 점유 슬롯 조회
@@ -1017,6 +1083,7 @@ function onGarageInput(e)
   slotNoText.value = ''
   slotQuery.value = ''
   currentSlotNo.value = null
+  mansionPosition.value = ''
 
   showSlotDropdown.value = false
   showGarageDropdown.value = true
@@ -1026,6 +1093,10 @@ function onGarageInput(e)
 async function selectGarage(g)
 {
   setGarageValue(g)
+
+  if (!isMansionGarage(g)) {
+    mansionPosition.value = ''
+  }
 
   slotNo.value = ''
   slotNoText.value = ''
@@ -1169,7 +1240,8 @@ async function updateOwnedTransport()
     remark: remark.value,
     imageUrl: imageUrl,
     decal: decal.value,
-    acquiredYn: acquiredYn.value
+    acquiredYn: acquiredYn.value,
+    mansionPosition: showMansionPosition.value ? mansionPosition.value : ''
   })
 }
 
@@ -1207,7 +1279,8 @@ async function createOwnedTransport()
     remark: remark.value,
     imageUrl: imageUrl,
     decal: decal.value,
-    acquiredYn: acquiredYn.value
+    acquiredYn: acquiredYn.value,
+    mansionPosition: showMansionPosition.value ? mansionPosition.value : ''
   })
 }
 
