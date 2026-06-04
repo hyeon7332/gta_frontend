@@ -20,11 +20,12 @@
             </span>
           </div>
 
+          <!-- 상징 -->
           <div
-            v-if="row?.remark && row.remark.trim()"
+            v-if="row?.decal && row.decal.trim()"
             class="mt-1 text-[11px] leading-snug text-neutral-400 break-words"
           >
-            {{ row.remark }}
+            {{ row.decal }}
           </div>
         </div>
 
@@ -60,21 +61,21 @@
 
       <div class="scroll-dark border-t border-neutral-700 overflow-y-auto pr-3 min-h-0 flex-1">
 
+        <div
+          v-if="row?.remark && row.remark.trim()"
+          class="px-1 py-3 border-b border-neutral-700"
+        >
+          <div
+            class="text-[13px] text-neutral-300 leading-relaxed whitespace-pre-wrap break-words"
+          >
+            {{ row.remark }}
+          </div>
+        </div>
+
         <div class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700">
           <span class="text-[13px] text-neutral-400">보관위치</span>
           <span class="text-[13px] font-medium text-neutral-100 text-right">
             {{ getStorageDisplayText(row) }}
-          </span>
-        </div>
-
-        <!-- 상징 -->
-        <div
-          v-if="row?.decal && row.decal.trim()"
-          class="flex items-center justify-between gap-4 px-1 py-2 border-b border-neutral-700"
-        >
-          <span class="text-[13px] text-neutral-400">상징</span>
-          <span class="text-[13px] font-medium text-neutral-100 text-right">
-            {{ row.decal }}
           </span>
         </div>
 

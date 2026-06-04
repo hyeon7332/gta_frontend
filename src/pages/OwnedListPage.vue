@@ -332,9 +332,7 @@
                           <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.category }}</td>
                           <td :class="[tdBaseClass, getRowHighlightClass(row)]">
                             <div class="flex items-center justify-between gap-2 min-w-0">
-                              <span class="block truncate">
-                                {{ row.remark || '-' }}
-                              </span>
+                              <span class="block min-w-[48px]"></span>
 
                               <span
                                 v-if="row.acquiredYn === 'N'"
@@ -399,9 +397,7 @@
                           <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.category }}</td>
                           <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 align-middle', getRowHighlightClass(row)]">
                             <div class="flex items-center justify-between gap-2 min-w-0">
-                              <span class="block truncate">
-                                {{ row.remark || '-' }}
-                              </span>
+                              <span class="block min-w-[48px]"></span>
 
                               <span
                                 v-if="row.acquiredYn === 'N'"

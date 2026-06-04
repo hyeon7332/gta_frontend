@@ -21,7 +21,7 @@
         <div class="grid grid-cols-2 gap-4 p-4 overflow-y-auto scroll-dark flex-1 min-h-0">
 
           <!-- 이동수단 선택 영역 -->
-          <div>
+          <div class="col-span-2">
             <div class="text-xs text-neutral-400 mb-1">이동수단</div>
 
             <!-- 등록 모드: 이동수단 검색/선택 -->
@@ -149,19 +149,6 @@
             </div>
           </div>
 
-          <!-- 비고 -->
-          <div>
-            <div class="text-xs text-neutral-400 mb-1">비고</div>
-
-            <input
-              v-model="remark"
-              type="text"
-              maxlength="255"
-              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
-              placeholder="비고 입력"
-            />
-          </div>
-
           <!-- 차고 -->
           <div>
             <div class="text-xs text-neutral-400 mb-1">차고</div>
@@ -263,6 +250,19 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- 비고 -->
+          <div class="col-span-2">
+            <div class="text-xs text-neutral-400 mb-1">비고</div>
+
+            <textarea
+              v-model="remark"
+              maxlength="255"
+              rows="3"
+              class="w-full min-h-[86px] px-3 py-2 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70 resize-none"
+              placeholder="비고 입력"
+            ></textarea>
           </div>
 
           <!-- 이미지 업로드 / 미리보기 -->
