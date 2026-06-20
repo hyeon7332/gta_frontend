@@ -76,12 +76,12 @@
 
               <div
                 v-if="showUpgradeLocationDropdown"
-                class="absolute left-0 right-0 mt-1 bg-neutral-800 border border-neutral-700 rounded-md z-20 p-2 max-h-80 overflow-y-auto"
+                class="absolute left-0 right-0 mt-1 bg-neutral-700 border border-neutral-600 rounded-md z-20 p-2 max-h-80 overflow-y-auto"
               >
                 <label
                   v-for="location in upgradeLocationOptions"
                   :key="location"
-                  class="flex items-center gap-2 px-2 py-1 text-sm text-neutral-200 hover:bg-neutral-700 rounded cursor-pointer"
+                  class="flex items-center gap-2 px-2 py-1 text-sm text-neutral-100 hover:bg-neutral-600 rounded cursor-pointer"
                 >
                   <input
                     type="checkbox"
@@ -164,7 +164,7 @@
                 <label
                   v-for="source in transportSourceOptions"
                   :key="source"
-                  class="flex items-center gap-2 px-2 py-1 text-sm text-neutral-200 hover:bg-neutral-700 rounded cursor-pointer"
+                  class="flex items-center gap-2 px-2 py-1 text-sm text-neutral-100 hover:bg-neutral-600 rounded cursor-pointer"
                 >
                   <input
                     type="checkbox"
@@ -200,12 +200,12 @@
           <div class="col-span-2">
             <label class="block mb-2 text-sm text-neutral-300">특징</label>
 
-            <div class="rounded-md border border-neutral-700 bg-neutral-800/50 p-3">
+            <div class="rounded-md border border-neutral-600 bg-neutral-700/60 p-3">
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-2">
                 <label
                   v-for="option in featureOptions"
                   :key="option.codeValue"
-                  class="flex items-center gap-2 min-w-0 text-sm text-neutral-200 cursor-pointer"
+                  class="flex items-center gap-2 min-w-0 text-sm text-neutral-100 cursor-pointer"
                 >
                   <input
                     type="checkbox"

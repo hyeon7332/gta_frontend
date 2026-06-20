@@ -12,7 +12,7 @@
             </div>
 
             <span
-              v-for="badge in formatFeatureBadges(row?.features)"
+              v-for="badge in format.formatFeatureBadges(row?.features)"
               :key="badge"
               class="relative top-[2px] px-2 py-[2px] rounded-md border border-neutral-700/70 bg-neutral-800/60 text-[11px] text-neutral-200 whitespace-nowrap"
             >
@@ -42,13 +42,13 @@
         <div class="relative aspect-[7/4] rounded-md bg-neutral-800/40 overflow-hidden">
           <a
             v-if="row?.imageUrl"
-            :href="resolveImageUrl(row.imageUrl)"
+            :href="format.resolveImageUrl(row.imageUrl)"
             target="_blank"
             rel="noopener noreferrer"
             class="block w-full h-full"
           >
             <img
-              :src="resolveImageUrl(row.imageUrl)"
+              :src="format.resolveImageUrl(row.imageUrl)"
               class="w-full h-full object-cover cursor-zoom-in"
             />
           </a>
@@ -191,7 +191,7 @@
               </div>
 
               <span class="w-[90px] text-[13px] text-neutral-100 text-right">
-                {{ formatSpeed(row?.topSpeed) }}
+                {{ format.formatSpeed(row?.topSpeed) }}
               </span>
             </div>
           </template>
@@ -208,7 +208,7 @@
         <div class="flex items-center justify-between gap-4 px-1 py-2 border-t border-neutral-700">
           <span class="text-[13px] text-neutral-400">가격</span>
           <span class="text-[13px] font-medium text-neutral-100 text-right">
-            {{ formatCurrencyUSD(row?.price) }}
+            {{ format.formatCurrencyUSD(row?.price) }}
           </span>
         </div>
 
@@ -216,7 +216,7 @@
         <div class="flex items-center justify-between gap-4 px-1 py-2 border-t border-neutral-700">
           <span class="text-[13px] text-neutral-400">출시일</span>
           <span class="text-[13px] font-medium text-neutral-100 text-right">
-            {{ formatDate(row?.releaseDate) }}
+            {{ format.formatDate(row?.releaseDate) }}
           </span>
         </div>
 
@@ -292,24 +292,32 @@
 <script setup>
 import { ref, watch, nextTick, onBeforeUnmount, onMounted } from 'vue'
 import { X } from 'lucide-vue-next'
-import { formatDate, formatCurrencyUSD, formatSpeed, formatFeatureBadges } from '@/utils/format'
 import { http } from '@/api/http'
-import { resolveImageUrl } from '@/utils/format'
+import * as format from '@/utils/format'
 
+// 상세 패널 입력 데이터
 const props = defineProps({
   row: Object
 })
 
-const animatedLapWidth = ref(0)
-const animatedTopSpeedWidth = ref(0)
-const featureOptions = ref([])
-
-let animationTimer = null
-
+// 부모 이벤트 emit
 const emit = defineEmits([
   'close'
 ])
 
+// 랩타임 그래프 너비
+const animatedLapWidth = ref(0)
+
+// 최고속도 그래프 너비
+const animatedTopSpeedWidth = ref(0)
+
+// 특징 코드 목록
+const featureOptions = ref([])
+
+// 그래프 애니메이션 타이머
+let animationTimer = null
+
+// 상세 타이틀 생성
 function getDetailTitle(row)
 {
   if (!row) {
@@ -330,6 +338,7 @@ function getDetailTitle(row)
   return `${manufacturer} ${name}`
 }
 
+// 보관위치 표시 텍스트 생성
 function getStorageDisplayText(row)
 {
   if (!row) {
@@ -354,6 +363,7 @@ function getStorageDisplayText(row)
   return garageName || '-'
 }
 
+// 랩타임 그래프 비율 계산
 function getLapTimePercent(value)
 {
   if (!value) {
@@ -364,6 +374,7 @@ function getLapTimePercent(value)
   return Math.max(0, 100 - (value / max) * 100)
 }
 
+// 최고속도 그래프 비율 계산
 function getTopSpeedPercent(value)
 {
   if (!value) {
@@ -374,6 +385,7 @@ function getTopSpeedPercent(value)
   return Math.min((value / max) * 100, 100)
 }
 
+// 성능 그래프 애니메이션 실행
 async function runBarAnimation()
 {
   if (animationTimer) {
@@ -392,6 +404,7 @@ async function runBarAnimation()
   }, 30)
 }
 
+// 랩타임 포맷 변환
 function formatLapTime(value)
 {
   if (!value) {
@@ -410,6 +423,7 @@ function formatLapTime(value)
   return `${minutes}:${secStr}.${msStr}`
 }
 
+// 순위 강조 클래스 반환
 function getRankClass(rank)
 {
   if (!rank) {
@@ -431,6 +445,7 @@ function getRankClass(rank)
   return 'text-neutral-100 font-medium'
 }
 
+// 특징 코드 목록 조회
 async function loadFeatureCodes()
 {
   try {
@@ -446,6 +461,8 @@ async function loadFeatureCodes()
   }
 }
 
+
+// 특징 코드값을 표시명으로 변환
 function displayFeatureNames(features)
 {
   if (!features || features.trim() === '') {
@@ -469,6 +486,7 @@ function displayFeatureNames(features)
     })
 }
 
+// 선택 차량 변경 시 성능 그래프 재실행
 watch(
   () => props.row,
   () => {
@@ -477,6 +495,7 @@ watch(
   { immediate: true }
 )
 
+// 컴포넌트 종료 시 타이머 제거
 onBeforeUnmount(() => {
   if (animationTimer) {
     clearTimeout(animationTimer)
@@ -484,6 +503,8 @@ onBeforeUnmount(() => {
   }
 })
 
+
+// 컴포넌트 진입 시 특징 코드 조회
 onMounted(() => {
   loadFeatureCodes()
 })
