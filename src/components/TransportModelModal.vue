@@ -76,12 +76,12 @@
 
               <div
                 v-if="showUpgradeLocationDropdown"
-                class="absolute left-0 right-0 mt-1 bg-neutral-700 border border-neutral-600 rounded-md z-20 p-2 max-h-80 overflow-y-auto"
+                class="absolute left-0 right-0 mt-1 bg-[rgba(113,113,122,0.9)] border border-zinc-400 rounded-md z-20 p-2 max-h-80 overflow-y-auto"
               >
                 <label
                   v-for="location in upgradeLocationOptions"
                   :key="location"
-                  class="flex items-center gap-2 px-2 py-1 text-sm text-neutral-100 hover:bg-neutral-600 rounded cursor-pointer"
+                  class="flex items-center gap-2 px-2 py-1 text-sm text-neutral-100 hover:bg-neutral-500 rounded cursor-pointer"
                 >
                   <input
                     type="checkbox"
@@ -159,12 +159,12 @@
 
               <div
                 v-if="showSourceDropdown"
-                class="absolute left-0 right-0 mt-1 bg-neutral-800 border border-neutral-700 rounded-md z-20 p-2 max-h-72 overflow-y-auto"
+                class="absolute left-0 right-0 mt-1 bg-[rgba(113,113,122,0.9)] border border-zinc-400 rounded-md z-20 p-2 max-h-72 overflow-y-auto"
               >
                 <label
                   v-for="source in transportSourceOptions"
                   :key="source"
-                  class="flex items-center gap-2 px-2 py-1 text-sm text-neutral-100 hover:bg-neutral-600 rounded cursor-pointer"
+                  class="flex items-center gap-2 px-2 py-1 text-sm text-neutral-100 hover:bg-neutral-500 rounded cursor-pointer"
                 >
                   <input
                     type="checkbox"

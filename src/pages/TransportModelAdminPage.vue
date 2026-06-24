@@ -1,13 +1,13 @@
 <template>
   <div class="h-full bg-neutral-700">
     <div class="w-full max-w-none px-4 pt-2 pb-4">
-      <div class="bg-neutral-900/40 border border-neutral-700 rounded-lg shadow-lg overflow-hidden">
+      <div class="bg-neutral-600/70 border border-neutral-400 rounded-lg shadow-lg overflow-hidden">
         <div class="p-2">
-          <div ref="listCardRef" class="border border-neutral-700 rounded-md overflow-hidden">
+          <div ref="listCardRef" class="border border-neutral-300 rounded-md overflow-hidden bg-neutral-200/90">
             <!-- toolbar -->
             <div
               class="flex items-center justify-between gap-3 px-3 py-2
-                    bg-neutral-900/30 border-b border-neutral-700"
+                    bg-neutral-300 border-b border-neutral-300"
             >
               <div class="flex items-center gap-2 min-w-0">
                 <div class="relative">
@@ -16,8 +16,8 @@
                     type="text"
                     placeholder="제조사 / 모델명 검색"
                     class="h-8 w-[280px] pr-9 pl-3 rounded-md
-                          bg-neutral-800/60 border border-neutral-600
-                          text-[13px] text-neutral-100 placeholder-neutral-400
+                          bg-neutral-100 border border-neutral-300
+                          text-[13px] text-neutral-800 placeholder-neutral-500
                           outline-none"
                     @keyup.enter="applySearch"
                   />
@@ -40,9 +40,9 @@
                 <button
                   type="button"
                   class="h-8 shrink-0 px-3 rounded-md
-                        bg-neutral-800/60 border border-neutral-600
-                        text-[13px] text-neutral-200
-                        hover:bg-neutral-700 active:bg-neutral-600 transition"
+                        bg-neutral-200/80 border border-neutral-300
+                        text-[13px] text-neutral-800
+                        hover:bg-neutral-300 active:bg-neutral-200 transition"
                   @click="applySearch"
                 >
                   검색
@@ -51,9 +51,9 @@
                 <button
                   type="button"
                   class="h-8 w-8 shrink-0 flex items-center justify-center rounded-md
-                        bg-neutral-800/60 border border-neutral-600
-                        text-neutral-300 hover:text-white
-                        hover:bg-neutral-700 active:bg-neutral-600 transition"
+                        bg-neutral-100 border border-neutral-300
+                        text-neutral-800 hover:text-neutral-700
+                        hover:bg-neutral-200 active:bg-neutral-100 transition"
                   title="검색/정렬 초기화"
                   @click="resetFilters"
                 >
@@ -66,9 +66,9 @@
                   v-if="selectedRow"
                   type="button"
                   class="h-8 shrink-0 px-3 rounded-md
-                        bg-neutral-800/60 border border-neutral-600
-                        text-[13px] text-neutral-200
-                        hover:bg-neutral-700 active:bg-neutral-600 transition"
+                        bg-neutral-100 border border-neutral-300
+                        text-[13px] text-neutral-800
+                        hover:bg-neutral-200 active:bg-neutral-100 transition"
                   @click="openEdit"
                 >
                   수정
@@ -78,9 +78,9 @@
                   v-if="selectedRow"
                   type="button"
                   class="h-8 shrink-0 px-3 rounded-md
-                        bg-neutral-800/60 border border-red-700
-                        text-[13px] text-red-300
-                        hover:bg-red-900/40 active:bg-red-900/60 transition"
+                        bg-red-100 border border-red-300
+                        text-[13px] text-red-700
+                        hover:bg-red-200 active:bg-red-100 transition"
                   @click="openDelete"
                 >
                   삭제
@@ -90,11 +90,11 @@
                   type="button"
                   class="h-8 shrink-0 px-3 flex items-center gap-1
                         rounded-md
-                        bg-neutral-800/60
-                        border border-neutral-600
-                        text-[13px] text-neutral-200
-                        hover:bg-neutral-700
-                        active:bg-neutral-600
+                        bg-neutral-100
+                        border border-neutral-300
+                        text-[13px] text-neutral-800
+                        hover:bg-neutral-200
+                        active:bg-neutral-100
                         transition"
                   @click="openAdd"
                 >
@@ -107,15 +107,15 @@
             <!-- filter bar -->
             <div
               class="flex flex-wrap items-center gap-2 px-3 py-2
-                    bg-neutral-900/20 border-b border-neutral-700"
+                    bg-neutral-300 border-b border-neutral-300"
             >
               <!-- 제조사 -->
               <div class="relative" ref="manufacturerDropdownRef">
                 <button
                   type="button"
                   class="h-8 w-[250px] px-3 rounded-md flex items-center justify-between
-                        bg-neutral-800/60 border border-neutral-600
-                        text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
+                        bg-neutral-100 border border-neutral-300
+                        text-[13px] text-neutral-800 hover:bg-neutral-200 transition"
                   @click="toggleManufacturerDropdown"
                 >
                   <span class="truncate">{{ manufacturerFilterLabel }}</span>
@@ -125,12 +125,12 @@
                 <div
                   v-if="showManufacturerDropdown"
                   class="absolute left-0 top-10 z-20 w-[250px] max-h-[260px] overflow-auto
-                        rounded-md border border-neutral-600 bg-neutral-800 shadow-lg p-1"
+                        rounded-md border border-neutral-300 bg-neutral-200 shadow-lg p-1"
                 >
                   <button
                     type="button"
                     class="w-full flex items-center justify-between px-2 py-2 rounded
-                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                          text-[13px] text-neutral-800 hover:bg-neutral-200/70 transition"
                     @click="selectManufacturer('')"
                   >
                     <span>전체</span>
@@ -142,14 +142,14 @@
                     </span>
                   </button>
 
-                  <div class="mx-2 border-t border-neutral-700"></div>
+                  <div class="mx-2 border-t border-neutral-300"></div>
 
                   <button
                     v-for="item in manufacturerOptions"
                     :key="item"
                     type="button"
                     class="w-full flex items-center justify-between px-2 py-2 rounded
-                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                          text-[13px] text-neutral-800 hover:bg-neutral-200/70 transition"
                     @click="selectManufacturer(item)"
                   >
                     <span class="truncate">{{ item }}</span>
@@ -168,8 +168,8 @@
                 <button
                   type="button"
                   class="h-8 w-[250px] px-3 rounded-md flex items-center justify-between
-                        bg-neutral-800/60 border border-neutral-600
-                        text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
+                        bg-neutral-100 border border-neutral-300
+                        text-[13px] text-neutral-800 hover:bg-neutral-200 transition"
                   @click="toggleCategoryDropdown"
                 >
                   <span class="truncate">{{ categoryFilterLabel }}</span>
@@ -179,24 +179,24 @@
                 <div
                   v-if="showCategoryDropdown"
                   class="absolute left-0 top-10 z-20 w-[250px] max-h-[260px] overflow-auto
-                        rounded-md border border-neutral-600 bg-neutral-800 shadow-lg p-1"
+                        rounded-md border border-neutral-300 bg-neutral-100 shadow-lg p-1"
                 >
                   <button
                     type="button"
                     class="w-full flex items-center justify-between px-2 py-2 rounded
-                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                          text-[13px] text-neutral-800 hover:bg-neutral-200/70 transition"
                     @click="clearMultiFilter('category')"
                   >
                     <span>전체</span>
                   </button>
 
-                  <div class="mx-2 border-t border-neutral-700"></div>
+                  <div class="mx-2 border-t border-neutral-300"></div>
 
                   <label
                     v-for="item in categoryOptions"
                     :key="item"
                     class="flex items-center gap-2 px-2 py-2 rounded cursor-pointer
-                          text-[13px] text-neutral-200 hover:bg-neutral-700/70"
+                          text-[13px] text-neutral-800 hover:bg-neutral-200/70"
                   >
                     <input
                       type="checkbox"
@@ -214,8 +214,8 @@
                 <button
                   type="button"
                   class="h-8 w-[250px] px-3 rounded-md flex items-center justify-between
-                        bg-neutral-800/60 border border-neutral-600
-                        text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
+                        bg-neutral-100 border border-neutral-300
+                        text-[13px] text-neutral-800 hover:bg-neutral-200 transition"
                   @click="toggleUpgradeLocationDropdown"
                 >
                   <span class="truncate">{{ getMultiFilterLabel('개조위치', upgradeLocationFilters) }}</span>
@@ -225,24 +225,24 @@
                 <div
                   v-if="showUpgradeLocationDropdown"
                   class="absolute left-0 top-10 z-20 w-[250px] max-h-[260px] overflow-auto
-                        rounded-md border border-neutral-600 bg-neutral-800 shadow-lg p-1"
+                        rounded-md border border-neutral-300 bg-neutral-100 shadow-lg p-1"
                 >
                   <button
                     type="button"
                     class="w-full flex items-center justify-between px-2 py-2 rounded
-                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                          text-[13px] text-neutral-800 hover:bg-neutral-200/70 transition"
                     @click="clearMultiFilter('upgradeLocation')"
                   >
                     <span>전체</span>
                   </button>
 
-                  <div class="mx-2 border-t border-neutral-700"></div>
+                  <div class="mx-2 border-t border-neutral-300"></div>
 
                   <label
                     v-for="item in upgradeLocationOptions"
                     :key="item"
                     class="flex items-center gap-2 px-2 py-2 rounded cursor-pointer
-                          text-[13px] text-neutral-200 hover:bg-neutral-700/70"
+                          text-[13px] text-neutral-800 hover:bg-neutral-200/70"
                   >
                     <input
                       type="checkbox"
@@ -260,8 +260,8 @@
                 <button
                   type="button"
                   class="h-8 w-[250px] px-3 rounded-md flex items-center justify-between
-                        bg-neutral-800/60 border border-neutral-600
-                        text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
+                        bg-neutral-100 border border-neutral-300
+                        text-[13px] text-neutral-800 hover:bg-neutral-200 transition"
                   @click="toggleSourceDropdown"
                 >
                   <span class="truncate">{{ sourceFilterLabel }}</span>
@@ -271,24 +271,24 @@
                 <div
                   v-if="showSourceDropdown"
                   class="absolute left-0 top-10 z-20 w-[250px] max-h-[260px] overflow-auto
-                        rounded-md border border-neutral-600 bg-neutral-800 shadow-lg p-1"
+                        rounded-md border border-neutral-300 bg-neutral-100 shadow-lg p-1"
                 >
                   <button
                     type="button"
                     class="w-full flex items-center justify-between px-2 py-2 rounded
-                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                          text-[13px] text-neutral-800 hover:bg-neutral-200/70 transition"
                     @click="clearMultiFilter('source')"
                   >
                     <span>전체</span>
                   </button>
 
-                  <div class="mx-2 border-t border-neutral-700"></div>
+                  <div class="mx-2 border-t border-neutral-300"></div>
 
                   <label
                     v-for="item in sourceOptionsList"
                     :key="item"
                     class="flex items-center gap-2 px-2 py-2 rounded cursor-pointer
-                          text-[13px] text-neutral-200 hover:bg-neutral-700/70"
+                          text-[13px] text-neutral-800 hover:bg-neutral-200/70"
                   >
                     <input
                       type="checkbox"
@@ -306,8 +306,8 @@
                 <button
                   type="button"
                   class="h-8 w-[250px] px-3 rounded-md flex items-center justify-between
-                        bg-neutral-800/60 border border-neutral-600
-                        text-[13px] text-neutral-200 hover:bg-neutral-700 transition"
+                        bg-neutral-100 border border-neutral-300
+                        text-[13px] text-neutral-800 hover:bg-neutral-200 transition"
                   @click="toggleFeatureDropdown"
                 >
                   <span class="truncate">{{ featureFilterLabel }}</span>
@@ -317,24 +317,24 @@
                 <div
                   v-if="showFeatureDropdown"
                   class="absolute left-0 top-10 z-20 w-[250px] max-h-[260px] overflow-auto
-                        rounded-md border border-neutral-600 bg-neutral-800 shadow-lg p-1"
+                        rounded-md border border-neutral-300 bg-neutral-100 shadow-lg p-1"
                 >
                   <button
                     type="button"
                     class="w-full flex items-center justify-between px-2 py-2 rounded
-                          text-[13px] text-neutral-200 hover:bg-neutral-700/70 transition"
+                          text-[13px] text-neutral-800 hover:bg-neutral-200/70 transition"
                     @click="clearMultiFilter('feature')"
                   >
                     <span>전체</span>
                   </button>
 
-                  <div class="mx-2 border-t border-neutral-700"></div>
+                  <div class="mx-2 border-t border-neutral-300"></div>
 
                   <label
                     v-for="item in featureOptions"
                     :key="item.codeValue"
                     class="flex items-center gap-2 px-2 py-2 rounded cursor-pointer
-                          text-[13px] text-neutral-200 hover:bg-neutral-700/70"
+                          text-[13px] text-neutral-800 hover:bg-neutral-200/70"
                   >
                     <input
                       type="checkbox"
@@ -350,10 +350,10 @@
 
             <!-- table -->
             <div class="scroll-dark mt-2 sm:mt-3 w-full overflow-auto max-h-[calc(100dvh-230px)]">
-              <table class="w-full text-sm text-neutral-200 border-separate border-spacing-0 table-fixed">
-                <thead class="bg-neutral-800">
-                  <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap bg-neutral-900/30">
-                    <th class="px-3 py-2 text-left w-[160px] border-b border-r border-neutral-700">
+              <table class="w-full text-sm text-neutral-800 border-collapse table-fixed">
+                <thead class="bg-neutral-100">
+                  <tr class="text-[13px] text-neutral-800 font-medium tracking-wide whitespace-nowrap bg-neutral-100/70">
+                    <th class="px-3 py-2 text-left w-[160px] border-b border-r border-neutral-300">
                       <button
                         type="button"
                         class="flex items-center gap-1 font-medium hover:text-white transition"
@@ -364,7 +364,7 @@
                       </button>
                     </th>
 
-                    <th class="px-3 py-2 text-left w-[250px] border-b border-r border-neutral-700">
+                    <th class="px-3 py-2 text-left w-[250px] border-b border-r border-neutral-300">
                       <button
                         type="button"
                         class="flex items-center gap-1 font-medium hover:text-white transition"
@@ -375,7 +375,7 @@
                       </button>
                     </th>
 
-                    <th class="px-3 py-2 text-left w-[140px] border-b border-r border-neutral-700">
+                    <th class="px-3 py-2 text-left w-[140px] border-b border-r border-neutral-300">
                       <button
                         type="button"
                         class="flex items-center gap-1 font-medium hover:text-white transition"
@@ -386,9 +386,9 @@
                       </button>
                     </th>
 
-                    <th class="px-3 py-2 text-left w-[400px] border-b border-r border-neutral-700">개조위치</th>
+                    <th class="px-3 py-2 text-left w-[400px] border-b border-r border-neutral-300">개조위치</th>
 
-                    <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">
+                    <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-300">
                       <button
                         type="button"
                         class="flex items-center gap-1 font-medium hover:text-white transition"
@@ -399,7 +399,7 @@
                       </button>
                     </th>
 
-                    <th class="px-3 py-2 text-left w-[110px] border-b border-r border-neutral-700">
+                    <th class="px-3 py-2 text-left w-[110px] border-b border-r border-neutral-300">
                       <button
                         type="button"
                         class="flex items-center gap-1 font-medium hover:text-white transition"
@@ -410,7 +410,7 @@
                       </button>
                     </th>
 
-                    <th class="px-3 py-2 text-left w-[100px] border-b border-r border-neutral-700">
+                    <th class="px-3 py-2 text-left w-[100px] border-b border-r border-neutral-300">
                       <button
                         type="button"
                         class="flex items-center gap-1 font-medium hover:text-white transition"
@@ -421,7 +421,7 @@
                       </button>
                     </th>
 
-                    <th class="px-3 py-2 text-left w-[110px] border-b border-r border-neutral-700">
+                    <th class="px-3 py-2 text-left w-[110px] border-b border-r border-neutral-300">
                       <button
                         type="button"
                         class="flex items-center gap-1 font-medium hover:text-white transition"
@@ -432,22 +432,22 @@
                       </button>
                     </th>
 
-                    <th class="px-3 py-2 text-left w-[350px] border-b border-r border-neutral-700">획득처</th>
-                    <th class="px-3 py-2 text-left w-[100px] border-b border-r border-neutral-700">무게</th>
-                    <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-700">구동방식</th>
-                    <th class="px-3 py-2 text-left w-[60px] border-b border-r border-neutral-700">좌석</th>
-                    <th class="px-3 py-2 text-left w-[400px] border-b border-r border-neutral-700">특징</th>
+                    <th class="px-3 py-2 text-left w-[350px] border-b border-r border-neutral-300">획득처</th>
+                    <th class="px-3 py-2 text-left w-[100px] border-b border-r border-neutral-300">무게</th>
+                    <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-300">구동방식</th>
+                    <th class="px-3 py-2 text-left w-[60px] border-b border-r border-neutral-300">좌석</th>
+                    <th class="px-3 py-2 text-left w-[400px] border-b border-r border-neutral-300">특징</th>
                   </tr>
                 </thead>
 
-                <tbody class="text-[13px] text-neutral-200 border-b border-neutral-700">
+                <tbody class="text-[13px] text-neutral-800">
                   <!-- 검색 결과 없음 -->
                   <tr v-if="rows.length === 0">
                     <td
                       colspan="13"
                       class="h-[500px] text-center align-middle
                             text-[14px] text-neutral-500
-                            border-b border-neutral-700"
+                            border-b border-neutral-300"
                     >
                       검색 결과가 없습니다.
                     </td>
@@ -463,11 +463,11 @@
                     @dblclick="handleRowDblClick(row)"
                   >
                     <template v-if="row">
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">
+                      <td class="px-3 py-2 text-left border-b border-neutral-300 truncate">
                         {{ displayValue(row.manufacturer) }}
                       </td>
 
-                      <td class="px-3 py-2 text-left border-b border-neutral-700">
+                      <td class="px-3 py-2 text-left border-b border-neutral-300">
                         <div class="flex items-center gap-1.5 min-w-0">
                           <span class="truncate">
                             {{ displayValue(row.name) }}
@@ -477,49 +477,49 @@
                             v-for="badge in format.formatFeatureBadges(row.features)"
                             :key="badge"
                             class="shrink-0 relative top-[1px] px-2 py-[2px]
-                                  rounded-md border border-neutral-700/70
-                                  bg-neutral-800/60 text-[11px]
-                                  text-neutral-200 whitespace-nowrap"
+                                  rounded-md border border-neutral-300/70
+                                  bg-neutral-100 text-[11px]
+                                  text-neutral-800 whitespace-nowrap"
                           >
                             {{ badge }}
                           </span>
                         </div>
                       </td>
 
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">
+                      <td class="px-3 py-2 text-left border-b border-neutral-300 truncate">
                         {{ displayValue(row.transportCategory) }}
                       </td>
 
                       <td 
-                        class="px-3 py-2 text-left border-b border-neutral-700 truncate"
+                        class="px-3 py-2 text-left border-b border-neutral-300 truncate"
                         :title="row.upgradeLocation"
                       >
                         {{ displayValue(row.upgradeLocation) }}
                       </td>
 
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
+                      <td class="px-3 py-2 text-left border-b border-neutral-300 tabular-nums whitespace-nowrap">
                         {{ formatLapTime(row.lapTime) }}
                       </td>
 
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
+                      <td class="px-3 py-2 text-left border-b border-neutral-300 tabular-nums whitespace-nowrap">
                         {{ format.formatSpeed(row.topSpeed) }}
                       </td>
 
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
+                      <td class="px-3 py-2 text-left border-b border-neutral-300 tabular-nums whitespace-nowrap">
                         {{ format.formatCurrencyUSD(row.price) }}
                       </td>
 
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">
+                      <td class="px-3 py-2 text-left border-b border-neutral-300 tabular-nums whitespace-nowrap">
                         {{ format.formatDate(row.releaseDate) }}
                       </td>
 
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ displayValue(row.source) }}</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ row.weight ? format.formatNumber(row.weight) + ' kg' : '-' }}</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 truncate">{{ displayValue(row.driveTrain) }}</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap">{{ displayValue(row.seats) }}</td>
+                      <td class="px-3 py-2 text-left border-b border-neutral-300 truncate">{{ displayValue(row.source) }}</td>
+                      <td class="px-3 py-2 text-left border-b border-neutral-300 truncate">{{ row.weight ? format.formatNumber(row.weight) + ' kg' : '-' }}</td>
+                      <td class="px-3 py-2 text-left border-b border-neutral-300 truncate">{{ displayValue(row.driveTrain) }}</td>
+                      <td class="px-3 py-2 text-left border-b border-neutral-300 tabular-nums whitespace-nowrap">{{ displayValue(row.seats) }}</td>
 
                       <td
-                        class="px-3 py-2 text-left border-b border-neutral-700 truncate"
+                        class="px-3 py-2 text-left border-b border-neutral-300 truncate"
                         :title="displayFeatureNames(row.features)"
                       >
                         {{ displayFeatureNames(row.features) }}
@@ -528,7 +528,7 @@
                     </template>
 
                     <template v-else>
-                      <td colspan="13" class="h-[40px] border-b border-neutral-700 bg-neutral-800/10"></td>
+                      <td colspan="13" class="h-[40px] border-b border-neutral-400/70 bg-neutral-100/60"></td>
                     </template>
                   </tr>
                 </tbody>
@@ -536,16 +536,16 @@
             </div>
 
             <!-- footer (pagination bar) -->
-            <div class="flex items-center justify-between px-4 py-2 border-t border-neutral-700 bg-neutral-900/40">
-              <div class="text-[12px] text-neutral-400 tracking-wide">
+            <div class="flex items-center justify-between px-4 py-2 border-t border-neutral-300 bg-neutral-100/70">
+              <div class="text-[12px] text-neutral-600 font-medium tracking-wide">
                 총 {{ total }}건 / {{ page }} / {{ totalPages }} 페이지
               </div>
 
               <div class="flex items-center gap-1.5">
                 <button
                   type="button"
-                  class="px-2.5 h-8 rounded border border-neutral-600 bg-neutral-800/80 text-[12px] text-neutral-200
-                        hover:bg-neutral-700 active:bg-neutral-600 disabled:opacity-40 disabled:cursor-default transition"
+                  class="px-2.5 h-8 rounded border border-neutral-300 bg-neutral-100/90 text-[12px] text-neutral-800
+                        hover:bg-neutral-200 active:bg-neutral-100 disabled:opacity-40 disabled:cursor-default transition"
                   :disabled="page <= 1"
                   @click="changePage(page - 1)"
                 >
@@ -558,7 +558,7 @@
                   type="button"
                   class="min-w-[30px] h-7 px-2 rounded border text-[12px] leading-none transition"
                   :class="num === page
-                    ? 'border-neutral-300 bg-neutral-200 text-neutral-900 font-semibold shadow-sm'
+                    ? 'border-neutral-300 bg-neutral-200 text-neutral-800 font-semibold shadow-sm'
                     : 'border-neutral-600 bg-neutral-800/80 text-neutral-200 hover:bg-neutral-700'"
                   @click="changePage(num)"
                 >
@@ -567,8 +567,8 @@
 
                 <button
                   type="button"
-                  class="px-2.5 h-8 rounded border border-neutral-600 bg-neutral-800/80 text-[12px] text-neutral-200
-                        hover:bg-neutral-700 active:bg-neutral-600 disabled:opacity-40 disabled:cursor-default transition"
+                  class="px-2.5 h-8 rounded border border-neutral-300 bg-neutral-100/90 text-[12px] text-neutral-800
+                        hover:bg-neutral-200 active:bg-neutral-100 disabled:opacity-40 disabled:cursor-default transition"
                   :disabled="page >= totalPages"
                   @click="changePage(page + 1)"
                 >
@@ -1062,14 +1062,14 @@ function getRowKey(row)
 function getRowClass(row)
 {
   if (!row) {
-    return 'hover:bg-neutral-800/20'
+    return 'bg-neutral-100/70'
   }
 
   if (isSelected(row)) {
-    return 'bg-neutral-700/70 hover:bg-neutral-700/70'
+    return 'bg-slate-300 hover:bg-slate-300'
   }
 
-  return 'hover:bg-neutral-800/60'
+  return 'bg-neutral-200 hover:bg-neutral-100'
 }
 
 function clearSelectionIfNotExists()
