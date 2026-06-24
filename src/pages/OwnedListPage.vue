@@ -664,6 +664,11 @@ watch(showModal, (isOpen) => {
 // 모든 일반 차고가 접혀있는지 여부
 const allGarageCollapsed = computed(() => {
   const garageIds = garageList.value
+    .filter((garage) => {
+      return garage.garageName !== getHangarGarageName('HANGAR') &&
+             garage.garageName !== getHangarGarageName('HANGAR_STORAGE') &&
+             garage.garageName !== getHangarGarageName('HANGAR_VINEWOOD')
+    })
     .map((garage) => {
       return garage.garageId
     })
@@ -1092,7 +1097,15 @@ function toggleGarageFilter(garageId)
 function resetFilters()
 {
   selectedGarageIds.value = []
-  collapsedGarageIds.value = new Set()
+  collapsedGarageIds.value = new Set(
+    garageList.value
+      .filter((garage) => {
+        return garage.garageName !== getHangarGarageName('HANGAR') &&
+               garage.garageName !== getHangarGarageName('HANGAR_STORAGE') &&
+               garage.garageName !== getHangarGarageName('HANGAR_VINEWOOD')
+      })
+      .map((garage) => garage.garageId)
+  )
   searchKeyword.value = ''
   closeDetailPanel()
 }
@@ -1248,6 +1261,11 @@ function toggleGarageCollapsed(garageId)
 function toggleAllGaragesCollapsed()
 {
   const garageIds = garageList.value
+    .filter((garage) => {
+      return garage.garageName !== getHangarGarageName('HANGAR') &&
+             garage.garageName !== getHangarGarageName('HANGAR_STORAGE') &&
+             garage.garageName !== getHangarGarageName('HANGAR_VINEWOOD')
+    })
     .map((garage) => {
       return garage.garageId
     })
@@ -1663,7 +1681,9 @@ async function loadGarages(preserveCollapsedState = false)
 
     const initialCollapsedIds = garageList.value
       .filter((garage) => {
-        return garage.collapsedYn === 'Y'
+        return garage.garageName !== getHangarGarageName('HANGAR') &&
+               garage.garageName !== getHangarGarageName('HANGAR_STORAGE') &&
+               garage.garageName !== getHangarGarageName('HANGAR_VINEWOOD')
       })
       .map((garage) => {
         return garage.garageId
