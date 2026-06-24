@@ -8,10 +8,10 @@
 
       <div
         class="relative z-10 w-full max-w-[980px] max-h-[90vh]
-               rounded-lg border border-neutral-700
-               bg-neutral-900 shadow-2xl overflow-hidden"
+               rounded-lg border border-neutral-400
+               bg-neutral-600 shadow-2xl overflow-hidden"
       >
-        <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-700">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-500">
           <h2 class="text-lg font-semibold text-white">
             {{ isEditMode ? '이동수단 모델 수정' : '이동수단 모델 등록' }}
           </h2>
@@ -200,7 +200,7 @@
           <div class="col-span-2">
             <label class="block mb-2 text-sm text-neutral-300">특징</label>
 
-            <div class="rounded-md border border-neutral-600 bg-neutral-700/60 p-3">
+            <div class="rounded-md border border-neutral-500 bg-neutral-600/70 p-3">
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-2">
                 <label
                   v-for="option in featureOptions"
@@ -223,12 +223,12 @@
 
         </div>
 
-        <div class="flex items-center justify-end gap-2 px-5 py-4 border-t border-neutral-700">
+        <div class="flex items-center justify-end gap-2 px-5 py-4 border-t border-neutral-500">
           <button
             type="button"
-            class="h-9 px-4 rounded-md border border-neutral-600
-                   bg-neutral-800/70 text-sm text-neutral-200
-                   hover:bg-neutral-700 active:bg-neutral-600 transition"
+            class="h-9 px-4 rounded-md border border-neutral-400
+                   bg-neutral-500 text-sm text-neutral-200
+                   hover:bg-neutral-400 active:bg-neutral-600 transition"
             @click="handleClose"
           >
             취소
