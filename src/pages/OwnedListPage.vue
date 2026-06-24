@@ -1097,6 +1097,7 @@ function toggleGarageFilter(garageId)
 function resetFilters()
 {
   selectedGarageIds.value = []
+  showGarageFilterDropdown.value = false
   collapsedGarageIds.value = new Set(
     garageList.value
       .filter((garage) => {
