@@ -558,8 +558,8 @@
                   type="button"
                   class="min-w-[30px] h-7 px-2 rounded border text-[12px] leading-none transition"
                   :class="num === page
-                    ? 'border-neutral-300 bg-neutral-200 text-neutral-800 font-semibold shadow-sm'
-                    : 'border-neutral-600 bg-neutral-800/80 text-neutral-200 hover:bg-neutral-700'"
+                    ? 'border-neutral-800 bg-neutral-800 text-white font-bold shadow-sm'
+                    : 'border-neutral-300 bg-neutral-100 text-neutral-700 hover:bg-neutral-200'"
                   @click="changePage(num)"
                 >
                   {{ num }}
