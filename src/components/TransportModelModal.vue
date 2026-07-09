@@ -177,26 +177,6 @@
             </div>
           </div>
 
-          <div>
-            <label class="block mb-1 text-sm text-neutral-300">무게</label>
-            <input v-model="form.weight" type="number" step="0.01" class="input-style" />
-          </div>
-
-          <div>
-            <label class="block mb-1 text-sm text-neutral-300">구동 방식</label>
-            <select v-model="form.driveTrain" class="input-style">
-              <option value="">선택하세요</option>
-              <option value="AWD">AWD</option>
-              <option value="RWD">RWD</option>
-              <option value="FWD">FWD</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block mb-1 text-sm text-neutral-300">좌석 수</label>
-            <input v-model="form.seats" type="number" class="input-style" />
-          </div>
-
           <div class="col-span-2">
             <label class="block mb-2 text-sm text-neutral-300">특징</label>
 
@@ -287,9 +267,6 @@ const form = reactive({
   price: '',
   releaseDate: '',
   source: '',
-  weight: '',
-  driveTrain: '',
-  seats: '',
   features: ''
 })
 
@@ -446,9 +423,6 @@ function resetForm()
   form.price = ''
   form.releaseDate = '2013-09-17'
   form.source = ''
-  form.weight = ''
-  form.driveTrain = ''
-  form.seats = ''
   form.features = ''
   selectedSources.value = []
   showSourceDropdown.value = false
@@ -473,9 +447,6 @@ function fillForm()
   form.price = props.model?.price ?? ''
   form.releaseDate = props.model?.releaseDate ?? ''
   form.source = props.model?.source ?? ''
-  form.weight = props.model?.weight ?? ''
-  form.driveTrain = props.model?.driveTrain ?? ''
-  form.seats = props.model?.seats ?? ''
   form.features = props.model?.features ?? ''
 
   if (form.lapTime === '' || form.lapTime === null || form.lapTime === undefined) {
@@ -625,9 +596,6 @@ async function handleSave()
       topSpeed: form.topSpeed === '' ? null : Number(form.topSpeed),
       price: form.price === '' ? null : Number(form.price),
       releaseDate: form.releaseDate === '' ? null : form.releaseDate,
-      weight: form.weight === '' ? null : Number(form.weight),
-      driveTrain: form.driveTrain,
-      seats: form.seats === '' ? null : Number(form.seats),
 
       source: transportSourceOptions.value
         .filter((source) => {

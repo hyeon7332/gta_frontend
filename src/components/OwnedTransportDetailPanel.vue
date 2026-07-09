@@ -232,33 +232,6 @@
           </span>
         </div>
 
-        <!-- 무게 -->
-        <div class="flex items-center justify-between gap-4 px-1 py-2 border-t border-neutral-700">
-          <span class="text-[13px] text-neutral-400">무게</span>
-
-          <span class="text-[13px] font-medium text-neutral-100 text-right">
-            {{ row?.weight ? row.weight + ' kg' : '-' }}
-          </span>
-        </div>
-
-        <!-- 구동방식 -->
-        <div class="flex items-center justify-between gap-4 px-1 py-2 border-t border-neutral-700">
-          <span class="text-[13px] text-neutral-400">구동방식</span>
-
-          <span class="text-[13px] font-medium text-neutral-100 text-right">
-            {{ row?.driveTrain || '-' }}
-          </span>
-        </div>
-
-        <!-- 좌석 -->
-        <div class="flex items-center justify-between gap-4 px-1 py-2 border-t border-neutral-700">
-          <span class="text-[13px] text-neutral-400">좌석</span>
-
-          <span class="text-[13px] font-medium text-neutral-100 text-right">
-            {{ row?.seats || '-' }}
-          </span>
-        </div>
-
         <!-- 특징 -->
         <div class="px-1 py-2 border-t border-neutral-700">
           <div class="mb-2 text-[13px] text-neutral-400">특징</div>

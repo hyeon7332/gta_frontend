@@ -433,9 +433,6 @@
                     </th>
 
                     <th class="px-3 py-2 text-left w-[350px] border-b border-r border-neutral-300">획득처</th>
-                    <th class="px-3 py-2 text-left w-[100px] border-b border-r border-neutral-300">무게</th>
-                    <th class="px-3 py-2 text-left w-[90px] border-b border-r border-neutral-300">구동방식</th>
-                    <th class="px-3 py-2 text-left w-[60px] border-b border-r border-neutral-300">좌석</th>
                     <th class="px-3 py-2 text-left w-[400px] border-b border-r border-neutral-300">특징</th>
                   </tr>
                 </thead>
@@ -444,7 +441,7 @@
                   <!-- 검색 결과 없음 -->
                   <tr v-if="rows.length === 0">
                     <td
-                      colspan="13"
+                      colspan="10"
                       class="h-[500px] text-center align-middle
                             text-[14px] text-neutral-500
                             border-b border-neutral-300"
@@ -514,9 +511,6 @@
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-300 truncate">{{ displayValue(row.source) }}</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-300 truncate">{{ row.weight ? format.formatNumber(row.weight) + ' kg' : '-' }}</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-300 truncate">{{ displayValue(row.driveTrain) }}</td>
-                      <td class="px-3 py-2 text-left border-b border-neutral-300 tabular-nums whitespace-nowrap">{{ displayValue(row.seats) }}</td>
 
                       <td
                         class="px-3 py-2 text-left border-b border-neutral-300 truncate"
@@ -528,7 +522,7 @@
                     </template>
 
                     <template v-else>
-                      <td colspan="13" class="h-[40px] border-b border-neutral-400/70 bg-neutral-100/60"></td>
+                      <td colspan="10" class="h-[40px] border-b border-neutral-400/70 bg-neutral-100/60"></td>
                     </template>
                   </tr>
                 </tbody>
