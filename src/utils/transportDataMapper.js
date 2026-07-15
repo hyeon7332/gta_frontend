@@ -40,7 +40,6 @@ export function normalizeOwnedTransport(x)
     source: x.source ?? x.source_name ?? x.obtainSource ?? '-',
     features: x.features ?? '',
     imageUrl: x.imageUrl ?? x.image_url ?? null,
-    decal: x.decal ?? '',
     acquiredYn: x.acquiredYn ?? x.acquired_yn ?? 'Y',
     mansionPosition: x.mansionPosition ?? x.mansion_position ?? ''
   }

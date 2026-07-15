@@ -4,6 +4,7 @@ import TransportModelAdminPage from '@/pages/TransportModelAdminPage.vue'
 import LoginPage from '@/pages/LoginPage.vue'
 import SignupPage from '@/pages/SignupPage.vue'
 import PendingUsersPage from '@/pages/PendingUsersPage.vue'
+import OwnedTransportDetailPage from '@/pages/OwnedTransportDetailPage.vue'
 
 const routes = [
   {
@@ -15,6 +16,11 @@ const routes = [
     path: '/owned', 
     component: OwnedListPage,
     meta: { requiresAuth: true }  //토큰 없으면 접근 차단
+  },
+  {
+    path: '/owned/:ownedId',
+    component: OwnedTransportDetailPage,
+    meta: { requiresAuth: true }
   },
   {
     path: '/login',

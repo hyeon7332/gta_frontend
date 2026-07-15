@@ -13,15 +13,9 @@
       </div>
     </div>
 
-    <div
-      class="w-full px-4 pt-2 pb-4 transition-all duration-300"
-      :class="showDetailPanel ? 'max-w-[1500px] mx-auto' : 'max-w-[1100px] mx-auto'"
-    >
-      <div
-        class="flex items-start gap-4 transition-all duration-300"
-        :class="showDetailPanel ? 'justify-start' : 'justify-center'"
-      >
-        <div class="w-[1100px] shrink-0">
+    <div class="w-full max-w-[1500px] mx-auto px-4 pt-2 pb-4 transition-all duration-300">
+      <div class="flex items-start justify-center">
+        <div class="w-full min-w-0">
           <!-- main panel -->
           <div class="bg-neutral-900/40 border border-neutral-700 rounded-lg shadow-lg overflow-hidden">
             <div class="p-2">
@@ -162,281 +156,366 @@
                     </button>
                   </div>
                 </div>
+
+                <!-- 일반 차고 카드형 목록 -->
+                <div
+                  v-if="!isSpecialStorageFilter"
+                  ref="listScrollRef"
+                  class="scroll-dark h-[calc(100dvh-220px)] max-h-[780px]
+                        overflow-y-auto overflow-x-hidden p-3"
+                >
+                  <div
+                    v-for="garage in filteredGarageGroups"
+                    :key="garage.garageId"
+                    class="mb-3 overflow-hidden rounded-md border border-neutral-700"
+                  >
+                    <!-- 차고 헤더 -->
+                    <div
+                      class="flex h-[42px] cursor-pointer items-center
+                            border-b border-neutral-600
+                            bg-neutral-700/40 px-3
+                            text-[13px] font-semibold text-neutral-300"
+                      @click="toggleGarageCollapsed(garage.garageId)"
+                    >
+                      <span class="mr-2 shrink-0 text-[11px] text-neutral-400">
+                        {{ garage.collapsed ? '▶' : '▼' }}
+                      </span>
+
+                      <div class="flex min-w-0 items-center gap-2">
+                        <span class="truncate">
+                          {{ garage.displayGarageName }}
+                        </span>
+
+                        <span class="shrink-0 text-[11px] font-normal text-neutral-400">
+                          {{ garage.usedSlotCount }} / {{ garage.slotCount }}
+                        </span>
+
+                        <span
+                          v-if="garage.description"
+                          class="truncate text-[11px] font-normal text-neutral-400"
+                        >
+                          {{ garage.description }}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        class="ml-auto shrink-0 rounded p-1
+                              hover:bg-neutral-600/40 transition"
+                        @click.stop="openGarageSetting({
+                          garageId: garage.garageId,
+                          garage: garage.garageName,
+                          alias: garage.alias,
+                          description: garage.description
+                        })"
+                      >
+                        <Settings class="h-4 w-4 text-neutral-400 hover:text-white" />
+                      </button>
+                    </div>
+
+                    <!-- 차량 카드 그리드 -->
+                    <div
+                      v-if="!garage.collapsed"
+                      class="grid grid-cols-2 gap-3 bg-neutral-900/20 p-3
+                            min-[800px]:grid-cols-3
+                            min-[1100px]:grid-cols-4
+                            min-[1400px]:grid-cols-5"
+                    >
+                      <div
+                        v-for="slot in garage.slots"
+                        :key="slot.id"
+                        :data-row-id="slot.id"
+                        :draggable="canDragRow(slot)"
+                        :class="[
+                          'relative min-w-0 overflow-hidden rounded-md border flex flex-col transition-all duration-150 hover:scale-[1.005]',
+                          slot.isEmpty
+                            ? 'border-neutral-700 bg-neutral-900/30 text-neutral-500'
+                            : 'cursor-pointer border-neutral-600 bg-neutral-800/50 hover:border-neutral-500 hover:bg-neutral-700/50',
+                          isDropTarget(slot)
+                            ? 'border-green-500 bg-green-900/20'
+                            : '',
+                          draggingRow && draggingRow.ownedId === slot.id
+                            ? 'opacity-50'
+                            : '',
+                          Number(highlightedOwnedId) === Number(slot.id)
+                            ? 'ring-2 ring-blue-400/80 border-blue-400 bg-blue-900/20'
+                            : ''
+                        ]"
+                        @click="handleRowClick(slot)"
+                        @dblclick="handleSlotDoubleClick(slot)"
+                        @dragstart="handleDragStart(slot)"
+                        @dragend="handleDragEnd"
+                        @dragover="handleDragOver($event, slot)"
+                        @drop="handleDrop(slot)"
+                      >
+                        <!-- 빈 슬롯 -->
+                        <template v-if="slot.isEmpty">
+                          <div
+                            class="flex h-[180px] items-center justify-center
+                                  border-b border-neutral-700 bg-neutral-900/40"
+                          >
+                            <span class="text-[12px] text-neutral-500">
+                              빈 슬롯
+                            </span>
+                          </div>
+
+                          <div class="flex flex-1 flex-col px-3 py-2">
+                            <div class="text-[12px] text-neutral-500">
+                              슬롯 {{ slot.slot }}
+                            </div>
+
+                            <div class="mt-auto pt-2 text-[11px] text-neutral-600">
+                              더블클릭하여 등록
+                            </div>
+                          </div>
+                        </template>
+
+                        <!-- 차량이 있는 슬롯 -->
+                        <template v-else>
+                          <div
+                            class="relative h-[180px] overflow-hidden
+                                  border-b border-neutral-700 bg-neutral-900"
+                          >
+                            <img
+                              v-if="slot.imageUrl"
+                              :src="slot.imageUrl"
+                              :alt="slot.name"
+                              loading="lazy"
+                              class="h-full w-full object-contain p-2"
+                            />
+
+                            <div
+                              v-else
+                              class="flex h-full items-center justify-center
+                                    text-[12px] text-neutral-500"
+                            >
+                              이미지 없음
+                            </div>
+
+                            <!-- 미획득 -->
+                            <span
+                              v-if="slot.acquiredYn === 'N'"
+                              class="absolute right-2 top-2 rounded-md
+                                    border border-red-500/40 bg-red-900/70
+                                    px-2 py-[2px] text-[10px] text-red-200"
+                            >
+                              미획득
+                            </span>
+                          </div>
+
+                          <div class="flex flex-1 flex-col px-3 py-2">
+                            <!-- 1줄: 이름 + 기능배지 / 우측 맨션배지 -->
+                            <div class="flex min-w-0 items-center gap-2">
+                              <div class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
+                                <span class="truncate text-[13px] font-medium text-neutral-100">
+                                  {{ slot.name }}
+                                </span>
+
+                                <span
+                                  v-for="badge in formatFeatureBadges(slot.features)"
+                                  :key="badge"
+                                  class="shrink-0 rounded-md
+                                        border border-neutral-700/70
+                                        bg-neutral-800/60
+                                        px-1.5 py-[1px]
+                                        text-[9px] text-neutral-300"
+                                >
+                                  {{ badge }}
+                                </span>
+                              </div>
+
+                              <span
+                                v-if="getMansionPositionLabel(slot)"
+                                class="ml-auto shrink-0 rounded-md
+                                      border border-blue-500/40 bg-blue-900/20
+                                      px-1.5 py-[1px] text-[9px] text-blue-300"
+                              >
+                                {{ getMansionPositionLabel(slot) }}
+                              </span>
+                            </div>
+
+                            <!-- 2줄: 제조사 / 분류 / 수정 -->
+                            <div class="mt-auto flex items-center justify-between gap-2 pt-2">
+                              <span class="truncate text-[11px] text-neutral-400">
+                                {{ slot.manufacturer }}
+                                <span class="text-neutral-600"> · </span>
+                                {{ slot.category }}
+                              </span>
+
+                              <button
+                                type="button"
+                                class="shrink-0 rounded p-1 transition hover:bg-neutral-600/40"
+                                @click.stop="openEdit(slot)"
+                              >
+                                <SquarePen class="h-4 w-4 text-neutral-400 hover:text-white" />
+                              </button>
+                            </div>
+                          </div>
+
+                        </template>
+                      </div>
+                    </div>
+                  </div>
+                </div>
   
-                <!-- table -->
-                <div class="scroll-dark overflow-y-auto overflow-x-hidden h-[675px]">
-                  <table class="w-full table-fixed border-separate border-spacing-0">
-                    <colgroup>
-                      <col class="w-[7%]" />   <!-- 슬롯 -->
-                      <col class="w-[17%]" />  <!-- 제조사 -->
-                      <col class="w-[35%]" />  <!-- 모델명 -->
-                      <col class="w-[17%]" />  <!-- 분류 -->
-                      <col class="w-[16%]" />  <!-- 액션 -->
-                    </colgroup>
-                    <thead>
-                      <tr class="text-[13px] text-neutral-200 font-medium tracking-wide whitespace-nowrap">
-                        <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">슬롯</th>
-                        <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">제조사</th>
-                        <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">모델명</th>
-                        <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-r border-neutral-700">분류</th>
-                        <th class="sticky top-0 z-10 bg-neutral-800 px-3 py-2 text-left border-b border-neutral-700"></th>
-                      </tr>
-                    </thead>
-  
-                    <tbody class="text-[13px] text-neutral-200 border-b border-neutral-700">
-                      <tr
-                        v-for="(row, index) in displayRows"
-                        :key="row ? row.id : `empty-${index}`"
-                        :data-row-id="row ? row.id : ''"
+                <!-- 특수 보관 카드형 목록 -->
+                <div
+                  v-else
+                  ref="listScrollRef"
+                  class="scroll-dark h-[calc(100dvh-220px)] max-h-[780px]
+                        overflow-y-auto overflow-x-hidden p-3"
+                >
+                  <div
+                    v-for="group in specialStorageGroups"
+                    :key="group.id"
+                    class="mb-3 overflow-hidden rounded-md border border-neutral-700"
+                  >
+                    <!-- 특수 보관 헤더 -->
+                    <div
+                      class="flex h-[42px] items-center
+                            border-b border-neutral-600
+                            bg-neutral-700/40 px-3"
+                    >
+                      <div class="flex min-w-0 items-center gap-2">
+                        <span class="truncate text-[13px] font-semibold text-neutral-300">
+                          {{ group.name }}
+                        </span>
+
+                        <span class="shrink-0 text-[11px] text-neutral-400">
+                          {{ group.rows.length }}대
+                        </span>
+
+                        <span
+                          v-if="group.description"
+                          class="truncate text-[11px] text-neutral-400"
+                        >
+                          {{ group.description }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- 특수 보관 차량 카드 -->
+                    <div
+                      class="grid grid-cols-2 gap-3 bg-neutral-900/20 p-3
+                            min-[800px]:grid-cols-3
+                            min-[1100px]:grid-cols-4
+                            min-[1400px]:grid-cols-5"
+                    >
+                      <div
+                        v-for="row in group.rows"
+                        :key="row.id"
+                        :data-row-id="row.id"
                         :draggable="canDragRow(row)"
                         :class="[
-                          'h-[40px]',
-                          row && (
-                            (row.type === 'slot' && !row.isEmpty) ||
-                            row.type === 'unassigned' ||
-                            row.type === 'pegasus' ||
-                            row.type === 'hangar' ||
-                            row.type === 'hangarStorage' ||
-                            row.type === 'hangarVinewood'
-                          )
-                            ? 'hover:bg-neutral-700/40 transition cursor-pointer'
-                            : '',
-                          row && row.type === 'slot' && row.isEmpty
-                            ? 'text-neutral-500'
-                            : '',
-                          draggingRow && row && row.type === 'slot' && row.isEmpty
-                            ? 'hover:bg-neutral-700/20'
-                            : '',
+                          'relative flex min-w-0 flex-col overflow-hidden rounded-md',
+                          'cursor-pointer border border-neutral-600 bg-neutral-800/50',
+                          'transition-all duration-150 hover:scale-[1.005] hover:border-neutral-500 hover:bg-neutral-700/50',
                           isDropTarget(row)
-                            ? 'bg-green-900/20'
+                            ? 'border-green-500 bg-green-900/20'
                             : '',
-                          draggingRow && row && draggingRow.ownedId === row.id
+                          draggingRow && draggingRow.ownedId === row.id
                             ? 'opacity-50'
+                            : '',
+                          Number(highlightedOwnedId) === Number(row.id)
+                            ? 'ring-2 ring-blue-400/80 border-blue-400 bg-blue-900/20'
                             : ''
                         ]"
                         @click="handleRowClick(row)"
-                        @dblclick="handleSlotDoubleClick(row)"
                         @dragstart="handleDragStart(row)"
                         @dragend="handleDragEnd"
                         @dragover="handleDragOver($event, row)"
                         @drop="handleDrop(row)"
                       >
-                        <!-- 차고 헤더 행 -->
-                        <template v-if="row && row.type === 'garageHeader'">
-                          <td
-                            colspan="5"
-                            class="h-[40px] px-3 py-2
-                                  bg-neutral-700/40
-                                  border-b border-neutral-600
-                                  text-[13px] font-semibold text-neutral-300 align-middle cursor-pointer"
-                            @click="row.garageId ? toggleGarageCollapsed(row.garageId) : null"
+                        <!-- 이미지 -->
+                        <div
+                          class="relative h-[180px] overflow-hidden
+                                border-b border-neutral-700 bg-neutral-900"
+                        >
+                          <img
+                            v-if="row.imageUrl"
+                            :src="row.imageUrl"
+                            :alt="row.name"
+                            loading="lazy"
+                            class="h-full w-full object-contain p-2"
+                          />
+
+                          <div
+                            v-else
+                            class="flex h-full items-center justify-center
+                                  text-[12px] text-neutral-500"
                           >
-                            <div class="flex items-center w-full">
-                              <span
-                                v-if="row.garageId"
-                                class="text-[11px] text-neutral-400 mr-2 shrink-0"
-                              >
-                                {{ collapsedGarageIds.has(row.garageId) ? '▶' : '▼' }}
-                              </span>
-  
-                              <!-- 이름 + 설명 -->
-                              <div class="flex items-center gap-2 min-w-0">
-                                <span class="truncate">
-                                  {{ row.alias ? row.alias : row.garage }}
-                                </span>
+                            이미지 없음
+                          </div>
 
-                                <!-- 격납고 사용량 -->
-                                <span
-                                  v-if="row.garage === getHangarGarageName('HANGAR')"
-                                  class="text-[11px] text-neutral-400 tabular-nums"
-                                >
-                                  <template v-if="hangarUsage.small > 0">
-                                    소형 {{ hangarUsage.small }}
-                                  </template>
+                          <span
+                            v-if="row.acquiredYn === 'N'"
+                            class="absolute right-2 top-2 rounded-md
+                                  border border-red-500/40 bg-red-900/70
+                                  px-2 py-[2px] text-[10px] text-red-200"
+                          >
+                            미획득
+                          </span>
+                        </div>
 
-                                  <template v-if="hangarUsage.medium > 0">
-                                    중형 {{ hangarUsage.medium }}
-                                  </template>
-
-                                  <template v-if="hangarUsage.large > 0">
-                                    대형 {{ hangarUsage.large }}
-                                  </template>
-
-                                  <template v-if="hangarUsage.xlarge > 0">
-                                    초대형 {{ hangarUsage.xlarge }}
-                                  </template>
-                                </span>
-
-                                <span
-                                  v-if="row.description"
-                                  class="text-[11px] text-neutral-400 ml-2"
-                                >
-                                  {{ row.description }}
-                                </span>
-                              </div>
-  
-                              <!-- 설정 버튼 -->
-                              <div v-if="row.garageId" class="ml-auto">
-                                <button
-                                  type="button"
-                                  class="p-1 rounded hover:bg-neutral-600/40 transition"
-                                  @click.stop="openGarageSetting(row)"
-                                >
-                                  <Settings class="w-4 h-4 text-neutral-400 hover:text-white" />
-                                </button>
-                              </div>
-                            </div>
-                          </td>
-                        </template>
-                        
-                        <!-- 특수 보관 행 (미배치 / 페가수스) -->
-                        <template v-else-if="row && (
-                          row.type === 'unassigned' ||
-                          row.type === 'pegasus' ||
-                          row.type === 'hangar' ||
-                          row.type === 'hangarStorage' ||
-                          row.type === 'hangarVinewood'
-                        )">
-                          <td :class="[tdBaseClass, getRowHighlightClass(row)]">-</td>
-                          <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
-                          <td :class="[tdBaseClass, getRowHighlightClass(row)]">
-                            <div class="flex items-center justify-between gap-2 min-w-0">
-                              <div class="flex items-baseline gap-1.5 min-w-0">
-                                <span class="truncate">
-                                  {{ row.name }}
-                                </span>
-
-                                <span
-                                  v-for="badge in formatFeatureBadges(row.features)"
-                                  :key="badge"
-                                  :class="[
-                                    'shrink-0 text-[11px]',
-                                    row.type === 'unassigned'
-                                      ? 'relative top-[1px] px-2 py-[2px] rounded-md border border-neutral-700/70 bg-neutral-800/60 text-neutral-200 whitespace-nowrap'
-                                      : 'text-neutral-300'
-                                  ]"
-                                >
-                                  {{ badge }}
-                                </span>
-                              </div>
-
-                              <span
-                                v-if="!row.imageUrl"
-                                class="shrink-0 text-[12px] opacity-70"
-                                title="이미지 없음"
-                              >
-                                📷❌
-                              </span>
-
-                            </div>
-                          </td>
-                          <td :class="[tdBaseClass, getRowHighlightClass(row)]">{{ row.category }}</td>
-                          <td :class="[tdBaseClass, getRowHighlightClass(row)]">
-                            <div class="flex items-center justify-end gap-2 min-w-0">
-                              <!-- 맨션 위치 배지 -->
-                              <span
-                                v-if="getMansionPositionLabel(row)"
-                                class="shrink-0 px-2 py-[2px] rounded-md border border-blue-500/40 bg-blue-900/20 text-[11px] text-blue-300 whitespace-nowrap"
-                              >
-                                {{ getMansionPositionLabel(row) }}
+                        <div class="flex flex-1 flex-col px-3 py-2">
+                          <!-- 1줄: 이름 + 기능배지 / 우측 맨션배지 -->
+                          <div class="flex min-w-0 items-center gap-2">
+                            <div class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
+                              <span class="truncate text-[13px] font-medium text-neutral-100">
+                                {{ row.name }}
                               </span>
 
                               <span
-                                v-if="row.acquiredYn === 'N'"
-                                class="shrink-0 px-2 py-[2px] rounded-md border border-red-500/40 bg-red-900/20 text-[11px] text-red-300 whitespace-nowrap"
+                                v-for="badge in formatFeatureBadges(row.features)"
+                                :key="badge"
+                                class="shrink-0 rounded-md
+                                      border border-neutral-700/70
+                                      bg-neutral-800/60
+                                      px-1.5 py-[1px]
+                                      text-[9px] text-neutral-300"
                               >
-                                미획득
-                              </span>
-
-                              <button
-                                type="button"
-                                class="shrink-0 p-1 rounded hover:bg-neutral-600/40 transition"
-                                @click.stop="openEdit(row)"
-                              >
-                                <SquarePen class="w-4 h-4 text-neutral-400 hover:text-white" />
-                              </button>
-                            </div>
-                          </td>
-                        </template>
-  
-                        <!-- 일반 슬롯 row -->
-                        <template v-else-if="row">
-                          <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 tabular-nums whitespace-nowrap align-middle', getRowHighlightClass(row)]">
-                            <div class="flex items-center">
-                              <span class="inline-block w-[18px] text-right text-neutral-100 font-medium tabular-nums">
-                                {{ row.slot }}
-                              </span>
-  
-                              <span
-                                v-if="getOfficeSectionLabel(row)"
-                                class="ml-2 text-[10px] text-neutral-500"
-                              >
-                                {{ getOfficeSectionLabel(row) }}
+                                {{ badge }}
                               </span>
                             </div>
-                          </td>
-                          <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.manufacturer }}</td>
-                          <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 align-middle', getRowHighlightClass(row)]">
-                            <div class="flex items-center justify-between gap-2 min-w-0">
-                              <div class="flex items-center gap-1.5 min-w-0">
-                                <span class="truncate">
-                                  {{ row.name }}
-                                </span>
 
-                                <span
-                                  v-for="badge in formatFeatureBadges(row.features)"
-                                  :key="badge"
-                                  class="shrink-0 relative top-[1px] px-2 py-[2px] rounded-md border border-neutral-700/70 bg-neutral-800/60 text-[11px] text-neutral-200 whitespace-nowrap"
-                                >
-                                  {{ badge }}
-                                </span>
-                              </div>
+                            <span
+                              v-if="getMansionPositionLabel(row)"
+                              class="ml-auto shrink-0 rounded-md
+                                    border border-blue-500/40 bg-blue-900/20
+                                    px-1.5 py-[1px] text-[9px] text-blue-300"
+                            >
+                              {{ getMansionPositionLabel(row) }}
+                            </span>
+                          </div>
 
-                              <span
-                                v-if="!row.isEmpty && !row.imageUrl"
-                                class="shrink-0 text-[12px] opacity-70"
-                                title="이미지 없음"
-                              >
-                                📷❌
-                              </span>
-                            </div>
-                          </td>
-                          <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 truncate align-middle', getRowHighlightClass(row)]">{{ row.category }}</td>
-                          <td :class="['h-[40px] px-3 py-2 text-left border-b border-neutral-700 align-middle', getRowHighlightClass(row)]">
-                            <div class="flex items-center justify-end gap-2 min-w-0">
-                              <!-- 맨션 위치 배지 -->
-                              <span
-                                v-if="getMansionPositionLabel(row)"
-                                class="shrink-0 px-2 py-[2px] rounded-md border border-blue-500/40 bg-blue-900/20 text-[11px] text-blue-300 whitespace-nowrap"
-                              >
-                                {{ getMansionPositionLabel(row) }}
-                              </span>
+                          <!-- 2줄: 제조사 / 분류 / 수정 -->
+                          <div class="mt-auto flex items-center justify-between gap-2 pt-2">
+                            <span class="truncate text-[11px] text-neutral-400">
+                              {{ row.manufacturer }}
+                              <span class="text-neutral-600"> · </span>
+                              {{ row.category }}
+                            </span>
 
-                              <span
-                                v-if="row.acquiredYn === 'N'"
-                                class="shrink-0 px-2 py-[2px] rounded-md border border-red-500/40 bg-red-900/20 text-[11px] text-red-300 whitespace-nowrap"
-                              >
-                                미획득
-                              </span>
+                            <button
+                              type="button"
+                              class="shrink-0 rounded p-1 transition hover:bg-neutral-600/40"
+                              @click.stop="openEdit(row)"
+                            >
+                              <SquarePen class="h-4 w-4 text-neutral-400 hover:text-white" />
+                            </button>
+                          </div>
+                        </div>
 
-                              <button
-                                v-if="!row.isEmpty"
-                                type="button"
-                                class="shrink-0 p-1 rounded hover:bg-neutral-600/40 transition"
-                                @click.stop="openEdit(row)"
-                              >
-                                <SquarePen class="w-4 h-4 text-neutral-400 hover:text-white" />
-                              </button>
-                            </div>
-                          </td>
-                        </template>
-  
-                        <template v-else>
-                          <td colspan="5" class="h-[40px]"></td>
-                        </template>
-                      </tr>
-                    </tbody>
-                  </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    v-if="specialStorageGroups.length === 0"
+                    class="flex h-full items-center justify-center text-[13px] text-neutral-500"
+                  >
+                    등록된 이동수단이 없습니다.
+                  </div>
                 </div>
   
                 <!-- footer: 슬롯 사용 통계 -->
@@ -516,14 +595,6 @@
             </div>
           </div>
         </div>
-
-        <!-- 우측 상세 패널 -->
-        <OwnedTransportDetailPanel
-          v-if="showDetailPanel"
-          :row="selectedDetailRow"
-          @close="closeDetailPanel"
-        />
-
       </div>
     </div>
   </div>
@@ -556,16 +627,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import { http } from '@/api/http'
 import { Plus, RotateCcw, ChevronDown, Settings, ChevronsUpDown, SquarePen } from 'lucide-vue-next'
 import OwnedTransportModal from '@/components/OwnedTransportModal.vue'
 import GarageSettingModal from '@/components/GarageSettingModal.vue'
 import Toast from '@/components/Toast.vue'
-import OwnedTransportDetailPanel from '@/components/OwnedTransportDetailPanel.vue'
 import OwnedTransportSearchResultModal from '@/components/OwnedTransportSearchResultModal.vue'
 import * as transportDataMapper from '@/utils/transportDataMapper'
 import { formatFeatureBadges } from '@/utils/format'
+
+const router = useRouter()
+
+// 상세 페이지 이동 전 목록 상태 저장 키
+const OWNED_LIST_STATE_KEY = 'ownedListState'
 
 // 보유 이동수단 목록 데이터
 const rows = ref([])
@@ -594,14 +670,14 @@ const modalMode = ref('create') // create | edit
 // 수정 대상 행 데이터
 const editTarget = ref(null)
 
-// 우측 상세 패널 표시 여부
-const showDetailPanel = ref(false)
-
-// 상세 패널에 표시할 선택 행 데이터
-const selectedDetailRow = ref(null)
-
 // 현재 하이라이트된 행 키
 const activeRowKey = ref('')
+
+// 상세에서 돌아왔을 때 잠깐 강조할 보유 이동수단 ID
+const highlightedOwnedId = ref(null)
+
+// 카드 강조 해제 타이머
+let highlightTimer = null
 
 // 선택된 차고 필터 목록
 const selectedGarageIds = ref([])
@@ -611,6 +687,9 @@ const showGarageFilterDropdown = ref(false)
 
 // 차고 필터 영역 DOM 참조
 const garageFilterRef = ref(null)
+
+// 차고 카드 목록 스크롤 영역 DOM 참조
+const listScrollRef = ref(null)
 
 // 이동수단 검색어 입력창 DOM 참조
 const searchInputRef = ref(null)
@@ -703,6 +782,162 @@ const slotRowMap = computed(() => {
   })
 
   return map
+})
+
+// 카드형 화면에서 사용할 차고별 그룹 데이터
+const garageGroups = computed(() => {
+  return garageList.value
+    .filter((garage) => {
+      const garageName = garage.garageName
+
+      // 격납고 특수 보관 3종은 일반 차고 그룹에서 제외
+      return (
+        garageName !== getHangarGarageName('HANGAR') &&
+        garageName !== getHangarGarageName('HANGAR_STORAGE') &&
+        garageName !== getHangarGarageName('HANGAR_VINEWOOD')
+      )
+    })
+    .map((garage) => {
+      const garageId = garage.garageId
+      const garageName = garage.garageName
+      const displayGarageName = garage.alias
+        ? garage.alias
+        : garageName
+      
+      const slotCount = Number(garage.slotCount ?? 0)
+      const slots = []
+
+      for (let slotNo = 1; slotNo <= slotCount; slotNo++) {
+        const slotKey = `${garageId}-${slotNo}`
+        const found = slotRowMap.value.get(slotKey)
+
+        if (found) {
+          slots.push({
+            ...found,
+            type: 'slot',
+            garageId,
+            garage: displayGarageName,
+            originalGarageName: garageName,
+            alias: garage.alias ?? found.alias ?? null,
+            slot: slotNo,
+            upgradeLocation: found.upgradeLocation ?? '',
+            isEmpty: false
+          })
+        } else {
+          slots.push({
+            id: `empty-${garageId}-${slotNo}`,
+            type: 'slot',
+            garageId,
+            garage: displayGarageName,
+            originalGarageName: garageName,
+            alias: garage.alias ?? null,
+            slot: slotNo,
+            manufacturer: '-',
+            name: '-',
+            category: '-',
+            imageUrl: null,
+            features: '',
+            acquiredYn: 'Y',
+            mansionPosition: null,
+            isEmpty: true
+          })
+        }
+      }
+
+      return {
+        garageId,
+        garageName,
+        displayGarageName,
+        alias: garage.alias ?? null,
+        description: garage.description ?? null,
+        slotCount,
+        usedSlotCount: slots.filter((slot) => {
+          return !slot.isEmpty
+        }).length,
+        collapsed: collapsedGarageIds.value.has(garageId),
+        slots
+      }
+    })
+})
+
+// 선택된 차고 필터를 반영한 카드형 차고 그룹
+const filteredGarageGroups = computed(() => {
+  if (selectedGarageIds.value.length === 0) {
+    return garageGroups.value
+  }
+
+  return garageGroups.value.filter((garage) => {
+    return selectedGarageIds.value.includes(String(garage.garageId))
+  })
+})
+
+// 특수 보관 필터 선택 여부
+const isSpecialStorageFilter = computed(() => {
+  return (
+    selectedGarageIds.value.includes('unassigned') ||
+    selectedGarageIds.value.includes('pegasus') ||
+    selectedGarageIds.value.includes('hangar')
+  )
+})
+
+// 카드형 화면에서 사용할 특수 보관 그룹
+const specialStorageGroups = computed(() => {
+  if (selectedGarageIds.value.includes('unassigned')) {
+    return [
+      {
+        id: 'unassigned',
+        name: '미배치',
+        description: '',
+        rows: unassignedRows.value
+      }
+    ]
+  }
+
+  if (selectedGarageIds.value.includes('pegasus')) {
+    return [
+      {
+        id: 'pegasus',
+        name: '페가수스',
+        description: '',
+        rows: pegasusRows.value
+      }
+    ]
+  }
+
+  if (selectedGarageIds.value.includes('hangar')) {
+    const groups = []
+
+    if (hangarRows.value.length > 0) {
+      groups.push({
+        id: 'hangar',
+        name: getHangarGarageName('HANGAR'),
+        description: '',
+        rows: hangarRows.value
+      })
+    }
+
+    if (hangarStorageRows.value.length > 0) {
+      groups.push({
+        id: 'hangar-storage',
+        name: getHangarGarageName('HANGAR_STORAGE'),
+        description: '',
+        rows: hangarStorageRows.value
+      })
+    }
+
+    if (hangarVinewoodRows.value.length > 0) {
+      groups.push({
+        id: 'hangar-vinewood',
+        name: getHangarGarageName('HANGAR_VINEWOOD'),
+        description: '',
+        rows: hangarVinewoodRows.value
+      })
+    }
+
+    return groups
+  }
+
+  return []
 })
 
 // 차고 목록을 기반으로 화면에 표시할 슬롯 구조 생성
@@ -1108,7 +1343,6 @@ function resetFilters()
       .map((garage) => garage.garageId)
   )
   searchKeyword.value = ''
-  closeDetailPanel()
 }
 
 // 보유 이동수단 검색
@@ -1185,29 +1419,17 @@ function applySearchResult(row)
 {
   if (row.storageType === 'PEGASUS') {
     selectedGarageIds.value = ['pegasus']
+
   } else if (row.storageType === 'UNASSIGNED' || (!row.storageType && !row.garageId)) {
     selectedGarageIds.value = ['unassigned']
-  } else if (row.storageType === 'HANGAR') {
-    const garageId = findGarageIdByName(
-      getHangarGarageName('HANGAR')
-    )
 
-    selectedGarageIds.value = garageId ? [String(garageId)] : []
-    expandGarage(garageId)
-  } else if (row.storageType === 'HANGAR_STORAGE') {
-    const garageId = findGarageIdByName(
-      getHangarGarageName('HANGAR_STORAGE')
-    )
-
-    selectedGarageIds.value = garageId ? [String(garageId)] : []
-    expandGarage(garageId)
-  } else if (row.storageType === 'HANGAR_VINEWOOD') {
-    const garageId = findGarageIdByName(
-      getHangarGarageName('HANGAR_VINEWOOD')
-    )
-
-    selectedGarageIds.value = garageId ? [String(garageId)] : []
-    expandGarage(garageId)
+  } else if (
+    row.storageType === 'HANGAR' ||
+    row.storageType === 'HANGAR_STORAGE' ||
+    row.storageType === 'HANGAR_VINEWOOD'
+  ) {
+    selectedGarageIds.value = ['hangar']
+    
   } else {
     selectedGarageIds.value = [String(row.garageId)]
 
@@ -1222,18 +1444,14 @@ function applySearchResult(row)
     )
   }
 
-  setTimeout(() => {
-    const target = displayRows.value.find((item) => {
-      return item && Number(item.id) === Number(row.id)
-    })
+  setTimeout(async () => {
+    await nextTick()
 
-    if (!target) {
-      return
-    }
+    highlightedOwnedId.value = Number(row.id)
 
-    handleRowClick(target)
-
-    const el = document.querySelector(`[data-row-id="${target.id}"]`)
+    const el = listScrollRef.value?.querySelector(
+      `[data-row-id="${row.id}"]`
+    )
 
     if (el) {
       el.scrollIntoView({
@@ -1241,6 +1459,14 @@ function applySearchResult(row)
         block: 'center'
       })
     }
+
+    if (highlightTimer) {
+      clearTimeout(highlightTimer)
+    }
+
+    highlightTimer = setTimeout(() => {
+      highlightedOwnedId.value = null
+    }, 1800)
   }, 0)
 }
 
@@ -1284,14 +1510,6 @@ function toggleAllGaragesCollapsed()
   }
 
   collapsedGarageIds.value = new Set(garageIds)
-}
-
-// 우측 상세 패널 닫기
-function closeDetailPanel()
-{
-  showDetailPanel.value = false
-  selectedDetailRow.value = null
-  activeRowKey.value = ''
 }
 
 // 등록 모달 열기
@@ -1347,7 +1565,7 @@ function handleSlotDoubleClick(row)
   showModal.value = true
 }
 
-// 행 단일 클릭 시 상세 패널 열기
+// 차량 카드 클릭 시 상세 페이지로 이동
 function handleRowClick(row)
 {
   if (!row) {
@@ -1358,18 +1576,17 @@ function handleRowClick(row)
     return
   }
 
-  // 하이라이트 직접 처리
-  activeRowKey.value = getRowHighlightKey(row)
-
-  // 빈 슬롯은 상세 패널 안 열기
+  // 빈 슬롯은 상세 페이지로 이동하지 않음
   if (row.type === 'slot' && row.isEmpty) {
-    selectedDetailRow.value = null
-    showDetailPanel.value = false
     return
   }
 
-  selectedDetailRow.value = row
-  showDetailPanel.value = true
+  activeRowKey.value = getRowHighlightKey(row)
+
+  // 상세 페이지 이동 전 목록 상태 저장
+  saveOwnedListState(row.id)
+
+  router.push(`/owned/${row.id}`)
 }
 
 // 행이 드래그 가능한지 여부
@@ -1488,7 +1705,6 @@ function handleDragStart(row)
     slotNo: row.slot,
     remark: row.remark,
     imageUrl: row.imageUrl,
-    decal: row.decal,
     acquiredYn: row.acquiredYn,
     mansionPosition: row.mansionPosition
   }
@@ -1765,7 +1981,6 @@ async function handleDrop(row)
         slotNo: targetSlotNo,
         remark: source.remark,
         imageUrl: source.imageUrl,
-        decal: source.decal,
         acquiredYn: source.acquiredYn,
         mansionPosition: source.mansionPosition
       })
@@ -1878,7 +2093,6 @@ async function handleUpdate(payload)
       slotNo: payload.slotNo,
       remark: payload.remark,
       imageUrl: payload.imageUrl,
-      decal: payload.decal,
       acquiredYn: payload.acquiredYn,
       mansionPosition: payload.mansionPosition
     })
@@ -1892,8 +2106,6 @@ async function handleUpdate(payload)
 // 등록/수정/삭제 성공 시 후처리
 async function handleOwnedTransportSuccess(successMessage)
 {
-  const selectedId = selectedDetailRow.value?.id ?? null
-
   showModal.value = false     // 모달 닫기
   editTarget.value = null     // 편집 대상 초기화
   activeRowKey.value = ''     // 행 하이라이트 초기화
@@ -1901,32 +2113,6 @@ async function handleOwnedTransportSuccess(successMessage)
   showToast(successMessage)   // 성공 토스트 표시
 
   await load()                // 목록 새로고침
-
-  if (selectedId) {
-    const refreshedRow = rows.value.find((row) => {
-      return Number(row.id) === Number(selectedId)
-    })
-
-    if (refreshedRow) {
-      const refreshedDisplayRow = displayRows.value.find((row) => {
-        return row && Number(row.id) === Number(selectedId)
-      })
-
-      if (refreshedDisplayRow) {
-        selectedDetailRow.value = refreshedDisplayRow
-        activeRowKey.value = getRowHighlightKey(refreshedDisplayRow)
-        showDetailPanel.value = true
-      } else {
-        selectedDetailRow.value = null
-        activeRowKey.value = ''
-        showDetailPanel.value = false
-      }
-    } else {
-      selectedDetailRow.value = null
-      activeRowKey.value = ''
-      showDetailPanel.value = false
-    }
-  }
 }
 
 // 차고 설정 저장 요청 처리
@@ -1998,11 +2184,107 @@ function isActiveSpecialFilter(type)
          selectedGarageIds.value.includes(type)
 }
 
+// 현재 차고 목록 화면 상태 저장
+function saveOwnedListState(selectedOwnedId)
+{
+  sessionStorage.setItem(
+    OWNED_LIST_STATE_KEY,
+    JSON.stringify({
+      collapsedGarageIds: [...collapsedGarageIds.value],
+      selectedGarageIds: [...selectedGarageIds.value],
+      scrollTop: listScrollRef.value?.scrollTop ?? 0,
+      selectedOwnedId
+    })
+  )
+}
+
+// 저장된 차고 목록 화면 상태 복원
+async function restoreOwnedListState()
+{
+  const savedStateText = sessionStorage.getItem(OWNED_LIST_STATE_KEY)
+
+  if (!savedStateText) {
+    return
+  }
+
+  try {
+    const savedState = JSON.parse(savedStateText)
+
+    if (Array.isArray(savedState.collapsedGarageIds)) {
+      collapsedGarageIds.value = new Set(savedState.collapsedGarageIds)
+    }
+
+    if (Array.isArray(savedState.selectedGarageIds)) {
+      selectedGarageIds.value = savedState.selectedGarageIds
+    }
+
+    await nextTick()
+
+    if (listScrollRef.value) {
+      listScrollRef.value.scrollTop = Number(savedState.scrollTop ?? 0)
+    }
+
+    highlightedOwnedId.value = savedState.selectedOwnedId
+      ? Number(savedState.selectedOwnedId)
+      : null
+
+    await nextTick()
+
+    ensureHighlightedCardVisible(highlightedOwnedId.value)
+
+    if (highlightTimer) {
+      clearTimeout(highlightTimer)
+    }
+
+    highlightTimer = setTimeout(() => {
+      highlightedOwnedId.value = null
+    }, 1800)
+
+  } catch (err) {
+    console.error('차고 목록 상태 복원 실패:', err)
+    sessionStorage.removeItem(OWNED_LIST_STATE_KEY)
+  }
+}
+
+// 강조할 차량 카드가 목록 화면 밖에 있으면 보이도록 스크롤 보정
+function ensureHighlightedCardVisible(ownedId)
+{
+  if (!ownedId || !listScrollRef.value) {
+    return
+  }
+
+  const cardElement = listScrollRef.value.querySelector(
+    `[data-row-id="${ownedId}"]`
+  )
+
+  if (!cardElement) {
+    return
+  }
+
+  const containerRect = listScrollRef.value.getBoundingClientRect()
+  const cardRect = cardElement.getBoundingClientRect()
+
+  const isVisible =
+    cardRect.top >= containerRect.top &&
+    cardRect.bottom <= containerRect.bottom
+
+  if (!isVisible) {
+    cardElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    })
+  }
+}
+
 // 초기 데이터 조회 및 이벤트 등록
-onMounted(() => {
-  load()
-  loadTransportModels()
-  loadGarages()
+onMounted(async () => {
+  await Promise.all([
+    load(),
+    loadTransportModels(),
+    loadGarages()
+  ])
+
+  await restoreOwnedListState()
 
   document.addEventListener('mousedown', handleClickOutside)
 })
@@ -2014,6 +2296,11 @@ onUnmounted(() => {
   if (toastTimer) {
     clearTimeout(toastTimer)
     toastTimer = null
+  }
+
+  if (highlightTimer) {
+    clearTimeout(highlightTimer)
+    highlightTimer = null
   }
 })
 </script>

@@ -21,7 +21,7 @@
         <div class="grid grid-cols-2 gap-4 p-4 overflow-y-auto scroll-dark flex-1 min-h-0">
 
           <!-- 이동수단 선택 영역 -->
-          <div class="col-span-2">
+          <div>
             <div class="text-xs text-neutral-400 mb-1">이동수단</div>
 
             <!-- 등록 모드: 이동수단 검색/선택 -->
@@ -109,19 +109,6 @@
                 </span>
               </div>
             </template>
-          </div>
-
-          <!-- 상징 -->
-          <div>
-            <div class="text-xs text-neutral-400 mb-1">상징</div>
-
-            <input
-              v-model="decal"
-              type="text"
-              maxlength="100"
-              class="w-full h-10 px-3 rounded-md border border-neutral-600 bg-neutral-800/60 text-sm text-neutral-200 placeholder:text-neutral-500 focus:outline-none focus:border-blue-500/70"
-              placeholder="상징 입력"
-            />
           </div>
 
           <!-- 획득 여부 -->
@@ -489,9 +476,6 @@ const showSlotDropdown = ref(false)
 // 비고
 const remark = ref('')
 
-// 상징
-const decal = ref('')
-
 // 획득 여부
 const acquiredYn = ref('Y')
 
@@ -721,7 +705,6 @@ function resetCreateState()
   transportDisplay.value = ''
 
   remark.value = ''
-  decal.value = ''
   acquiredYn.value = 'Y'
   mansionPosition.value = ''
 
@@ -790,7 +773,6 @@ function setPegasusGarageState()
 function setFormValue(row)
 {
   remark.value = row?.remark || ''
-  decal.value = row?.decal || ''
   acquiredYn.value = row?.acquiredYn || 'Y'
   mansionPosition.value = row?.mansionPosition || ''
 }
@@ -950,8 +932,6 @@ function clearTransport()
   selectedTransport.value = null
   transportDisplay.value = ''
   mansionPosition.value = ''
-
-  decal.value = ''
 }
 
 // 격납층 여부
@@ -1239,7 +1219,6 @@ async function updateOwnedTransport()
     slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
     remark: remark.value,
     imageUrl: imageUrl,
-    decal: decal.value,
     acquiredYn: acquiredYn.value,
     mansionPosition: showMansionPosition.value ? mansionPosition.value : ''
   })
@@ -1278,7 +1257,6 @@ async function createOwnedTransport()
     slotNo: storageType === 'GARAGE' ? Number(slotNo.value) : null,
     remark: remark.value,
     imageUrl: imageUrl,
-    decal: decal.value,
     acquiredYn: acquiredYn.value,
     mansionPosition: showMansionPosition.value ? mansionPosition.value : ''
   })
