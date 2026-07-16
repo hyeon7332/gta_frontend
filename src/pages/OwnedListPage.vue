@@ -350,7 +350,7 @@
                             <div class="mt-1 flex items-center justify-between gap-2">
                               <span class="truncate text-[11px] text-neutral-400">
                                 {{ slot.manufacturer }}
-                                <span class="text-neutral-600"> · </span>
+                                <span class="mx-1 text-[13px] leading-none text-neutral-400">•</span>
                                 {{ slot.category }}
                               </span>
 
@@ -504,7 +504,7 @@
                           <div class="mt-1 flex items-center justify-between gap-2">
                             <span class="truncate text-[11px] text-neutral-400">
                               {{ row.manufacturer }}
-                              <span class="text-neutral-600"> · </span>
+                              <span class="mx-1 text-[13px] leading-none text-neutral-400">•</span>
                               {{ row.category }}
                             </span>
 
