@@ -13,7 +13,7 @@
       </div>
     </div>
 
-    <div class="w-full max-w-[1500px] mx-auto px-4 pt-2 pb-4 transition-all duration-300">
+    <div class="w-full max-w-[1650px] mx-auto px-4 pt-2 pb-4 transition-all duration-300">
       <div class="flex items-start justify-center">
         <div class="w-full min-w-0">
           <!-- main panel -->
@@ -227,7 +227,7 @@
                         :data-row-id="slot.id"
                         :draggable="canDragRow(slot)"
                         :class="[
-                          'relative min-w-0 overflow-hidden rounded-md border flex flex-col transition-all duration-150 hover:scale-[1.005]',
+                          'relative min-w-0 overflow-hidden rounded-md border flex flex-col transition-colors duration-150',
                           slot.isEmpty
                             ? 'border-neutral-700 bg-neutral-900/30 text-neutral-500'
                             : 'cursor-pointer border-neutral-600 bg-neutral-800/50 hover:border-neutral-500 hover:bg-neutral-700/50',
@@ -251,7 +251,7 @@
                         <!-- 빈 슬롯 -->
                         <template v-if="slot.isEmpty">
                           <div
-                            class="flex h-[180px] items-center justify-center
+                            class="flex aspect-[3/2] shrink-0 items-center justify-center
                                   border-b border-neutral-700 bg-neutral-900/40"
                           >
                             <span class="text-[12px] text-neutral-500">
@@ -273,15 +273,15 @@
                         <!-- 차량이 있는 슬롯 -->
                         <template v-else>
                           <div
-                            class="relative h-[180px] overflow-hidden
+                            class="relative aspect-[3/2] shrink-0 overflow-hidden
                                   border-b border-neutral-700 bg-neutral-900"
                           >
                             <img
                               v-if="slot.imageUrl"
-                              :src="slot.imageUrl"
+                              :src="resolveThumbnailUrl(slot.imageUrl)"
                               :alt="slot.name"
                               loading="lazy"
-                              class="h-full w-full object-contain p-2"
+                              class="h-full w-full object-cover"
                             />
 
                             <div
@@ -335,7 +335,7 @@
                             </div>
 
                             <!-- 2줄: 제조사 / 분류 / 수정 -->
-                            <div class="mt-auto flex items-center justify-between gap-2 pt-2">
+                            <div class="mt-1 flex items-center justify-between gap-2">
                               <span class="truncate text-[11px] text-neutral-400">
                                 {{ slot.manufacturer }}
                                 <span class="text-neutral-600"> · </span>
@@ -409,7 +409,7 @@
                         :class="[
                           'relative flex min-w-0 flex-col overflow-hidden rounded-md',
                           'cursor-pointer border border-neutral-600 bg-neutral-800/50',
-                          'transition-all duration-150 hover:scale-[1.005] hover:border-neutral-500 hover:bg-neutral-700/50',
+                          'transition-colors duration-150 hover:border-neutral-500 hover:bg-neutral-700/50',
                           isDropTarget(row)
                             ? 'border-green-500 bg-green-900/20'
                             : '',
@@ -428,7 +428,7 @@
                       >
                         <!-- 이미지 -->
                         <div
-                          class="relative h-[180px] overflow-hidden
+                          class="relative aspect-[3/2] shrink-0 overflow-hidden
                                 border-b border-neutral-700 bg-neutral-900"
                         >
                           <img
@@ -436,7 +436,7 @@
                             :src="row.imageUrl"
                             :alt="row.name"
                             loading="lazy"
-                            class="h-full w-full object-contain p-2"
+                            class="h-full w-full object-cover"
                           />
 
                           <div
@@ -489,7 +489,7 @@
                           </div>
 
                           <!-- 2줄: 제조사 / 분류 / 수정 -->
-                          <div class="mt-auto flex items-center justify-between gap-2 pt-2">
+                          <div class="mt-1 flex items-center justify-between gap-2">
                             <span class="truncate text-[11px] text-neutral-400">
                               {{ row.manufacturer }}
                               <span class="text-neutral-600"> · </span>
@@ -636,7 +636,7 @@ import GarageSettingModal from '@/components/GarageSettingModal.vue'
 import Toast from '@/components/Toast.vue'
 import OwnedTransportSearchResultModal from '@/components/OwnedTransportSearchResultModal.vue'
 import * as transportDataMapper from '@/utils/transportDataMapper'
-import { formatFeatureBadges } from '@/utils/format'
+import { formatFeatureBadges, resolveImageUrl, resolveThumbnailUrl } from '@/utils/format'
 
 const router = useRouter()
 
@@ -678,6 +678,9 @@ const highlightedOwnedId = ref(null)
 
 // 카드 강조 해제 타이머
 let highlightTimer = null
+
+// 상세 페이지 이동 중인지 여부
+let navigatingToDetail = false
 
 // 선택된 차고 필터 목록
 const selectedGarageIds = ref([])
@@ -1429,7 +1432,7 @@ function applySearchResult(row)
     row.storageType === 'HANGAR_VINEWOOD'
   ) {
     selectedGarageIds.value = ['hangar']
-    
+
   } else {
     selectedGarageIds.value = [String(row.garageId)]
 
@@ -1582,6 +1585,9 @@ function handleRowClick(row)
   }
 
   activeRowKey.value = getRowHighlightKey(row)
+
+  // 상세 페이지 이동임을 표시
+  navigatingToDetail = true
 
   // 상세 페이지 이동 전 목록 상태 저장
   saveOwnedListState(row.id)
@@ -2286,12 +2292,20 @@ onMounted(async () => {
 
   await restoreOwnedListState()
 
+  // 복원은 한 번만 사용
+  sessionStorage.removeItem(OWNED_LIST_STATE_KEY)
+
   document.addEventListener('mousedown', handleClickOutside)
 })
 
 // 컴포넌트 종료 시 이벤트 및 타이머 제거
 onUnmounted(() => {
   document.removeEventListener('mousedown', handleClickOutside)
+
+  // 상세 페이지 이동이 아닌 경우 저장된 목록 상태 제거
+  if (!navigatingToDetail) {
+    sessionStorage.removeItem(OWNED_LIST_STATE_KEY)
+  }
   
   if (toastTimer) {
     clearTimeout(toastTimer)

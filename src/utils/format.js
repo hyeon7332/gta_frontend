@@ -68,6 +68,28 @@ export function resolveImageUrl(imageUrl)
   return import.meta.env.VITE_FILE_BASE_URL + imageUrl
 }
 
+/** 리스트용 썸네일 URL */
+export function resolveThumbnailUrl(imageUrl)
+{
+  if (!imageUrl) {
+    return ''
+  }
+
+  let url = imageUrl
+
+  if (!(url.startsWith('http://') || url.startsWith('https://'))) {
+    url = import.meta.env.VITE_FILE_BASE_URL + url
+  }
+
+  const dot = url.lastIndexOf('.')
+
+  if (dot === -1) {
+    return url
+  }
+
+  return url.substring(0, dot) + '_thumb' + url.substring(dot)
+}
+
 /** 특징 코드 배지 표시명 매핑 */
 export const featureBadgeDisplayMap = {
   HSW: 'HSW',

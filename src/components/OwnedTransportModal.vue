@@ -295,46 +295,58 @@
             ></textarea>
           </div>
 
-          <!-- 이미지 업로드 / 미리보기 -->
+          <!-- 이미지 업로드 -->
           <div class="col-span-2">
-            <div class="text-xs text-neutral-400 mb-1">이미지</div>
+            <div class="mb-1 text-xs text-neutral-400">이미지</div>
 
-            <div class="relative h-[260px] rounded-md border border-neutral-700 bg-neutral-800/40 overflow-hidden">
-              <img
-                v-if="!removeImageYn && (previewUrl || props.initialRow?.imageUrl)"
-                :src="previewUrl || format.resolveImageUrl(props.initialRow?.imageUrl)"
-                class="w-full h-full object-cover"
-              />
-
-              <div
-                v-else
-                class="w-full h-full flex items-center justify-center text-sm text-neutral-400"
-              >
-                이미지 없음
-              </div>
-
-              <button
-                v-if="!removeImageYn && (previewUrl || props.initialRow?.imageUrl)"
-                type="button"
-                class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center
-                      rounded-full bg-black/60 text-white hover:bg-black/80"
-                @click="removeImage"
-              >
-                <Trash2 class="w-4 h-4" />
-              </button>
-            </div>
-
-            <div class="mt-2">
+            <div class="flex items-center gap-2">
               <input
                 type="file"
-                accept="image/*"
-                class="block w-full text-sm text-neutral-300
-                      file:mr-3 file:px-3 file:py-1.5 file:rounded-md
+                accept="image/png, image/jpeg"
+                class="min-w-0 flex-1 text-sm text-neutral-300
+                      file:mr-3 file:rounded-md
                       file:border file:border-neutral-600
-                      file:bg-neutral-800/60 file:text-neutral-200
+                      file:bg-neutral-800/60
+                      file:px-3 file:py-1.5
+                      file:text-neutral-200
                       hover:file:bg-neutral-700"
                 @change="handleImageChange"
               />
+
+              <button
+                v-if="
+                  imageFile ||
+                  (!removeImageYn && props.initialRow?.imageUrl)
+                "
+                type="button"
+                class="flex h-8 shrink-0 items-center gap-1
+                      rounded-md border border-red-500/50
+                      bg-red-900/30 px-3
+                      text-[12px] text-red-300
+                      transition hover:bg-red-900/50"
+                @click="removeImage"
+              >
+                <Trash2 class="h-4 w-4" />
+                <span>이미지 삭제</span>
+              </button>
+            </div>
+
+            <div class="mt-1.5 text-[11px] text-neutral-500">
+              <template v-if="imageFile">
+                선택된 파일: {{ imageFile.name }}
+              </template>
+
+              <template v-else-if="removeImageYn">
+                저장하면 기존 이미지가 삭제됩니다.
+              </template>
+
+              <template v-else-if="props.initialRow?.imageUrl">
+                현재 이미지가 등록되어 있습니다.
+              </template>
+
+              <template v-else>
+                PNG 또는 JPEG, 최대 2MB
+              </template>
             </div>
           </div>
 
@@ -484,9 +496,6 @@ const mansionPosition = ref('')
 
 // 업로드 이미지 파일
 const imageFile = ref(null)
-
-// 이미지 미리보기 URL
-const previewUrl = ref('')
 
 // 이미지 삭제 여부
 const removeImageYn = ref(false)
@@ -715,7 +724,6 @@ function resetCreateState()
 function resetImageState()
 {
   imageFile.value = null
-  previewUrl.value = ''
   removeImageYn.value = false
 }
 
@@ -1304,7 +1312,6 @@ function handleImageChange(e)
 
     e.target.value = ''
     imageFile.value = null
-    previewUrl.value = ''
     return
   }
 
@@ -1315,12 +1322,10 @@ function handleImageChange(e)
 
     e.target.value = ''
     imageFile.value = null
-    previewUrl.value = ''
     return
   }
 
   imageFile.value = file
-  previewUrl.value = URL.createObjectURL(file)
   removeImageYn.value = false
 }
 
@@ -1347,7 +1352,6 @@ async function uploadImageIfNeeded()
 function removeImage()
 {
   imageFile.value = null
-  previewUrl.value = ''
   removeImageYn.value = true
 }
 

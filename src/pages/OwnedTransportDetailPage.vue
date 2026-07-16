@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-[calc(100dvh-56px)] bg-neutral-700">
-    <div class="mx-auto w-full max-w-[1100px] px-4 pb-4 pt-2">
+    <div class="mx-auto w-full max-w-[800px] px-4 pb-4 pt-2">
       <!-- 조회 중 -->
       <div
         v-if="loading"
