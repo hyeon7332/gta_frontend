@@ -186,8 +186,20 @@
                           {{ garage.displayGarageName }}
                         </span>
 
-                        <span class="shrink-0 text-[11px] font-normal text-neutral-400">
-                          {{ garage.usedSlotCount }} / {{ garage.slotCount }}
+                        <span
+                          class="shrink-0 rounded-md border border-neutral-700
+                                bg-neutral-900/80 px-1.5 py-[3px]
+                                text-[10px] font-semibold leading-none shadow-sm"
+                        >
+                          <span class="text-neutral-300">
+                            {{ garage.usedSlotCount }}
+                          </span>
+
+                          <span class="mx-0.5 text-neutral-500">/</span>
+
+                          <span class="text-neutral-300">
+                            {{ garage.slotCount }}
+                          </span>
                         </span>
 
                         <span
