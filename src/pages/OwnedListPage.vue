@@ -536,27 +536,12 @@
                         bg-neutral-900/30 border-t border-neutral-700
                         text-[13px] text-neutral-300"
                 >
-                  <div class="tabular-nums">
-                    총 
+                  <div class="tabular-nums text-neutral-300">
+                    보유 이동수단
                     <span class="font-semibold text-white">
-                      {{ totalSlotCount }}
+                      {{ acquiredTransportCount }}
                     </span>
-                    칸 중
-                    <span
-                      class="font-semibold"
-                      :class="
-                        totalSlotCount === 0
-                          ? 'text-neutral-400'
-                          : usedSlotCount / totalSlotCount > 0.8
-                          ? 'text-red-400'
-                          : usedSlotCount / totalSlotCount > 0.5
-                          ? 'text-yellow-400'
-                          : 'text-green-400'
-                      "
-                    >
-                      {{ usedSlotCount }}
-                    </span>
-                    칸 사용중
+                    대
                   </div>
   
                   <div class="flex items-center gap-4 text-[13px] text-neutral-400">
@@ -1276,26 +1261,9 @@ const selectedGarageFilterLabel = computed(() => {
   return `${selectedOptions[0].garageName} 외 ${selectedOptions.length - 1}`
 })
 
-// 전체 슬롯 수
-const totalSlotCount = computed(() => {
-  return garageList.value.reduce((sum, garage) => {
-    return sum + Number(garage.slotCount ?? 0)
-  }, 0)
-})
-
-// 사용 중인 슬롯 수
-const usedSlotCount = computed(() => {
-  const occupiedSlotKeys = new Set()
-
-  rows.value.forEach((row) => {
-    if (!row.garageId || !row.slot) {
-      return
-    }
-
-    occupiedSlotKeys.add(`${row.garageId}-${row.slot}`)
-  })
-
-  return occupiedSlotKeys.size
+// 미획득을 제외한 보유 이동수단 수
+const acquiredTransportCount = computed(() => {
+  return rows.value.filter((row) => row.acquiredYn !== 'N').length
 })
 
 // 외부 클릭 시 차고 필터 드롭다운 닫기
