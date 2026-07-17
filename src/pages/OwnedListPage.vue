@@ -445,7 +445,7 @@
                         >
                           <img
                             v-if="row.imageUrl"
-                            :src="row.imageUrl"
+                            :src="resolveThumbnailUrl(row.imageUrl)"
                             :alt="row.name"
                             loading="lazy"
                             class="h-full w-full object-cover"
