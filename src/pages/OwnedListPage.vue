@@ -198,7 +198,7 @@
                           <span class="mx-0.5 text-neutral-500">/</span>
 
                           <span class="text-neutral-300">
-                            {{ garage.slotCount }}
+                            {{ garage.displaySlotCount  }}
                           </span>
                         </span>
 
@@ -844,6 +844,29 @@ const garageGroups = computed(() => {
         }
       }
 
+      const isApartmentGarage = /^아파트 차고\s*[1-8]$/.test(garageName)
+
+      const displaySlotCount = isApartmentGarage
+        ? 10
+        : slotCount
+
+      const usedSlotCount = slots.filter((slot) => {
+        if (slot.isEmpty) {
+          return false
+        }
+
+        // 아파트 차고 1~8의 자전거 전용 슬롯 제외
+        if (
+          isApartmentGarage &&
+          Number(slot.slot) >= 11 &&
+          Number(slot.slot) <= 13
+        ) {
+          return false
+        }
+
+        return true
+      }).length
+
       return {
         garageId,
         garageName,
@@ -851,9 +874,8 @@ const garageGroups = computed(() => {
         alias: garage.alias ?? null,
         description: garage.description ?? null,
         slotCount,
-        usedSlotCount: slots.filter((slot) => {
-          return !slot.isEmpty
-        }).length,
+        displaySlotCount,
+        usedSlotCount,
         collapsed: collapsedGarageIds.value.has(garageId),
         slots
       }
