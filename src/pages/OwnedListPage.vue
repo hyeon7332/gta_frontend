@@ -844,7 +844,7 @@ const garageGroups = computed(() => {
         }
       }
 
-      const isApartmentGarage = /^아파트 차고\s*[1-8]$/.test(garageName)
+      const isApartmentGarage = /^아파트 차고\s*(10|[1-9])$/.test(garageName)
 
       const displaySlotCount = isApartmentGarage
         ? 10
