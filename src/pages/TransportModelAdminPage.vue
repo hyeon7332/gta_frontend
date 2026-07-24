@@ -349,7 +349,7 @@
             </div>
 
             <!-- table -->
-            <div class="scroll-dark mt-2 sm:mt-3 w-full overflow-auto max-h-[calc(100dvh-230px)]">
+            <div class="scroll-dark mt-2 sm:mt-3 w-full overflow-auto max-h-[calc(100dvh-285px)]">
               <table class="w-full text-sm text-neutral-800 border-collapse table-fixed">
                 <thead class="bg-neutral-100">
                   <tr class="text-[13px] text-neutral-800 font-medium tracking-wide whitespace-nowrap bg-neutral-100/70">
@@ -473,9 +473,9 @@
                           <span
                             v-for="badge in format.formatFeatureBadges(row.features)"
                             :key="badge"
-                            class="shrink-0 relative top-[1px] px-2 py-[2px]
-                                  rounded-md border border-neutral-300/70
-                                  bg-neutral-100 text-[11px]
+                            class="shrink-0 relative px-1.5 py-0
+                                  rounded border border-neutral-300/70
+                                  bg-neutral-100 text-[9px]
                                   text-neutral-800 whitespace-nowrap"
                           >
                             {{ badge }}
