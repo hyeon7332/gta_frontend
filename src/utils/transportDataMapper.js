@@ -17,6 +17,7 @@ export function normalizeOwnedTransport(x)
   return {
     id: x.id ?? x.ownedTransportId ?? x.ownedId ?? x.transportId,
     garageId: x.garageId ?? x.garage_id ?? null,
+    garageAlias: x.garageAlias ?? x.garage_alias ?? x.alias ?? '',
     garage: x.garageName ?? x.garage_name ?? x.garage ?? x.storage ?? '-',
     slot: x.slot ?? x.slotNo ?? x.slot_no ?? null,
     storageType: x.storageType ?? x.storage_type ?? '',

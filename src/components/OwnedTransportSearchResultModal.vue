@@ -163,6 +163,8 @@ onUnmounted(() => {
 
 function getLocationLabel(row)
 {
+  console.log(row)
+  
   if (row.storageType === 'PEGASUS') {
     return '페가수스'
   }
