@@ -177,7 +177,7 @@
                         hover:bg-neutral-100 active:bg-neutral-200"
                   @click="selectGarage(g)"
                 >
-                  <div class="text-neutral-900">{{ g.garageName }}</div>
+                  <div class="text-neutral-900">{{ getGarageDisplayText(g) }}</div>
                   <div class="text-neutral-500 text-[12px]">{{ g.type }}</div>
                 </button>
 
@@ -551,9 +551,10 @@ const filteredGarageList = computed(() => {
   const tokens = kwRaw.split(/\s+/).filter(Boolean)
 
   return (Array.isArray(props.garageList) ? props.garageList : []).filter((g) => {
+    const alias = String(g?.alias || '').toLowerCase()
     const garageName = String(g?.garageName || '').toLowerCase()
     const type = String(g?.type || '').toLowerCase()
-    const hay = `${garageName} ${type}`
+    const hay = `${alias} ${garageName} ${type}`
 
     return tokens.every((tok) => {
       return hay.includes(tok)
@@ -790,7 +791,7 @@ function setGarageValue(garage)
 {
   selectedGarage.value = garage
   selectedGarageId.value = garage.garageId
-  garageText.value = String(garage.garageName || '').trim()
+  garageText.value = getGarageDisplayText(garage)
   garageQuery.value = ''
 }
 
@@ -865,6 +866,15 @@ function findGarageByStorageType(storageType)
   }
 
   return null
+}
+
+// 차고 표시명 생성
+function getGarageDisplayText(garage)
+{
+  const alias = String(garage?.alias || '').trim()
+  const garageName = String(garage?.garageName || '').trim()
+
+  return alias || garageName
 }
 
 // 이동수단 표시명 생성
