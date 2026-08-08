@@ -657,10 +657,11 @@ async function initEditMode()
 {
   const row = props.initialRow
 
-  if (row?.storageType === 'PEGASUS') {
-    selectedTransport.value = row
-    transportDisplay.value = getTransportDisplayText(row)
+  // 수정 대상 이동수단 세팅
+  selectedTransport.value = row
+  transportDisplay.value = getTransportDisplayText(row)
 
+  if (row?.storageType === 'PEGASUS') {
     setPegasusGarageState()
     setFormValue(row)
     return
