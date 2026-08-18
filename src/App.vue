@@ -24,6 +24,15 @@
           </button>
 
           <button
+            type="button"
+            :class="getMenuButtonClass(isActiveMenu('/ranking'))"
+            @click="goRanking"
+          >
+            <Trophy class="w-4 h-4" />
+            <span>랭킹</span>
+          </button>
+
+          <button
             v-if="isAdmin"
             type="button"
             :class="getMenuButtonClass(isActiveMenu('/transport-models'))"
@@ -85,7 +94,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Car, LogOut, UserCheck, Warehouse } from 'lucide-vue-next'
+import { Car, LogOut, UserCheck, Warehouse, Trophy } from 'lucide-vue-next'
 
 const AUTH_STORAGE_KEYS = [
   'accessToken',
@@ -137,6 +146,12 @@ function getMenuButtonClass(isActive)
 function goHome()
 {
   router.push('/')
+}
+
+// 랭킹 화면으로 이동
+function goRanking()
+{
+  router.push('/ranking')
 }
 
 // 이동수단 관리 화면으로 이동
