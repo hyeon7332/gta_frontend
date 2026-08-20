@@ -9,6 +9,7 @@
                rounded-lg shadow-lg overflow-hidden"
       >
         <div class="p-2">
+
           <!-- 내부 카드 -->
           <div
             class="border border-neutral-300
@@ -21,19 +22,68 @@
                      bg-neutral-300
                      border-b border-neutral-400"
             >
-              <!-- 제목 -->
-              <div>
+              <!-- 제목 + 랭킹 기준 -->
+              <div class="flex items-center justify-between gap-4">
                 <h1 class="text-xl font-bold text-neutral-900">
                   이동수단 랭킹
                 </h1>
 
-                <p class="mt-1 text-[13px] text-neutral-600">
-                  내 차고에 등록된 이동수단의 순위를 확인할 수 있습니다.
-                </p>
+                <!-- 랭킹 기준 -->
+                <div
+                  ref="rankingTypeDropdownRef"
+                  class="relative w-[200px]"
+                >
+                  <button
+                    type="button"
+                    class="h-8 w-[200px] px-3 rounded-md
+                          flex items-center justify-between
+                          bg-neutral-100 border border-neutral-400
+                          text-[13px] text-neutral-800
+                          hover:bg-neutral-200 transition"
+                    @click="showRankingTypeDropdown = !showRankingTypeDropdown"
+                  >
+                    <span class="truncate">
+                      {{ selectedRankingTypeLabel }}
+                    </span>
+
+                    <ChevronDown class="w-4 h-4 text-neutral-400" />
+                  </button>
+
+                  <div
+                    v-if="showRankingTypeDropdown"
+                    class="absolute right-0 top-10 z-20 w-[200px]
+                          rounded-md border border-neutral-300
+                          bg-neutral-100 shadow-lg p-1"
+                  >
+                    <button
+                      v-for="type in rankingTypes"
+                      :key="type.value"
+                      type="button"
+                      class="w-full flex items-center justify-between
+                            px-2 py-2 rounded
+                            text-[13px] text-neutral-800
+                            hover:bg-neutral-200/70 transition"
+                      @click="selectRankingType(type.value)"
+                    >
+                      <span>
+                        {{ type.label }}
+                      </span>
+
+                      <span
+                        v-if="selectedRankingType === type.value"
+                        class="text-[11px] text-neutral-400"
+                      >
+                        선택됨
+                      </span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <!-- 차량 분류 -->
-              <div class="mt-4">
+              <!-- 차량 분류 + 초기화 -->
+              <div class="mt-4 flex items-center justify-between gap-4">
+
+                <!-- 차량 분류 -->
                 <div class="flex flex-wrap gap-2">
                   <button
                     v-for="category in categories"
@@ -50,34 +100,37 @@
                     {{ category.label }}
                   </button>
                 </div>
+
+                <!-- 초기화 -->
+                <button
+                  type="button"
+                  class="h-8 w-8 shrink-0
+                        flex items-center justify-center
+                        rounded-md
+                        bg-neutral-100
+                        border border-neutral-400
+                        text-neutral-700
+                        hover:bg-neutral-200
+                        active:bg-neutral-300
+                        transition"
+                  title="초기화"
+                  @click="resetRanking"
+                >
+                  <RotateCcw class="w-4 h-4" />
+                </button>
+
               </div>
 
-              <!-- 랭킹 기준 -->
-              <div class="mt-3">
-                <select
-                  v-model="selectedRankingType"
-                  class="h-9 min-w-[130px]
-                         px-3
-                         bg-neutral-100
-                         border border-neutral-400
-                         rounded-md
-                         text-[13px] text-neutral-800
-                         outline-none
-                         focus:border-neutral-600"
-                >
-                  <option
-                    v-for="type in rankingTypes"
-                    :key="type.value"
-                    :value="type.value"
-                  >
-                    {{ type.label }}
-                  </option>
-                </select>
-              </div>
             </div>
 
             <!-- 랭킹 영역 -->
-            <div class="p-4 bg-neutral-200/90">
+            <div
+              class="scroll-dark
+                    h-[calc(100dvh-250px)]
+                    [@media(min-height:1200px)]:h-[calc(100dvh-310px)]
+                    overflow-y-auto overflow-x-hidden
+                    px-4 pt-2 pb-4 bg-neutral-200/90"
+            >
               <!-- 로딩 -->
               <div
                 v-if="loading"
@@ -88,7 +141,7 @@
 
               <!-- 데이터 없음 -->
               <div
-                v-else-if="rankingList.length === 0"
+                v-else-if="top3List.length === 0 && rankingList.length === 0"
                 class="py-16 text-center text-sm text-neutral-500"
               >
                 해당 조건의 랭킹 데이터가 없습니다.
@@ -96,31 +149,35 @@
 
               <!-- 랭킹 데이터 -->
               <template v-else>
+
                 <!-- TOP 3 -->
-                <div class="pt-6">
+                <div
+                  v-if="top3List.length > 0"
+                  class="pt-6"
+                >
                   <div
                     class="grid grid-cols-1 md:grid-cols-3
-                          gap-4 items-end
-                          max-w-[1050px] mx-auto"
+                           gap-4 items-end
+                           max-w-[1050px] mx-auto"
                   >
                     <!-- 2위 -->
                     <div
-                      v-if="rankingList[1]"
+                      v-if="top3List[1]"
                       class="bg-neutral-100 w-[310px]
-                            border border-neutral-300
-                            rounded-lg overflow-hidden
-                            shadow-sm
-                            md:-translate-x-10"
+                             border border-neutral-300
+                             rounded-lg overflow-hidden
+                             shadow-sm
+                             md:-translate-x-10"
                     >
                       <!-- 이미지 영역 -->
                       <div
                         class="relative aspect-[3/2] shrink-0 overflow-hidden
-                              border-b border-neutral-300 bg-neutral-300"
+                               border-b border-neutral-300 bg-neutral-300"
                       >
                         <img
-                          v-if="rankingList[1].imageUrl"
-                          :src="format.resolveThumbnailUrl(rankingList[1].imageUrl)"
-                          :alt="rankingList[1].name"
+                          v-if="top3List[1].imageUrl"
+                          :src="format.resolveThumbnailUrl(top3List[1].imageUrl)"
+                          :alt="top3List[1].name"
                           loading="lazy"
                           class="h-full w-full object-cover"
                         />
@@ -128,18 +185,19 @@
                         <div
                           v-else
                           class="flex h-full items-center justify-center
-                                text-[12px] text-neutral-500"
+                                 text-[12px] text-neutral-500"
                         >
                           이미지 없음
                         </div>
 
+                        <!-- 2위 메달 -->
                         <div class="absolute top-3 left-3 z-10 flex flex-col items-center">
                           <div
                             class="relative flex h-8 w-8 items-center justify-center
-                                  rounded-full border-2 border-neutral-400
-                                  bg-gradient-to-br from-white via-neutral-200 to-neutral-400
-                                  text-sm font-extrabold text-neutral-800
-                                  shadow-md"
+                                   rounded-full border-2 border-neutral-400
+                                   bg-gradient-to-br from-white via-neutral-200 to-neutral-400
+                                   text-sm font-extrabold text-neutral-800
+                                   shadow-md"
                           >
                             2
                           </div>
@@ -147,7 +205,7 @@
                           <div class="-mt-1 flex">
                             <div
                               class="h-3 w-2.5 bg-neutral-400
-                                    [clip-path:polygon(0_0,100%_0,75%_100%,50%_75%,25%_100%)]"
+                                     [clip-path:polygon(0_0,100%_0,75%_100%,50%_75%,25%_100%)]"
                             ></div>
                           </div>
                         </div>
@@ -156,38 +214,51 @@
                       <!-- 차량 정보 -->
                       <div class="px-3 py-2">
                         <p class="text-xs leading-tight text-neutral-500">
-                          {{ rankingList[1].manufacturer }}
+                          {{ top3List[1].manufacturer }}
                         </p>
 
-                        <h2 class="mt-0.5 text-base font-bold leading-tight text-neutral-900">
-                          {{ rankingList[1].name }}
-                        </h2>
+                        <div class="mt-0.5 flex min-w-0 items-center gap-1">
+                          <h2 class="truncate text-base font-bold leading-tight text-neutral-900">
+                            {{ top3List[1].name }}
+                          </h2>
+
+                          <span
+                            v-for="badge in format.formatFeatureBadges(top3List[1].features)"
+                            :key="badge"
+                            class="shrink-0 rounded-md
+                                   border border-neutral-300
+                                   bg-neutral-100
+                                   px-1.5 py-[1px]
+                                   text-[9px] font-medium text-neutral-600"
+                          >
+                            {{ badge }}
+                          </span>
+                        </div>
 
                         <p class="mt-1 text-right text-sm font-bold leading-tight text-neutral-800">
-                          {{ formatRankingValue(rankingList[1]) }}
+                          {{ formatRankingValue(top3List[1]) }}
                         </p>
                       </div>
                     </div>
 
-
                     <!-- 1위 -->
                     <div
-                      v-if="rankingList[0]"
+                      v-if="top3List[0]"
                       class="bg-neutral-100 w-[310px]
-                            border border-neutral-300
-                            rounded-lg overflow-hidden
-                            shadow-md
-                            md:-translate-y-6"
+                             border border-neutral-300
+                             rounded-lg overflow-hidden
+                             shadow-md
+                             md:-translate-y-6"
                     >
                       <!-- 이미지 영역 -->
                       <div
                         class="relative aspect-[3/2] shrink-0 overflow-hidden
-                              border-b border-neutral-300 bg-neutral-300"
+                               border-b border-neutral-300 bg-neutral-300"
                       >
                         <img
-                          v-if="rankingList[0].imageUrl"
-                          :src="format.resolveThumbnailUrl(rankingList[0].imageUrl)"
-                          :alt="rankingList[0].name"
+                          v-if="top3List[0].imageUrl"
+                          :src="format.resolveThumbnailUrl(top3List[0].imageUrl)"
+                          :alt="top3List[0].name"
                           loading="lazy"
                           class="h-full w-full object-cover"
                         />
@@ -195,28 +266,27 @@
                         <div
                           v-else
                           class="flex h-full items-center justify-center
-                                text-[12px] text-neutral-500"
+                                 text-[12px] text-neutral-500"
                         >
                           이미지 없음
                         </div>
 
+                        <!-- 1위 메달 -->
                         <div class="absolute top-3 left-3 z-10 flex flex-col items-center">
-                          <!-- 메달 -->
                           <div
                             class="relative flex h-8 w-8 items-center justify-center
-                                  rounded-full border-2 border-yellow-600
-                                  bg-gradient-to-br from-yellow-200 via-yellow-400 to-yellow-600
-                                  text-sm font-extrabold text-yellow-950
-                                  shadow-md"
+                                   rounded-full border-2 border-yellow-600
+                                   bg-gradient-to-br from-yellow-200 via-yellow-400 to-yellow-600
+                                   text-sm font-extrabold text-yellow-950
+                                   shadow-md"
                           >
                             1
                           </div>
 
-                          <!-- 리본 -->
                           <div class="-mt-1 flex">
                             <div
                               class="h-3 w-2.5 bg-yellow-600
-                                    [clip-path:polygon(0_0,100%_0,75%_100%,50%_75%,25%_100%)]"
+                                     [clip-path:polygon(0_0,100%_0,75%_100%,50%_75%,25%_100%)]"
                             ></div>
                           </div>
                         </div>
@@ -225,38 +295,51 @@
                       <!-- 차량 정보 -->
                       <div class="px-3 py-2">
                         <p class="text-xs leading-tight text-neutral-500">
-                          {{ rankingList[0].manufacturer }}
+                          {{ top3List[0].manufacturer }}
                         </p>
 
-                        <h2 class="mt-0.5 text-base font-bold leading-tight text-neutral-900">
-                          {{ rankingList[0].name }}
-                        </h2>
+                        <div class="mt-0.5 flex min-w-0 items-center gap-1">
+                          <h2 class="truncate text-base font-bold leading-tight text-neutral-900">
+                            {{ top3List[0].name }}
+                          </h2>
+
+                          <span
+                            v-for="badge in format.formatFeatureBadges(top3List[0].features)"
+                            :key="badge"
+                            class="shrink-0 rounded-md
+                                   border border-neutral-300
+                                   bg-neutral-100
+                                   px-1.5 py-[1px]
+                                   text-[9px] font-medium text-neutral-600"
+                          >
+                            {{ badge }}
+                          </span>
+                        </div>
 
                         <p class="mt-1 text-right text-sm font-bold leading-tight text-neutral-800">
-                          {{ formatRankingValue(rankingList[0]) }}
+                          {{ formatRankingValue(top3List[0]) }}
                         </p>
                       </div>
                     </div>
 
-
                     <!-- 3위 -->
                     <div
-                      v-if="rankingList[2]"
+                      v-if="top3List[2]"
                       class="bg-neutral-100 w-[310px]
-                            border border-neutral-300
-                            rounded-lg overflow-hidden
-                            shadow-sm
-                            md:translate-x-10"
+                             border border-neutral-300
+                             rounded-lg overflow-hidden
+                             shadow-sm
+                             md:translate-x-10"
                     >
                       <!-- 이미지 영역 -->
                       <div
                         class="relative aspect-[3/2] shrink-0 overflow-hidden
-                              border-b border-neutral-300 bg-neutral-300"
+                               border-b border-neutral-300 bg-neutral-300"
                       >
                         <img
-                          v-if="rankingList[2].imageUrl"
-                          :src="format.resolveThumbnailUrl(rankingList[2].imageUrl)"
-                          :alt="rankingList[2].name"
+                          v-if="top3List[2].imageUrl"
+                          :src="format.resolveThumbnailUrl(top3List[2].imageUrl)"
+                          :alt="top3List[2].name"
                           loading="lazy"
                           class="h-full w-full object-cover"
                         />
@@ -264,18 +347,19 @@
                         <div
                           v-else
                           class="flex h-full items-center justify-center
-                                text-[12px] text-neutral-500"
+                                 text-[12px] text-neutral-500"
                         >
                           이미지 없음
                         </div>
 
+                        <!-- 3위 메달 -->
                         <div class="absolute top-3 left-3 z-10 flex flex-col items-center">
                           <div
                             class="relative flex h-8 w-8 items-center justify-center
-                                  rounded-full border-2 border-amber-800
-                                  bg-gradient-to-br from-amber-300 via-amber-600 to-amber-800
-                                  text-sm font-extrabold text-white
-                                  shadow-md"
+                                   rounded-full border-2 border-amber-800
+                                   bg-gradient-to-br from-amber-300 via-amber-600 to-amber-800
+                                   text-sm font-extrabold text-white
+                                   shadow-md"
                           >
                             3
                           </div>
@@ -283,7 +367,7 @@
                           <div class="-mt-1 flex">
                             <div
                               class="h-3 w-2.5 bg-amber-800
-                                    [clip-path:polygon(0_0,100%_0,75%_100%,50%_75%,25%_100%)]"
+                                     [clip-path:polygon(0_0,100%_0,75%_100%,50%_75%,25%_100%)]"
                             ></div>
                           </div>
                         </div>
@@ -292,21 +376,187 @@
                       <!-- 차량 정보 -->
                       <div class="px-3 py-2">
                         <p class="text-xs leading-tight text-neutral-500">
-                          {{ rankingList[2].manufacturer }}
+                          {{ top3List[2].manufacturer }}
                         </p>
 
-                        <h2 class="mt-0.5 text-base font-bold leading-tight text-neutral-900">
-                          {{ rankingList[2].name }}
-                        </h2>
+                        <div class="mt-0.5 flex min-w-0 items-center gap-1">
+                          <h2 class="truncate text-base font-bold leading-tight text-neutral-900">
+                            {{ top3List[2].name }}
+                          </h2>
+
+                          <span
+                            v-for="badge in format.formatFeatureBadges(top3List[2].features)"
+                            :key="badge"
+                            class="shrink-0 rounded-md
+                                   border border-neutral-300
+                                   bg-neutral-100
+                                   px-1.5 py-[1px]
+                                   text-[9px] font-medium text-neutral-600"
+                          >
+                            {{ badge }}
+                          </span>
+                        </div>
 
                         <p class="mt-1 text-right text-sm font-bold leading-tight text-neutral-800">
-                          {{ formatRankingValue(rankingList[2]) }}
+                          {{ formatRankingValue(top3List[2]) }}
                         </p>
                       </div>
                     </div>
                   </div>
                 </div>
-                
+
+                <!-- 4위 이하 -->
+                <div
+                  v-if="rankingList.length > 0"
+                  class="mt-3 border-t border-neutral-300 pt-3"
+                >
+                  <!-- 카드 목록 -->
+                  <div
+                    class="grid grid-cols-2 gap-3
+                           min-[800px]:grid-cols-3
+                           min-[1100px]:grid-cols-4
+                           min-[1400px]:grid-cols-5"
+                  >
+                    <div
+                      v-for="(item, index) in rankingList"
+                      :key="item.ownedId || item.modelId"
+                      class="min-w-0 overflow-hidden
+                             rounded-lg border border-neutral-300
+                             bg-neutral-100 shadow-sm"
+                    >
+                      <!-- 이미지 -->
+                      <div
+                        class="relative aspect-[3/2] shrink-0 overflow-hidden
+                               border-b border-neutral-300 bg-neutral-300"
+                      >
+                        <img
+                          v-if="item.imageUrl"
+                          :src="format.resolveThumbnailUrl(item.imageUrl)"
+                          :alt="item.name"
+                          loading="lazy"
+                          class="h-full w-full object-cover"
+                        />
+
+                        <div
+                          v-else
+                          class="flex h-full items-center justify-center
+                                 text-[12px] text-neutral-500"
+                        >
+                          이미지 없음
+                        </div>
+
+                        <!-- 순위 -->
+                        <div
+                          class="absolute left-2 top-2
+                                 flex h-8 min-w-8 items-center justify-center
+                                 rounded-full border border-neutral-300
+                                 bg-white/95 px-2
+                                 text-[12px] font-bold text-neutral-800
+                                 shadow"
+                        >
+                          {{ 4 + (currentPage - 1) * pageSize + index }}
+                        </div>
+                      </div>
+
+                      <!-- 차량 정보 -->
+                      <div class="px-3 py-2">
+                        <!-- 제조사 -->
+                        <p class="truncate text-[11px] leading-tight text-neutral-500">
+                          {{ item.manufacturer }}
+                        </p>
+
+                        <!-- 차량명 + 기능 배지 -->
+                        <div class="mt-0.5 flex min-w-0 items-center gap-1">
+                          <h3
+                            class="min-w-0 truncate
+                                   text-[14px] font-bold leading-tight
+                                   text-neutral-900"
+                          >
+                            {{ item.name }}
+                          </h3>
+
+                          <span
+                            v-for="badge in format.formatFeatureBadges(item.features)"
+                            :key="badge"
+                            class="shrink-0 rounded-md
+                                   border border-neutral-300
+                                   bg-neutral-200/70
+                                   px-1.5 py-[1px]
+                                   text-[9px] font-medium text-neutral-600"
+                          >
+                            {{ badge }}
+                          </span>
+                        </div>
+
+                        <!-- 랩타임 / 최고속도 -->
+                        <p
+                          class="mt-1 text-right
+                                 text-[13px] font-bold leading-tight
+                                 text-neutral-800"
+                        >
+                          {{ formatRankingValue(item) }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 페이징 -->
+                  <div
+                    v-if="totalPages > 1"
+                    class="mt-3 flex items-center justify-center gap-1"
+                  >
+                    <!-- 이전 -->
+                    <button
+                      type="button"
+                      :disabled="currentPage === 1"
+                      class="h-8 px-2.5 rounded-md
+                            border border-neutral-300
+                            bg-neutral-100
+                            text-[12px] text-neutral-700
+                            transition
+                            hover:bg-neutral-200
+                            disabled:cursor-default
+                            disabled:opacity-40"
+                      @click="changePage(currentPage - 1)"
+                    >
+                      이전
+                    </button>
+
+                    <!-- 페이지 번호 -->
+                    <button
+                      v-for="page in visiblePages"
+                      :key="page"
+                      type="button"
+                      :class="[
+                        'h-8 min-w-8 rounded-md border px-2 text-[12px] transition',
+                        currentPage === page
+                          ? 'border-neutral-700 bg-neutral-700 text-white'
+                          : 'border-neutral-300 bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                      ]"
+                      @click="changePage(page)"
+                    >
+                      {{ page }}
+                    </button>
+
+                    <!-- 다음 -->
+                    <button
+                      type="button"
+                      :disabled="currentPage === totalPages"
+                      class="h-8 px-2.5 rounded-md
+                            border border-neutral-300
+                            bg-neutral-100
+                            text-[12px] text-neutral-700
+                            transition
+                            hover:bg-neutral-200
+                            disabled:cursor-default
+                            disabled:opacity-40"
+                      @click="changePage(currentPage + 1)"
+                    >
+                      다음
+                    </button>
+                  </div>
+                </div>
+
               </template>
             </div>
           </div>
@@ -317,22 +567,91 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { ChevronDown, RotateCcw } from 'lucide-vue-next'
 import { http } from '@/api/http'
 import * as format from '@/utils/format'
 
 // 현재 선택된 랭킹 기준
 const selectedRankingType = ref('LAP_TIME')
 
+// 랭킹 기준 드롭다운
+const showRankingTypeDropdown = ref(false)
+const rankingTypeDropdownRef = ref(null)
+
+// 선택된 랭킹 기준 라벨
+const selectedRankingTypeLabel = computed(() =>
+{
+  return rankingTypes.find(
+    (type) => type.value === selectedRankingType.value
+  )?.label ?? '랭킹 기준'
+})
+
 // 현재 선택된 차량 분류
 // 전체 조회는 null 사용
 const selectedCategory = ref(null)
 
-// 랭킹 데이터
+// TOP3 랭킹 데이터
+const top3List = ref([])
+
+// 4위 이하 현재 페이지 랭킹 데이터
 const rankingList = ref([])
 
 // 조회 상태
 const loading = ref(false)
+
+// 현재 페이지
+const currentPage = ref(1)
+
+// 페이지당 조회 개수
+const pageSize = ref(5)
+
+// 화면 높이에 따른 페이지당 조회 개수 설정
+function updatePageSize()
+{
+  const nextSize = window.innerHeight >= 1200 ? 10 : 5
+
+  if (pageSize.value !== nextSize)
+  {
+    pageSize.value = nextSize
+    currentPage.value = 1
+    fetchRanking()
+  }
+}
+
+// 4위 이하 전체 건수
+const totalCount = ref(0)
+
+// 전체 페이지 수
+const totalPages = computed(() =>
+{
+  return Math.ceil(totalCount.value / pageSize.value)
+})
+
+// 화면에 표시할 페이지 번호
+const visiblePages = computed(() =>
+{
+  const maxVisible = 10
+
+  if (totalPages.value <= maxVisible)
+  {
+    return Array.from(
+      { length: totalPages.value },
+      (_, index) => index + 1
+    )
+  }
+
+  const groupStart =
+    Math.floor((currentPage.value - 1) / maxVisible) * maxVisible + 1
+
+  const groupEnd =
+    Math.min(groupStart + maxVisible - 1, totalPages.value)
+
+  return Array.from(
+    { length: groupEnd - groupStart + 1 },
+    (_, index) => groupStart + index
+  )
+})
 
 // 차량 분류
 const categories = [
@@ -370,9 +689,7 @@ const rankingTypes = [
   }
 ]
 
-/**
- * 이동수단 랭킹 조회
- */
+// 이동수단 랭킹 조회
 async function fetchRanking()
 {
   loading.value = true
@@ -380,7 +697,9 @@ async function fetchRanking()
   try
   {
     const params = {
-      type: selectedRankingType.value
+      type: selectedRankingType.value,
+      page: currentPage.value,
+      size: pageSize.value
     }
 
     // 전체가 아닌 경우에만 category 전달
@@ -393,12 +712,17 @@ async function fetchRanking()
       params
     })
 
-    rankingList.value = response.data
+    top3List.value = response.data.top3 ?? []
+    rankingList.value = response.data.items ?? []
+    totalCount.value = response.data.totalCount ?? 0
   }
   catch (error)
   {
     console.error('랭킹 조회 실패:', error)
+
+    top3List.value = []
     rankingList.value = []
+    totalCount.value = 0
   }
   finally
   {
@@ -406,10 +730,47 @@ async function fetchRanking()
   }
 }
 
-/**
- * 랩타임 표시
- * 예: 62345 -> 1:02:345
- */
+// 랭킹 조회 조건 초기화
+function resetRanking()
+{
+  const isDefault =
+    selectedRankingType.value === 'LAP_TIME' &&
+    selectedCategory.value === null &&
+    currentPage.value === 1
+
+  selectedRankingType.value = 'LAP_TIME'
+  selectedCategory.value = null
+  currentPage.value = 1
+  showRankingTypeDropdown.value = false
+
+  // 이미 기본 조건인 경우 watch가 실행되지 않으므로 직접 재조회
+  if (isDefault)
+  {
+    fetchRanking()
+  }
+}
+
+// 페이지 변경
+function changePage(page)
+{
+  if (page < 1 || page > totalPages.value)
+  {
+    return
+  }
+
+  currentPage.value = page
+  fetchRanking()
+}
+
+// 랭킹 기준 선택
+function selectRankingType(value)
+{
+  selectedRankingType.value = value
+  showRankingTypeDropdown.value = false
+}
+
+// 랩타임 표시
+// 예: 62345 -> 1:02:345
 function formatLapTime(ms)
 {
   if (ms == null)
@@ -426,9 +787,7 @@ function formatLapTime(ms)
   return `${minutes}:${String(seconds).padStart(2, '0')}:${String(millis).padStart(3, '0')}`
 }
 
-/**
- * 현재 랭킹 기준에 따른 기록 표시
- */
+// 현재 랭킹 기준에 따른 기록 표시
 function formatRankingValue(item)
 {
   if (selectedRankingType.value === 'LAP_TIME')
@@ -439,11 +798,32 @@ function formatRankingValue(item)
   return format.formatSpeed(item.topSpeed)
 }
 
-// 랭킹 기준 또는 차량 분류 변경 시 다시 조회
+// 바깥 클릭 시 드롭다운 닫히게 처리
+function handleDocumentClick(event)
+{
+  const target = event.target
+
+  if (!(target instanceof Node))
+  {
+    return
+  }
+
+  if (
+    rankingTypeDropdownRef.value &&
+    !rankingTypeDropdownRef.value.contains(target)
+  )
+  {
+    showRankingTypeDropdown.value = false
+  }
+}
+
+// 랭킹 기준 또는 차량 분류 변경 시
+// 1페이지부터 다시 조회
 watch(
   [selectedRankingType, selectedCategory],
   () =>
   {
+    currentPage.value = 1
     fetchRanking()
   }
 )
@@ -451,6 +831,18 @@ watch(
 // 최초 진입
 onMounted(() =>
 {
+  // 최초 화면 높이에 따라 조회 개수 설정
+  pageSize.value = window.innerHeight >= 1200 ? 10 : 5
+
   fetchRanking()
+  document.addEventListener('click', handleDocumentClick)
+  window.addEventListener('resize', updatePageSize)
+})
+
+// 컴포넌트 종료 시 이벤트 제거
+onBeforeUnmount(() =>
+{
+  document.removeEventListener('click', handleDocumentClick)
+  window.removeEventListener('resize', updatePageSize)
 })
 </script>
