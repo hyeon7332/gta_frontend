@@ -589,7 +589,7 @@ const selectedRankingTypeLabel = computed(() =>
 
 // 현재 선택된 차량 분류
 // 전체 조회는 null 사용
-const selectedCategory = ref(null)
+const selectedCategory = ref('슈퍼카')
 
 // TOP3 랭킹 데이터
 const top3List = ref([])
@@ -735,11 +735,11 @@ function resetRanking()
 {
   const isDefault =
     selectedRankingType.value === 'LAP_TIME' &&
-    selectedCategory.value === null &&
+    selectedCategory.value === '슈퍼카' &&
     currentPage.value === 1
 
   selectedRankingType.value = 'LAP_TIME'
-  selectedCategory.value = null
+  selectedCategory.value = '슈퍼카'
   currentPage.value = 1
   showRankingTypeDropdown.value = false
 
