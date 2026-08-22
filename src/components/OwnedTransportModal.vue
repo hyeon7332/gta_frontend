@@ -1326,10 +1326,10 @@ function handleImageChange(e)
     return
   }
 
-  const maxSize = 2 * 1024 * 1024
+  const maxSize = 5 * 1024 * 1024
 
   if (file.size > maxSize) {
-    alert('이미지는 2MB 이하만 업로드 가능합니다.')
+    alert('이미지는 5MB 이하만 업로드 가능합니다.')
 
     e.target.value = ''
     imageFile.value = null
