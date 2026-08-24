@@ -84,21 +84,61 @@
               <div class="mt-4 flex items-center justify-between gap-4">
 
                 <!-- 차량 분류 -->
-                <div class="flex flex-wrap gap-2">
+                <div
+                  class="relative"
+                  ref="categoryDropdownRef"
+                >
                   <button
-                    v-for="category in categories"
-                    :key="category.label"
                     type="button"
-                    :class="[
-                      'h-8 px-3 rounded-md border text-[13px] transition',
-                      selectedCategory === category.value
-                        ? 'bg-neutral-700 border-neutral-700 text-white'
-                        : 'bg-neutral-100 border-neutral-400 text-neutral-800 hover:bg-neutral-200'
-                    ]"
-                    @click="selectedCategory = category.value"
+                    class="h-8 w-[250px] px-3 rounded-md flex items-center justify-between
+                          bg-neutral-100 border border-neutral-300
+                          text-[13px] text-neutral-800 hover:bg-neutral-200 transition"
+                    @click="showCategoryDropdown = !showCategoryDropdown"
                   >
-                    {{ category.label }}
+                    <span class="truncate">
+                      {{ categoryFilterLabel }}
+                    </span>
+
+                    <ChevronDown class="w-4 h-4 text-neutral-400" />
                   </button>
+
+                  <div
+                    v-if="showCategoryDropdown"
+                    class="absolute left-0 top-10 z-20 w-[250px] max-h-[260px] overflow-auto
+                          rounded-md border border-neutral-300 bg-neutral-100 shadow-lg p-1"
+                  >
+                    <!-- 전체 -->
+                    <button
+                      type="button"
+                      class="w-full flex items-center justify-between px-2 py-2 rounded
+                            text-[13px] text-neutral-800 hover:bg-neutral-200/70 transition"
+                      @click="clearCategory"
+                    >
+                      <span>전체</span>
+                    </button>
+
+                    <!-- 구분선 -->
+                    <div class="mx-2 border-t border-neutral-300"></div>
+
+                    <!-- 이동수단 분류 목록 -->
+                    <label
+                      v-for="item in categoryOptions"
+                      :key="item"
+                      class="flex items-center gap-2 px-2 py-2 rounded cursor-pointer
+                            text-[13px] text-neutral-800 hover:bg-neutral-200/70"
+                    >
+                      <input
+                        type="checkbox"
+                        :value="item"
+                        :checked="selectedCategories.includes(item)"
+                        @change="toggleCategory(item)"
+                      />
+
+                      <span class="truncate">
+                        {{ item }}
+                      </span>
+                    </label>
+                  </div>
                 </div>
 
                 <!-- 초기화 -->
@@ -588,8 +628,16 @@ const selectedRankingTypeLabel = computed(() =>
 })
 
 // 현재 선택된 차량 분류
-// 전체 조회는 null 사용
-const selectedCategory = ref('슈퍼카')
+const selectedCategories = ref(['슈퍼카'])
+
+// 이동수단 분류 목록
+const categoryOptions = ref([])
+
+// 이동수단 분류 드롭다운 표시 여부
+const showCategoryDropdown = ref(false)
+
+// 이동수단 분류 드롭다운 영역 참조
+const categoryDropdownRef = ref(null)
 
 // TOP3 랭킹 데이터
 const top3List = ref([])
@@ -605,19 +653,6 @@ const currentPage = ref(1)
 
 // 페이지당 조회 개수
 const pageSize = ref(5)
-
-// 화면 높이에 따른 페이지당 조회 개수 설정
-function updatePageSize()
-{
-  const nextSize = window.innerHeight >= 1200 ? 10 : 5
-
-  if (pageSize.value !== nextSize)
-  {
-    pageSize.value = nextSize
-    currentPage.value = 1
-    fetchRanking()
-  }
-}
 
 // 4위 이하 전체 건수
 const totalCount = ref(0)
@@ -653,29 +688,32 @@ const visiblePages = computed(() =>
   )
 })
 
-// 차량 분류
-const categories = [
+// 선택된 이동수단 분류 표시 문구
+const categoryFilterLabel = computed(() =>
+{
+  if (selectedCategories.value.length === 0)
   {
-    label: '전체',
-    value: null
-  },
-  {
-    label: '슈퍼카',
-    value: '슈퍼카'
-  },
-  {
-    label: '스포츠카',
-    value: '스포츠카'
-  },
-  {
-    label: '스포츠 클래식',
-    value: '스포츠 클래식'
-  },
-  {
-    label: '오프로드',
-    value: '오프로드'
+    return '전체'
   }
-]
+
+  // 공통코드 목록 순서를 기준으로 선택된 분류 정렬
+  const selectedOptions = categoryOptions.value.filter((category) =>
+  {
+    return selectedCategories.value.includes(category)
+  })
+
+  if (selectedOptions.length === 0)
+  {
+    return '전체'
+  }
+
+  if (selectedOptions.length === 1)
+  {
+    return selectedOptions[0]
+  }
+
+  return `${selectedOptions[0]} 외 ${selectedOptions.length - 1}`
+})
 
 // 랭킹 기준
 const rankingTypes = [
@@ -688,6 +726,28 @@ const rankingTypes = [
     value: 'TOP_SPEED'
   }
 ]
+
+// 이동수단 분류 공통코드 조회
+async function loadTransportCategories()
+{
+  try
+  {
+    const res = await http.get('/common-codes', {
+      params: {
+        groupCode: 'TRANSPORT_CATEGORY'
+      }
+    })
+
+    categoryOptions.value = res.data.map((item) => {
+      return item.codeName
+    })
+  }
+  catch (err)
+  {
+    console.error('이동수단 분류 조회 실패:', err)
+    categoryOptions.value = []
+  }
+}
 
 // 이동수단 랭킹 조회
 async function fetchRanking()
@@ -702,10 +762,10 @@ async function fetchRanking()
       size: pageSize.value
     }
 
-    // 전체가 아닌 경우에만 category 전달
-    if (selectedCategory.value)
+    // 선택된 이동수단 분류가 있는 경우 조회 조건에 추가
+    if (selectedCategories.value.length > 0)
     {
-      params.category = selectedCategory.value
+      params.categoryList = selectedCategories.value
     }
 
     const response = await http.get('/rankings', {
@@ -730,18 +790,43 @@ async function fetchRanking()
   }
 }
 
+// 화면 높이에 따른 페이지당 조회 개수 설정
+function updatePageSize()
+{
+  const nextSize = window.innerHeight >= 1200 ? 10 : 5
+
+  if (pageSize.value !== nextSize)
+  {
+    pageSize.value = nextSize
+    currentPage.value = 1
+    fetchRanking()
+  }
+}
+
 // 랭킹 조회 조건 초기화
 function resetRanking()
 {
+  // 현재 조회 조건이 기본 상태인지 확인
   const isDefault =
     selectedRankingType.value === 'LAP_TIME' &&
-    selectedCategory.value === '슈퍼카' &&
+    selectedCategories.value.length === 1 &&
+    selectedCategories.value[0] === '슈퍼카' &&
     currentPage.value === 1
 
+  // 랭킹 기준을 기본값인 랩타임으로 초기화
   selectedRankingType.value = 'LAP_TIME'
-  selectedCategory.value = '슈퍼카'
+
+  // 이동수단 분류를 기본값인 슈퍼카로 초기화
+  selectedCategories.value = ['슈퍼카']
+
+  // 현재 페이지를 첫 페이지로 초기화
   currentPage.value = 1
+
+  // 랭킹 기준 드롭다운 닫기
   showRankingTypeDropdown.value = false
+
+  // 이동수단 분류 드롭다운 닫기
+  showCategoryDropdown.value = false
 
   // 이미 기본 조건인 경우 watch가 실행되지 않으므로 직접 재조회
   if (isDefault)
@@ -798,7 +883,7 @@ function formatRankingValue(item)
   return format.formatSpeed(item.topSpeed)
 }
 
-// 바깥 클릭 시 드롭다운 닫히게 처리
+// 드롭다운 외부 클릭 시 열려 있는 드롭다운 닫기
 function handleDocumentClick(event)
 {
   const target = event.target
@@ -808,6 +893,7 @@ function handleDocumentClick(event)
     return
   }
 
+  // 랭킹 기준 드롭다운 외부 클릭 처리
   if (
     rankingTypeDropdownRef.value &&
     !rankingTypeDropdownRef.value.contains(target)
@@ -815,24 +901,63 @@ function handleDocumentClick(event)
   {
     showRankingTypeDropdown.value = false
   }
+
+  // 이동수단 분류 드롭다운 외부 클릭 처리
+  if (
+    categoryDropdownRef.value &&
+    !categoryDropdownRef.value.contains(target)
+  )
+  {
+    showCategoryDropdown.value = false
+  }
 }
 
-// 랭킹 기준 또는 차량 분류 변경 시
-// 1페이지부터 다시 조회
+// 이동수단 분류 선택 또는 선택 해제
+function toggleCategory(value)
+{
+  const current = [...selectedCategories.value]
+  const index = current.indexOf(value)
+
+  if (index > -1)
+  {
+    current.splice(index, 1)
+  }
+  else
+  {
+    current.push(value)
+  }
+
+  selectedCategories.value = current
+}
+
+// 이동수단 분류 전체 선택
+function clearCategory()
+{
+  selectedCategories.value = []
+  showCategoryDropdown.value = false
+}
+
+// 랭킹 기준 또는 이동수단 분류 변경 시 첫 페이지부터 다시 조회
 watch(
-  [selectedRankingType, selectedCategory],
+  [selectedRankingType, selectedCategories],
   () =>
   {
     currentPage.value = 1
     fetchRanking()
+  },
+  {
+    deep: true  // 이동수단 분류 배열 내부 변경 감지
   }
 )
 
 // 최초 진입
-onMounted(() =>
+onMounted(async () =>
 {
   // 최초 화면 높이에 따라 조회 개수 설정
   pageSize.value = window.innerHeight >= 1200 ? 10 : 5
+
+  // 이동수단 분류 공통코드 조회
+  await loadTransportCategories()
 
   fetchRanking()
   document.addEventListener('click', handleDocumentClick)
