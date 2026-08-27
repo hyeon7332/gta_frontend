@@ -177,6 +177,41 @@
             </div>
           </div>
 
+          <div>
+            <label class="block mb-1 text-sm text-neutral-300">개인 랩 타임</label>
+            <div class="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-2 w-full">
+              <input
+                v-model="personalLapTimeMinutes"
+                type="number"
+                min="0"
+                class="input-style w-full"
+                placeholder="min"
+              />
+
+              <span class="text-neutral-400">:</span>
+
+              <input
+                v-model="personalLapTimeSeconds"
+                type="number"
+                min="0"
+                max="59"
+                class="input-style w-full"
+                placeholder="sec"
+              />
+
+              <span class="text-neutral-400">:</span>
+
+              <input
+                v-model="personalLapTimeMillis"
+                type="number"
+                min="0"
+                max="999"
+                class="input-style w-full"
+                placeholder="ms"
+              />
+            </div>
+          </div>
+
           <div class="col-span-2">
             <label class="block mb-2 text-sm text-neutral-300">특징</label>
 
@@ -264,6 +299,7 @@ const form = reactive({
   upgradeLocation: '',
   lapTime: '',
   topSpeed: '',
+  personalLapTime: '',
   price: '',
   releaseDate: '',
   source: '',
@@ -274,6 +310,9 @@ const lapTimeMinutes = ref('')
 const lapTimeSeconds = ref('')
 const lapTimeMillis = ref('')
 const topSpeedInputRef = ref(null)
+const personalLapTimeMinutes = ref('')
+const personalLapTimeSeconds = ref('')
+const personalLapTimeMillis = ref('')
 
 const showUpgradeLocationDropdown = ref(false)
 const showSourceDropdown = ref(false)
@@ -340,6 +379,35 @@ function buildLapTimeMs()
   const minutes = Number(lapTimeMinutes.value || 0)
   const seconds = Number(lapTimeSeconds.value || 0)
   const millis = Number(lapTimeMillis.value || 0)
+
+  if (!Number.isInteger(minutes) || minutes < 0) {
+    return NaN
+  }
+
+  if (!Number.isInteger(seconds) || seconds < 0 || seconds > 59) {
+    return NaN
+  }
+
+  if (!Number.isInteger(millis) || millis < 0 || millis > 999) {
+    return NaN
+  }
+
+  return (minutes * 60 * 1000) + (seconds * 1000) + millis
+}
+
+function buildPersonalLapTimeMs()
+{
+  if (
+    personalLapTimeMinutes.value === '' &&
+    personalLapTimeSeconds.value === '' &&
+    personalLapTimeMillis.value === ''
+  ) {
+    return null
+  }
+
+  const minutes = Number(personalLapTimeMinutes.value || 0)
+  const seconds = Number(personalLapTimeSeconds.value || 0)
+  const millis = Number(personalLapTimeMillis.value || 0)
 
   if (!Number.isInteger(minutes) || minutes < 0) {
     return NaN
@@ -434,6 +502,12 @@ function resetForm()
   lapTimeMinutes.value = ''
   lapTimeSeconds.value = ''
   lapTimeMillis.value = ''
+
+  form.personalLapTime = ''
+
+  personalLapTimeMinutes.value = ''
+  personalLapTimeSeconds.value = ''
+  personalLapTimeMillis.value = ''
 }
 
 function fillForm()
@@ -444,6 +518,7 @@ function fillForm()
   form.upgradeLocation = props.model?.upgradeLocation ?? ''
   form.lapTime = props.model?.lapTime ?? ''
   form.topSpeed = props.model?.topSpeed ?? ''
+  form.personalLapTime = props.model?.personalLapTime ?? ''
   form.price = props.model?.price ?? ''
   form.releaseDate = props.model?.releaseDate ?? ''
   form.source = props.model?.source ?? ''
@@ -459,6 +534,22 @@ function fillForm()
     lapTimeMinutes.value = String(Math.floor(total / 60000))
     lapTimeSeconds.value = String(Math.floor((total % 60000) / 1000))
     lapTimeMillis.value = String(total % 1000)
+  }
+
+  if (
+    form.personalLapTime === '' ||
+    form.personalLapTime === null ||
+    form.personalLapTime === undefined
+  ) {
+    personalLapTimeMinutes.value = ''
+    personalLapTimeSeconds.value = ''
+    personalLapTimeMillis.value = ''
+  } else {
+    const total = Number(form.personalLapTime)
+
+    personalLapTimeMinutes.value = String(Math.floor(total / 60000))
+    personalLapTimeSeconds.value = String(Math.floor((total % 60000) / 1000))
+    personalLapTimeMillis.value = String(total % 1000)
   }
 
   selectedUpgradeLocations.value = form.upgradeLocation
@@ -564,6 +655,13 @@ async function handleSave()
     return
   }
 
+  const personalLapTimeMs = buildPersonalLapTimeMs()
+
+  if (Number.isNaN(personalLapTimeMs)) {
+    alert('개인 랩 타임은 min / sec / ms 형식으로 입력하세요.')
+    return
+  }
+
   if (form.topSpeed !== '') {
     const topSpeed = Number(form.topSpeed)
 
@@ -594,6 +692,7 @@ async function handleSave()
 
       lapTime: lapTimeMs,
       topSpeed: form.topSpeed === '' ? null : Number(form.topSpeed),
+      personalLapTime: personalLapTimeMs,
       price: form.price === '' ? null : Number(form.price),
       releaseDate: form.releaseDate === '' ? null : form.releaseDate,
 

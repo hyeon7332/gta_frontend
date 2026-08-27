@@ -399,7 +399,7 @@
                       </button>
                     </th>
 
-                    <th class="px-3 py-2 text-left w-[110px] border-b border-r border-neutral-300">
+                    <th class="px-3 py-2 text-left w-[100px] border-b border-r border-neutral-300">
                       <button
                         type="button"
                         class="flex items-center gap-1 font-medium hover:text-white transition"
@@ -407,6 +407,20 @@
                       >
                         최고속도
                         <span class="text-[11px] text-neutral-400">{{ getSortMark('topSpeed') }}</span>
+                      </button>
+                    </th>
+
+                    <!-- 개인 랩타임 -->
+                    <th class="px-3 py-2 text-left w-[100px] border-b border-r border-neutral-300">
+                      <button
+                        type="button"
+                        class="flex items-center gap-1 font-medium hover:text-white transition"
+                        @click="toggleSort('personalLapTime')"
+                      >
+                        개인 랩타임
+                        <span class="text-[11px] text-neutral-400">
+                          {{ getSortMark('personalLapTime') }}
+                        </span>
                       </button>
                     </th>
 
@@ -500,6 +514,10 @@
 
                       <td class="px-3 py-2 text-left border-b border-neutral-300 tabular-nums whitespace-nowrap">
                         {{ format.formatSpeed(row.topSpeed) }}
+                      </td>
+
+                      <td class="px-3 py-2 text-left border-b border-neutral-300 tabular-nums whitespace-nowrap">
+                        {{ formatLapTime(row.personalLapTime) }}
                       </td>
 
                       <td class="px-3 py-2 text-left border-b border-neutral-300 tabular-nums whitespace-nowrap">
