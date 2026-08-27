@@ -18,7 +18,7 @@
           >
             <!-- 제목 / 필터 영역 -->
             <div
-              class="px-4 py-4
+              class="px-4 py-3
                      bg-neutral-300
                      border-b border-neutral-400"
             >
@@ -30,54 +30,31 @@
 
                 <!-- 랭킹 기준 -->
                 <div
-                  ref="rankingTypeDropdownRef"
-                  class="relative w-[200px]"
+                  class="flex items-center gap-4
+                        px-3 py-1.5
+                        rounded-md border border-neutral-300
+                        bg-neutral-50"
                 >
-                  <button
-                    type="button"
-                    class="h-8 w-[200px] px-3 rounded-md
-                          flex items-center justify-between
-                          bg-neutral-100 border border-neutral-400
-                          text-[13px] text-neutral-800
-                          hover:bg-neutral-200 transition"
-                    @click="showRankingTypeDropdown = !showRankingTypeDropdown"
+                  <label
+                    v-for="type in rankingTypes"
+                    :key="type.value"
+                    class="flex items-center gap-1.5 cursor-pointer
+                          text-[13px] text-neutral-700"
                   >
-                    <span class="truncate">
-                      {{ selectedRankingTypeLabel }}
+                    <input
+                      v-model="selectedRankingType"
+                      type="radio"
+                      name="rankingType"
+                      :value="type.value"
+                      class="cursor-pointer"
+                    />
+
+                    <span>
+                      {{ type.label }}
                     </span>
-
-                    <ChevronDown class="w-4 h-4 text-neutral-400" />
-                  </button>
-
-                  <div
-                    v-if="showRankingTypeDropdown"
-                    class="absolute right-0 top-10 z-20 w-[200px]
-                          rounded-md border border-neutral-300
-                          bg-neutral-100 shadow-lg p-1"
-                  >
-                    <button
-                      v-for="type in rankingTypes"
-                      :key="type.value"
-                      type="button"
-                      class="w-full flex items-center justify-between
-                            px-2 py-2 rounded
-                            text-[13px] text-neutral-800
-                            hover:bg-neutral-200/70 transition"
-                      @click="selectRankingType(type.value)"
-                    >
-                      <span>
-                        {{ type.label }}
-                      </span>
-
-                      <span
-                        v-if="selectedRankingType === type.value"
-                        class="text-[11px] text-neutral-400"
-                      >
-                        선택됨
-                      </span>
-                    </button>
-                  </div>
+                  </label>
                 </div>
+
               </div>
 
               <!-- 차량 분류 + 초기화 -->
@@ -169,7 +146,7 @@
                     h-[calc(100dvh-250px)]
                     [@media(min-height:1200px)]:h-[calc(100dvh-310px)]
                     overflow-y-auto overflow-x-hidden
-                    px-4 pt-2 pb-4 bg-neutral-200/90"
+                    px-4 pt-2.5 pb-4 bg-neutral-200/90"
             >
               <!-- 로딩 -->
               <div
@@ -615,18 +592,6 @@ import * as format from '@/utils/format'
 // 현재 선택된 랭킹 기준
 const selectedRankingType = ref('LAP_TIME')
 
-// 랭킹 기준 드롭다운
-const showRankingTypeDropdown = ref(false)
-const rankingTypeDropdownRef = ref(null)
-
-// 선택된 랭킹 기준 라벨
-const selectedRankingTypeLabel = computed(() =>
-{
-  return rankingTypes.find(
-    (type) => type.value === selectedRankingType.value
-  )?.label ?? '랭킹 기준'
-})
-
 // 현재 선택된 차량 분류
 const selectedCategories = ref(['슈퍼카'])
 
@@ -724,6 +689,10 @@ const rankingTypes = [
   {
     label: '최고속도',
     value: 'TOP_SPEED'
+  },
+  {
+    label: '개인 랩타임',
+    value: 'PERSONAL_LAP_TIME'
   }
 ]
 
@@ -822,9 +791,6 @@ function resetRanking()
   // 현재 페이지를 첫 페이지로 초기화
   currentPage.value = 1
 
-  // 랭킹 기준 드롭다운 닫기
-  showRankingTypeDropdown.value = false
-
   // 이동수단 분류 드롭다운 닫기
   showCategoryDropdown.value = false
 
@@ -847,15 +813,7 @@ function changePage(page)
   fetchRanking()
 }
 
-// 랭킹 기준 선택
-function selectRankingType(value)
-{
-  selectedRankingType.value = value
-  showRankingTypeDropdown.value = false
-}
-
-// 랩타임 표시
-// 예: 62345 -> 1:02:345
+// 랩타임 표시 (예: 62345 -> 1:02:345)
 function formatLapTime(ms)
 {
   if (ms == null)
@@ -880,6 +838,11 @@ function formatRankingValue(item)
     return formatLapTime(item.lapTime)
   }
 
+  if (selectedRankingType.value === 'PERSONAL_LAP_TIME')
+  {
+    return formatLapTime(item.personalLapTime)
+  }
+
   return format.formatSpeed(item.topSpeed)
 }
 
@@ -891,15 +854,6 @@ function handleDocumentClick(event)
   if (!(target instanceof Node))
   {
     return
-  }
-
-  // 랭킹 기준 드롭다운 외부 클릭 처리
-  if (
-    rankingTypeDropdownRef.value &&
-    !rankingTypeDropdownRef.value.contains(target)
-  )
-  {
-    showRankingTypeDropdown.value = false
   }
 
   // 이동수단 분류 드롭다운 외부 클릭 처리
