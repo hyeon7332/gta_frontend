@@ -298,88 +298,12 @@
                         </template>
 
                         <!-- 차량이 있는 슬롯 -->
-                        <template v-else>
-                          <div
-                            class="relative aspect-[3/2] shrink-0 overflow-hidden
-                                  border-b border-neutral-700 bg-neutral-900"
-                          >
-                            <img
-                              v-if="slot.imageUrl"
-                              :src="resolveThumbnailUrl(slot.imageUrl)"
-                              :alt="slot.name"
-                              loading="lazy"
-                              class="h-full w-full object-cover"
-                            />
+                        <OwnedTransportCard
+                          v-else
+                          :row="slot"
+                          @edit="openEdit"
+                        />
 
-                            <div
-                              v-else
-                              class="flex h-full items-center justify-center
-                                    text-[12px] text-neutral-500"
-                            >
-                              이미지 없음
-                            </div>
-
-                            <!-- 미획득 -->
-                            <span
-                              v-if="slot.acquiredYn === 'N'"
-                              class="absolute right-2 top-2 rounded-md
-                                    border border-red-500/40 bg-red-900/70
-                                    px-2 py-[2px] text-[10px] text-red-200"
-                            >
-                              미획득
-                            </span>
-                          </div>
-
-                          <div class="flex flex-1 flex-col px-3 py-2">
-                            <!-- 1줄: 이름 + 기능배지 / 우측 맨션배지 -->
-                            <div class="flex min-w-0 items-center gap-2">
-                              <div class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
-                                <span class="truncate text-[13px] font-medium text-neutral-100">
-                                  {{ slot.name }}
-                                </span>
-
-                                <span
-                                  v-for="badge in formatFeatureBadges(slot.features)"
-                                  :key="badge"
-                                  class="shrink-0 rounded-md
-                                        border border-neutral-700/70
-                                        bg-neutral-800/60
-                                        px-1.5 py-[1px]
-                                        text-[9px] text-neutral-300"
-                                >
-                                  {{ badge }}
-                                </span>
-                              </div>
-
-                              <span
-                                v-if="getMansionPositionLabel(slot)"
-                                class="ml-auto shrink-0 rounded-md
-                                      border border-blue-500/40 bg-blue-900/20
-                                      px-1.5 py-[1px] text-[9px] text-blue-300"
-                              >
-                                {{ getMansionPositionLabel(slot) }}
-                              </span>
-                            </div>
-
-                            <!-- 2줄: 제조사 / 분류 / 수정 -->
-                            <div class="mt-1 flex items-center justify-between gap-2">
-                              <span class="truncate text-[11px] text-neutral-400">
-                                {{ slot.manufacturer }}
-                                <span class="mx-1 text-[13px] leading-none text-neutral-400">•</span>
-                                {{ slot.category }}
-                              </span>
-
-                              <button
-                                type="button"
-                                class="shrink-0 rounded p-1 transition hover:bg-neutral-600/40"
-                                @click.stop="openEdit(slot)"
-                              >
-                                <SquarePen class="h-4 w-4 text-neutral-400 hover:text-white" />
-                              </button>
-                            </div>
-                          </div>
-
-                        </template>
                       </div>
                     </div>
                   </div>
@@ -453,86 +377,10 @@
                         @dragover="handleDragOver($event, row)"
                         @drop="handleDrop(row)"
                       >
-                        <!-- 이미지 -->
-                        <div
-                          class="relative aspect-[3/2] shrink-0 overflow-hidden
-                                border-b border-neutral-700 bg-neutral-900"
-                        >
-                          <img
-                            v-if="row.imageUrl"
-                            :src="resolveThumbnailUrl(row.imageUrl)"
-                            :alt="row.name"
-                            loading="lazy"
-                            class="h-full w-full object-cover"
-                          />
-
-                          <div
-                            v-else
-                            class="flex h-full items-center justify-center
-                                  text-[12px] text-neutral-500"
-                          >
-                            이미지 없음
-                          </div>
-
-                          <span
-                            v-if="row.acquiredYn === 'N'"
-                            class="absolute right-2 top-2 rounded-md
-                                  border border-red-500/40 bg-red-900/70
-                                  px-2 py-[2px] text-[10px] text-red-200"
-                          >
-                            미획득
-                          </span>
-                        </div>
-
-                        <div class="flex flex-1 flex-col px-3 py-2">
-                          <!-- 1줄: 이름 + 기능배지 / 우측 맨션배지 -->
-                          <div class="flex min-w-0 items-center gap-2">
-                            <div class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
-                              <span class="truncate text-[13px] font-medium text-neutral-100">
-                                {{ row.name }}
-                              </span>
-
-                              <span
-                                v-for="badge in formatFeatureBadges(row.features)"
-                                :key="badge"
-                                class="shrink-0 rounded-md
-                                      border border-neutral-700/70
-                                      bg-neutral-800/60
-                                      px-1.5 py-[1px]
-                                      text-[9px] text-neutral-300"
-                              >
-                                {{ badge }}
-                              </span>
-                            </div>
-
-                            <span
-                              v-if="getMansionPositionLabel(row)"
-                              class="ml-auto shrink-0 rounded-md
-                                    border border-blue-500/40 bg-blue-900/20
-                                    px-1.5 py-[1px] text-[9px] text-blue-300"
-                            >
-                              {{ getMansionPositionLabel(row) }}
-                            </span>
-                          </div>
-
-                          <!-- 2줄: 제조사 / 분류 / 수정 -->
-                          <div class="mt-1 flex items-center justify-between gap-2">
-                            <span class="truncate text-[11px] text-neutral-400">
-                              {{ row.manufacturer }}
-                              <span class="mx-1 text-[13px] leading-none text-neutral-400">•</span>
-                              {{ row.category }}
-                            </span>
-
-                            <button
-                              type="button"
-                              class="shrink-0 rounded p-1 transition hover:bg-neutral-600/40"
-                              @click.stop="openEdit(row)"
-                            >
-                              <SquarePen class="h-4 w-4 text-neutral-400 hover:text-white" />
-                            </button>
-                          </div>
-                        </div>
-
+                        <OwnedTransportCard
+                          :row="row"
+                          @edit="openEdit"
+                        />
                       </div>
                     </div>
                   </div>
@@ -642,13 +490,13 @@
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { http } from '@/api/http'
-import { Plus, RotateCcw, ChevronDown, Settings, ChevronsUpDown, SquarePen } from 'lucide-vue-next'
+import { Plus, RotateCcw, ChevronDown, Settings, ChevronsUpDown } from 'lucide-vue-next'
 import OwnedTransportModal from '@/components/OwnedTransportModal.vue'
 import GarageSettingModal from '@/components/GarageSettingModal.vue'
 import Toast from '@/components/Toast.vue'
 import OwnedTransportSearchResultModal from '@/components/OwnedTransportSearchResultModal.vue'
+import OwnedTransportCard from '@/components/OwnedTransportCard.vue'
 import * as transportDataMapper from '@/utils/transportDataMapper'
-import { formatFeatureBadges, resolveImageUrl, resolveThumbnailUrl } from '@/utils/format'
 
 const router = useRouter()
 
@@ -1814,26 +1662,6 @@ function getOfficeSectionLabel(row)
 
   if (slot >= 14 && slot <= 20) {
     return `${officeNo}C`
-  }
-
-  return ''
-}
-
-// 맨션 위치 표시명 반환
-function getMansionPositionLabel(row)
-{
-  const mansionPosition = String(row?.mansionPosition || '').trim()
-
-  if (mansionPosition === 'PODIUM') {
-    return '포디움'
-  }
-
-  if (mansionPosition === 'D1') {
-    return '진입로1'
-  }
-
-  if (mansionPosition === 'D2') {
-    return '진입로2'
   }
 
   return ''
