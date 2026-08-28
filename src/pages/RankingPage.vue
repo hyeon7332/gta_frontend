@@ -520,60 +520,70 @@
                   <!-- 페이징 -->
                   <div
                     v-if="totalPages > 1"
-                    class="mt-3 flex items-center justify-center gap-1"
+                    class="relative mt-3 flex items-center justify-center"
                   >
-                    <!-- 이전 -->
-                    <button
-                      type="button"
-                      :disabled="currentPage === 1"
-                      class="h-8 px-2.5 rounded-md
-                            border border-neutral-300
-                            bg-neutral-100
-                            text-[12px] text-neutral-700
-                            transition
-                            hover:bg-neutral-200
-                            disabled:cursor-default
-                            disabled:opacity-40"
-                      @click="changePage(currentPage - 1)"
+                    <!-- 전체 건수 -->
+                    <div
+                      class="absolute left-0
+                            text-[12px] text-neutral-500"
                     >
-                      이전
-                    </button>
+                      총 {{ totalCount + top3List.length }}건
+                    </div>
+                    
+                    <!-- 페이지 버튼 -->
+                    <div class="flex items-center justify-center gap-1">
+                      <!-- 이전 -->
+                      <button
+                        type="button"
+                        :disabled="currentPage === 1"
+                        class="h-8 px-2.5 rounded-md
+                              border border-neutral-300
+                              bg-neutral-100
+                              text-[12px] text-neutral-700
+                              transition
+                              hover:bg-neutral-200
+                              disabled:cursor-default
+                              disabled:opacity-40"
+                        @click="changePage(currentPage - 1)"
+                      >
+                        이전
+                      </button>
 
-                    <!-- 페이지 번호 -->
-                    <button
-                      v-for="page in visiblePages"
-                      :key="page"
-                      type="button"
-                      :class="[
-                        'h-8 min-w-8 rounded-md border px-2 text-[12px] transition',
-                        currentPage === page
-                          ? 'border-neutral-700 bg-neutral-700 text-white'
-                          : 'border-neutral-300 bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                      ]"
-                      @click="changePage(page)"
-                    >
-                      {{ page }}
-                    </button>
+                      <!-- 페이지 번호 -->
+                      <button
+                        v-for="page in visiblePages"
+                        :key="page"
+                        type="button"
+                        :class="[
+                          'h-8 min-w-8 rounded-md border px-2 text-[12px] transition',
+                          currentPage === page
+                            ? 'border-neutral-700 bg-neutral-700 text-white'
+                            : 'border-neutral-300 bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                        ]"
+                        @click="changePage(page)"
+                      >
+                        {{ page }}
+                      </button>
 
-                    <!-- 다음 -->
-                    <button
-                      type="button"
-                      :disabled="currentPage === totalPages"
-                      class="h-8 px-2.5 rounded-md
-                            border border-neutral-300
-                            bg-neutral-100
-                            text-[12px] text-neutral-700
-                            transition
-                            hover:bg-neutral-200
-                            disabled:cursor-default
-                            disabled:opacity-40"
-                      @click="changePage(currentPage + 1)"
-                    >
-                      다음
-                    </button>
+                      <!-- 다음 -->
+                      <button
+                        type="button"
+                        :disabled="currentPage === totalPages"
+                        class="h-8 px-2.5 rounded-md
+                              border border-neutral-300
+                              bg-neutral-100
+                              text-[12px] text-neutral-700
+                              transition
+                              hover:bg-neutral-200
+                              disabled:cursor-default
+                              disabled:opacity-40"
+                        @click="changePage(currentPage + 1)"
+                      >
+                        다음
+                      </button>
+                    </div> 
                   </div>
                 </div>
-
               </template>
             </div>
           </div>
@@ -719,7 +729,7 @@ async function loadTransportCategories()
 }
 
 // 이동수단 랭킹 조회
-async function fetchRanking()
+async function fetchRanking(includeTop3 = true)
 {
   loading.value = true
 
@@ -728,7 +738,8 @@ async function fetchRanking()
     const params = {
       type: selectedRankingType.value,
       page: currentPage.value,
-      size: pageSize.value
+      size: pageSize.value,
+      includeTop3
     }
 
     // 선택된 이동수단 분류가 있는 경우 조회 조건에 추가
@@ -741,7 +752,11 @@ async function fetchRanking()
       params
     })
 
-    top3List.value = response.data.top3 ?? []
+    // TOP3 조회 요청인 경우에만 갱신
+    if (includeTop3)
+    {
+      top3List.value = response.data.top3 ?? []
+    }
     rankingList.value = response.data.items ?? []
     totalCount.value = response.data.totalCount ?? 0
   }
@@ -749,7 +764,11 @@ async function fetchRanking()
   {
     console.error('랭킹 조회 실패:', error)
 
-    top3List.value = []
+    // TOP3 조회 요청 중 오류가 발생한 경우에만 초기화
+    if (includeTop3)
+    {
+      top3List.value = []
+    }
     rankingList.value = []
     totalCount.value = 0
   }
@@ -810,7 +829,9 @@ function changePage(page)
   }
 
   currentPage.value = page
-  fetchRanking()
+
+  // 페이지 이동 시 TOP3는 재조회하지 않음
+  fetchRanking(false)
 }
 
 // 랩타임 표시 (예: 62345 -> 1:02:345)
