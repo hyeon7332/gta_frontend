@@ -66,26 +66,20 @@
 
     <div class="mt-auto flex items-end justify-between gap-2 pt-2">
       <div class="min-w-0 text-[11px] text-neutral-400">
+        <!-- 제조사 / 분류 / 가격 -->
         <div class="truncate">
-          <!-- 제조사 -->
-          <span v-if="row.manufacturer">
-            {{ row.manufacturer }}
-          </span>
-
-          <span v-if="row.manufacturer && row.category">
-            ·
-          </span>
-
-          <!-- 분류 -->
-          <span v-if="row.category">
-            {{ row.category }}
-          </span>
+          {{ row.manufacturer }}
+          <span class="mx-0.5">•</span>
+          {{ row.category }}
+          <span class="mx-0.5">•</span>
+          <span class="mx-0.5 font-semibold">{{ formatCurrencyUSD(row.price) }}</span>
         </div>
 
         <!-- 출시일 -->
-        <div v-if="row.releaseDate">
+        <div v-if="row.releaseDate" class="font-semibold">
           {{ row.releaseDate }}
         </div>
+
       </div>
 
       <!-- 수정 버튼 -->
@@ -104,7 +98,7 @@
 <script setup>
 import { computed } from 'vue'
 import { SquarePen } from 'lucide-vue-next'
-import { formatFeatureBadges, resolveThumbnailUrl } from '@/utils/format'
+import { formatFeatureBadges, resolveThumbnailUrl, formatCurrencyUSD } from '@/utils/format'
 
 // 부모 컴포넌트에서 전달받는 이동수단 정보
 const props = defineProps({
