@@ -131,35 +131,28 @@
                     type="button"
                     class="w-full flex items-center justify-between px-2 py-2 rounded
                           text-[13px] text-neutral-800 hover:bg-neutral-200/70 transition"
-                    @click="selectManufacturer('')"
+                    @click="clearMultiFilter('manufacturer')"
                   >
                     <span>전체</span>
-                    <span
-                      v-if="manufacturerFilter === ''"
-                      class="text-[11px] text-neutral-400"
-                    >
-                      선택됨
-                    </span>
                   </button>
 
                   <div class="mx-2 border-t border-neutral-300"></div>
 
-                  <button
+                  <label
                     v-for="item in manufacturerOptions"
                     :key="item"
-                    type="button"
-                    class="w-full flex items-center justify-between px-2 py-2 rounded
-                          text-[13px] text-neutral-800 hover:bg-neutral-200/70 transition"
-                    @click="selectManufacturer(item)"
+                    class="flex items-center gap-2 px-2 py-2 rounded cursor-pointer
+                          text-[13px] text-neutral-800 hover:bg-neutral-200/70"
                   >
+                    <input
+                      type="checkbox"
+                      :value="item"
+                      :checked="manufacturerFilters.includes(item)"
+                      @change="toggleMultiFilter('manufacturer', item)"
+                    />
+
                     <span class="truncate">{{ item }}</span>
-                    <span
-                      v-if="manufacturerFilter === item"
-                      class="text-[11px] text-neutral-400"
-                    >
-                      선택됨
-                    </span>
-                  </button>
+                  </label>
                 </div>
               </div>
 
@@ -218,7 +211,7 @@
                         text-[13px] text-neutral-800 hover:bg-neutral-200 transition"
                   @click="toggleUpgradeLocationDropdown"
                 >
-                  <span class="truncate">{{ getMultiFilterLabel('개조위치', upgradeLocationFilters) }}</span>
+                  <span class="truncate">{{ upgradeLocationFilterLabel }}</span>
                   <ChevronDown class="w-4 h-4 text-neutral-400" />
                 </button>
 
@@ -632,7 +625,7 @@ const listCardRef = ref(null)
 const loading = ref(false)
 let loadingTimer = null
 
-const manufacturerFilter = ref('')
+const manufacturerFilters = ref([])
 const categoryFilters = ref([])
 const sourceFilters = ref([])
 
@@ -689,33 +682,31 @@ const pageNumbers = computed(() => {
   return pages
 })
 
-const manufacturerFilterLabel = computed(() => {
-  return manufacturerFilter.value || '제조사'
-})
+// 제조사 다중 선택 표시
+const manufacturerFilterLabel = computed(() =>
+  format.formatMultiSelectLabel(manufacturerFilters.value, '제조사')
+)
 
-const categoryFilterLabel = computed(() => {
-  return getMultiFilterLabel('분류', categoryFilters.value)
-})
+// 분류 다중 선택 표시
+const categoryFilterLabel = computed(() =>
+  format.formatMultiSelectLabel(categoryFilters.value, '분류')
+)
 
-const sourceFilterLabel = computed(() => {
-  return getMultiFilterLabel('획득처', sourceFilters.value)
-})
+// 획득처 다중 선택 표시
+const sourceFilterLabel = computed(() =>
+  format.formatMultiSelectLabel(sourceFilters.value, '획득처')
+)
 
-const featureFilterLabel = computed(() => {
-  if (!featureFilters.value || featureFilters.value.length === 0) {
-    return '특징'
-  }
+// 개조위치 다중 선택 표시
+const upgradeLocationFilterLabel = computed(() =>
+  format.formatMultiSelectLabel(upgradeLocationFilters.value, '개조위치')
+)
 
-  if (featureFilters.value.length > 1) {
-    return `특징 ${featureFilters.value.length}개`
-  }
+// 특징 다중 선택 표시
+const featureFilterLabel = computed(() =>
+  format.formatMultiSelectLabel(featureFilters.value, '특징')
+)
 
-  const matched = featureOptions.value.find((option) => {
-    return option.codeValue === featureFilters.value[0]
-  })
-
-  return matched ? matched.codeName : featureFilters.value[0]
-})
 
 async function load()
 {
@@ -729,7 +720,7 @@ async function load()
     const res = await http.get('/transport-models', {
       params: {
         keyword: keyword.value,
-        manufacturer: manufacturerFilter.value,
+        manufacturers: manufacturerFilters.value,
         categories: categoryFilters.value,
         sources: sourceFilters.value,
         upgradeLocations: upgradeLocationFilters.value,
@@ -833,7 +824,7 @@ function resetFilters()
   keyword.value = ''
   sort.value = 'default'
 
-  manufacturerFilter.value = ''
+  manufacturerFilters.value = []
   categoryFilters.value = []
   sourceFilters.value = []
   upgradeLocationFilters.value = []
@@ -938,16 +929,12 @@ function toggleSourceDropdown()
   showSourceDropdown.value = next
 }
 
-function selectManufacturer(value)
-{
-  manufacturerFilter.value = value
-  showManufacturerDropdown.value = false
-  applyFilterChange()
-}
-
 function clearMultiFilter(type)
 {
-  if (type === 'upgradeLocation') {
+  if (type === 'manufacturer') {
+    manufacturerFilters.value = []
+    showManufacturerDropdown.value = false
+  } else if (type === 'upgradeLocation') {
     upgradeLocationFilters.value = []
     showUpgradeLocationDropdown.value = false
   } else if (type === 'source') {
@@ -984,7 +971,9 @@ function toggleMultiFilter(type, value)
 {
   let target = featureFilters
 
-  if (type === 'upgradeLocation') {
+  if (type === 'manufacturer') {
+    target = manufacturerFilters
+  } else if (type === 'upgradeLocation') {
     target = upgradeLocationFilters
   } else if (type === 'source') {
     target = sourceFilters
@@ -1003,19 +992,6 @@ function toggleMultiFilter(type, value)
 
   target.value = current
   applyFilterChange()
-}
-
-function getMultiFilterLabel(label, values)
-{
-  if (!values || values.length === 0) {
-    return label
-  }
-
-  if (values.length === 1) {
-    return values[0]
-  }
-
-  return `${label} ${values.length}개`
 }
 
 function openAdd()

@@ -117,3 +117,16 @@ export function formatFeatureBadges(features)
       return featureBadgeDisplayMap[item]
     })
 }
+
+/** 다중 선택 콤보박스 표시 형식 */
+export function formatMultiSelectLabel(list, defaultLabel) {
+  if (!list || list.length === 0) {
+    return defaultLabel
+  }
+
+  if (list.length === 1) {
+    return list[0]
+  }
+
+  return `${list[0]} 외 ${list.length - 1}건`
+}
