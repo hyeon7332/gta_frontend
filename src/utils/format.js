@@ -119,14 +119,25 @@ export function formatFeatureBadges(features)
 }
 
 /** 다중 선택 콤보박스 표시 형식 */
-export function formatMultiSelectLabel(list, defaultLabel) {
+export function formatMultiSelectLabel(list, defaultLabel, options = null) {
   if (!list || list.length === 0) {
     return defaultLabel
   }
 
-  if (list.length === 1) {
-    return list[0]
+  let selectedList = list
+
+  // 옵션 목록이 있으면 옵션 목록 순서 기준으로 정렬
+  if (options && options.length > 0) {
+    selectedList = options.filter((item) => list.includes(item))
   }
 
-  return `${list[0]} 외 ${list.length - 1}건`
+  if (selectedList.length === 0) {
+    return defaultLabel
+  }
+
+  if (selectedList.length === 1) {
+    return selectedList[0]
+  }
+
+  return `${selectedList[0]} 외 ${selectedList.length - 1}건`
 }

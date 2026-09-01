@@ -665,30 +665,8 @@ const visiblePages = computed(() =>
 
 // 선택된 이동수단 분류 표시 문구
 const categoryFilterLabel = computed(() =>
-{
-  if (selectedCategories.value.length === 0)
-  {
-    return '전체'
-  }
-
-  // 공통코드 목록 순서를 기준으로 선택된 분류 정렬
-  const selectedOptions = categoryOptions.value.filter((category) =>
-  {
-    return selectedCategories.value.includes(category)
-  })
-
-  if (selectedOptions.length === 0)
-  {
-    return '전체'
-  }
-
-  if (selectedOptions.length === 1)
-  {
-    return selectedOptions[0]
-  }
-
-  return `${selectedOptions[0]} 외 ${selectedOptions.length - 1}`
-})
+  format.formatMultiSelectLabel(selectedCategories.value, '전체', categoryOptions.value)
+)
 
 // 랭킹 기준
 const rankingTypes = [

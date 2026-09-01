@@ -278,7 +278,7 @@
                   <div class="mx-2 border-t border-neutral-300"></div>
 
                   <label
-                    v-for="item in sourceOptionsList"
+                    v-for="item in sourceOptions"
                     :key="item"
                     class="flex items-center gap-2 px-2 py-2 rounded cursor-pointer
                           text-[13px] text-neutral-800 hover:bg-neutral-200/70"
@@ -638,10 +638,19 @@ const showFeatureDropdown = ref(false)
 const upgradeLocationDropdownRef = ref(null)
 const featureDropdownRef = ref(null)
 
+// 제조사 옵션 목록
 const manufacturerOptions = ref([])
+
+// 분류 옵션 목록
 const categoryOptions = ref([])
-const sourceOptionsList = ref([])
+
+// 획득처 옵션 목록
+const sourceOptions = ref([])
+
+// 개조위치 옵션 목록
 const upgradeLocationOptions = ref([])
+
+// 특징 옵션 목록
 const featureOptions = ref([])
 
 const showManufacturerDropdown = ref(false)
@@ -684,29 +693,39 @@ const pageNumbers = computed(() => {
 
 // 제조사 다중 선택 표시
 const manufacturerFilterLabel = computed(() =>
-  format.formatMultiSelectLabel(manufacturerFilters.value, '제조사')
+  format.formatMultiSelectLabel(manufacturerFilters.value, '제조사', manufacturerOptions.value)
 )
 
 // 분류 다중 선택 표시
 const categoryFilterLabel = computed(() =>
-  format.formatMultiSelectLabel(categoryFilters.value, '분류')
+  format.formatMultiSelectLabel(categoryFilters.value, '분류', categoryOptions.value)
 )
 
 // 획득처 다중 선택 표시
 const sourceFilterLabel = computed(() =>
-  format.formatMultiSelectLabel(sourceFilters.value, '획득처')
+  format.formatMultiSelectLabel(sourceFilters.value, '획득처', sourceOptions.value)
 )
 
 // 개조위치 다중 선택 표시
 const upgradeLocationFilterLabel = computed(() =>
-  format.formatMultiSelectLabel(upgradeLocationFilters.value, '개조위치')
+  format.formatMultiSelectLabel(upgradeLocationFilters.value, '개조위치', upgradeLocationOptions.value)
 )
 
 // 특징 다중 선택 표시
-const featureFilterLabel = computed(() =>
-  format.formatMultiSelectLabel(featureFilters.value, '특징')
-)
+const featureFilterLabel = computed(() => {
+  const selectedValues = featureOptions.value
+    .filter(item => featureFilters.value.includes(item.codeValue))
 
+  if (selectedValues.length === 0) {
+    return '특징'
+  }
+
+  if (selectedValues.length === 1) {
+    return selectedValues[0].codeName
+  }
+
+  return `${selectedValues[0].codeName} 외 ${selectedValues.length - 1}건`
+})
 
 async function load()
 {
@@ -775,7 +794,7 @@ async function loadCommonCodes()
     const groups = [
       ['MANUFACTURER', manufacturerOptions],
       ['TRANSPORT_CATEGORY', categoryOptions],
-      ['TRANSPORT_SOURCE', sourceOptionsList],
+      ['TRANSPORT_SOURCE', sourceOptions],
       ['UPGRADE_LOCATION', upgradeLocationOptions],
       ['FEATURE', featureOptions]
     ]
