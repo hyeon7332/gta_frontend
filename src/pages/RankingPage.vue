@@ -600,10 +600,10 @@ import { http } from '@/api/http'
 import * as format from '@/utils/format'
 
 // 현재 선택된 랭킹 기준
-const selectedRankingType = ref('LAP_TIME')
+const selectedRankingType = ref('PERSONAL_LAP_TIME')
 
 // 현재 선택된 차량 분류
-const selectedCategories = ref(['슈퍼카'])
+const selectedCategories = ref([])
 
 // 이동수단 분류 목록
 const categoryOptions = ref([])
@@ -796,16 +796,15 @@ function resetRanking()
 {
   // 현재 조회 조건이 기본 상태인지 확인
   const isDefault =
-    selectedRankingType.value === 'LAP_TIME' &&
-    selectedCategories.value.length === 1 &&
-    selectedCategories.value[0] === '슈퍼카' &&
+    selectedRankingType.value === 'PERSONAL_LAP_TIME' &&
+    selectedCategories.value.length === 0 &&
     currentPage.value === 1
 
-  // 랭킹 기준을 기본값인 랩타임으로 초기화
-  selectedRankingType.value = 'LAP_TIME'
+  // 랭킹 기준을 기본값으로 초기화
+  selectedRankingType.value = 'PERSONAL_LAP_TIME'
 
-  // 이동수단 분류를 기본값인 슈퍼카로 초기화
-  selectedCategories.value = ['슈퍼카']
+  // 이동수단 분류를 기본값으로 초기화
+  selectedCategories.value = []
 
   // 현재 페이지를 첫 페이지로 초기화
   currentPage.value = 1
