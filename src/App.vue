@@ -42,15 +42,6 @@
             <span>이동수단</span>
           </button>
 
-          <button
-            v-if="isAdmin"
-            type="button"
-            :class="getMenuButtonClass(isActiveMenu('/admin/pending-users'))"
-            @click="goPendingUsers"
-          >
-            <UserCheck class="w-4 h-4" />
-            <span>회원승인</span>
-          </button>
         </div>
 
         <!-- right -->
@@ -94,7 +85,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Car, LogOut, UserCheck, Warehouse, Trophy } from 'lucide-vue-next'
+import { Car, LogOut, Warehouse, Trophy } from 'lucide-vue-next'
 
 const AUTH_STORAGE_KEYS = [
   'accessToken',
@@ -158,12 +149,6 @@ function goRanking()
 function goTransportModels()
 {
   router.push('/transport-models')
-}
-
-// 회원승인 화면으로 이동
-function goPendingUsers()
-{
-  router.push('/admin/pending-users')
 }
 
 // 현재 메뉴 활성 여부 확인

@@ -2,11 +2,15 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import OwnedListPage from '@/pages/OwnedListPage.vue'
 import TransportModelAdminPage from '@/pages/TransportModelAdminPage.vue'
 import LoginPage from '@/pages/LoginPage.vue'
-import SignupPage from '@/pages/SignupPage.vue'
-import PendingUsersPage from '@/pages/PendingUsersPage.vue'
 import OwnedTransportDetailPage from '@/pages/OwnedTransportDetailPage.vue'
 import RankingPage from '@/pages/RankingPage.vue'
 
+/**
+ * 화면별 라우팅 설정
+ *
+ * requiresAuth  : 로그인한 사용자만 접근 가능
+ * requiresAdmin : ADMIN 권한 사용자만 접근 가능
+ */
 const routes = [
   {
     path: '/',
@@ -32,20 +36,8 @@ const routes = [
     path: '/login',
     component: LoginPage
   },
-  {
-    path: '/signup',
-    component: SignupPage
-  },
   { path: '/transport-models', 
     component: TransportModelAdminPage,
-    meta: { 
-      requiresAuth: true,
-      requiresAdmin: true
-    }
-  },
-  { 
-    path: '/admin/pending-users',
-    component: PendingUsersPage,
     meta: { 
       requiresAuth: true,
       requiresAdmin: true
@@ -58,23 +50,26 @@ const router = createRouter({
   routes
 })
 
+/** 화면 이동 전 로그인 및 관리자 권한 확인 */
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('accessToken') //현재 로그인 상태 판단 기준
+  //현재 로그인 상태 판단 기준
+  const token = localStorage.getItem('accessToken') 
 
-  // requiresAuth 체크
+  // 로그인이 필요한 화면에 비로그인 상태로 접근할 경우 로그인 화면으로 이동
   if (to.meta.requiresAuth && !token) { 
     next('/login')
     return
   }
   
-  // 로그인한 상태로 /login 들어가는 것 방지
-  if ((to.path === '/login' || to.path === '/signup') && token) {
+  // 로그인한 상태에서 로그인 화면으로 접근하는 것을 방지
+  if ((to.path === '/login') && token) {
     next('/')
     return
   }
 
+  // 관리자 권한이 필요한 화면 접근 여부 확인
   const userRole = localStorage.getItem('userRole')
-
+  
   if (to.meta.requiresAdmin && userRole !== 'ADMIN') {
     next('/')
     return

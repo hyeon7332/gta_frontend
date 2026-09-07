@@ -7,7 +7,7 @@
       class="max-h-[620px] bg-neutral-900 border border-neutral-700 rounded-lg shadow-xl overflow-hidden"
       style="width: 750px;"
     >
-      <!-- header -->
+      <!-- 헤더 -->
       <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-700">
         <div>
           <div class="text-[15px] font-semibold text-neutral-100">
@@ -19,7 +19,7 @@
         </div>
       </div>
 
-      <!-- body -->
+      <!-- 검색 결과 목록 -->
       <div class="p-3">
 
         <div class="max-h-[400px] overflow-y-auto scroll-dark space-y-1 pr-1">
@@ -63,7 +63,7 @@
         </div>
       </div>
 
-      <!-- footer -->
+      <!-- 하단 버튼 영역 -->
       <div class="flex items-center justify-between gap-2 px-4 py-3 border-t border-neutral-700 bg-neutral-900/80">
         <div class="text-[12px] text-neutral-400">
           총 <span class="text-neutral-100 font-semibold">{{ results.length }}</span>건
@@ -99,6 +99,7 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { formatFeatureBadges } from '@/utils/format'
 
+// 부모 컴포넌트에서 전달받는 모달 상태 및 검색 결과
 const props = defineProps({
   open: Boolean,
   results: {
@@ -107,32 +108,29 @@ const props = defineProps({
   }
 })
 
+// 부모 컴포넌트로 전달할 이벤트
 const emit = defineEmits(['update:open', 'move'])
 
+// 현재 선택된 검색 결과 행
 const selectedRow = ref(null)
+
+// 현재 선택된 검색 결과 ID
 const selectedId = ref(null)
 
-watch(
-  () => props.open,
-  (isOpen) => {
-    if (!isOpen) {
-      selectedRow.value = null
-      selectedId.value = null
-    }
-  }
-)
-
+/** 검색 결과 행 선택 */
 function selectRow(row)
 {
   selectedRow.value = row
   selectedId.value = row.id
 }
 
+/** 모달 닫기 */
 function close()
 {
   emit('update:open', false)
 }
 
+/** 선택한 이동수단으로 이동 */
 function move()
 {
   if (!selectedRow.value) {
@@ -142,6 +140,7 @@ function move()
   emit('move', selectedRow.value)
 }
 
+/** ESC 키 입력 시 모달 닫기 */
 function handleKeyDown(e)
 {
   if (!props.open) {
@@ -153,18 +152,9 @@ function handleKeyDown(e)
   }
 }
 
-onMounted(() => {
-  window.addEventListener('keydown', handleKeyDown)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyDown)
-})
-
+/** 보관 위치 표시 문구 생성 */
 function getLocationLabel(row)
 {
-  console.log(row)
-  
   if (row.storageType === 'PEGASUS') {
     return '페가수스'
   }
@@ -177,4 +167,26 @@ function getLocationLabel(row)
 
   return `${garageName} / ${row.slot || '-'}번 슬롯`
 }
+
+// 모달이 닫힐 때 선택 상태 초기화
+watch(
+  () => props.open,
+  (isOpen) => {
+    if (!isOpen) {
+      selectedRow.value = null
+      selectedId.value = null
+    }
+  }
+)
+
+// 키보드 이벤트 등록
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+// 키보드 이벤트 해제
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
+})
+
 </script>

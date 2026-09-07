@@ -61,17 +61,6 @@
 
             <div class="flex items-center justify-between gap-2 pt-1">
               <button
-                type="button"
-                class="h-9 px-4 rounded-md border border-neutral-600
-                       bg-neutral-800/60 text-sm text-neutral-200
-                       hover:bg-neutral-700 active:bg-neutral-600 transition"
-                :disabled="loading"
-                @click="goSignup"
-              >
-                회원가입
-              </button>
-
-              <button
                 type="submit"
                 class="h-9 px-4 rounded-md border border-neutral-600
                        bg-neutral-200 text-sm font-medium text-neutral-900
@@ -100,11 +89,6 @@ const loginId = ref('')
 const password = ref('')
 const loading = ref(false)
 const errorMessage = ref('')
-
-function goSignup()
-{
-  router.push('/signup')
-}
 
 async function handleLogin()
 {
