@@ -87,6 +87,10 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Car, LogOut, Warehouse, Trophy } from 'lucide-vue-next'
 
+const router = useRouter()
+const route = useRoute()
+
+// 로그아웃 시 삭제할 인증 관련 로컬 스토리지 키 목록
 const AUTH_STORAGE_KEYS = [
   'accessToken',
   'loginId',
@@ -95,15 +99,22 @@ const AUTH_STORAGE_KEYS = [
   'nickname'
 ]
 
+// 메뉴 공통 스타일
 const MENU_BASE_CLASS = 'h-9 px-3 flex items-center gap-1.5 rounded-md text-base font-medium tracking-wide transition'
+
+// 활성화된 메뉴 스타일
 const MENU_ACTIVE_CLASS = 'bg-neutral-200 text-neutral-900 shadow-sm'
+
+// 비활성화된 메뉴 스타일
 const MENU_INACTIVE_CLASS = 'bg-transparent text-neutral-100 hover:bg-white/15'
 
-const router = useRouter()
-const route = useRoute()
-
+// 로그인 여부
 const isLoggedIn = ref(false)
+
+// 로그인 사용자 권한
 const userRole = ref('')
+
+// 로그인 사용자 닉네임
 const nickname = ref('')
 
 // 관리자 여부

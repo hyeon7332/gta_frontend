@@ -487,7 +487,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { http } from '@/api/http'
 import { Plus, RotateCcw, ChevronDown, Settings, ChevronsUpDown } from 'lucide-vue-next'
@@ -529,9 +529,6 @@ const modalMode = ref('create') // create | edit
 
 // 수정 대상 행 데이터
 const editTarget = ref(null)
-
-// 현재 하이라이트된 행 키
-const activeRowKey = ref('')
 
 // 상세에서 돌아왔을 때 잠깐 강조할 보유 이동수단 ID
 const highlightedOwnedId = ref(null)
@@ -575,9 +572,6 @@ const showGarageSettingModal = ref(false)
 // 설정 중인 차고 데이터
 const selectedGarageSettingRow = ref(null)
 
-// 테이블 셀 기본 스타일
-const tdBaseClass = 'px-3 py-2 border-b border-neutral-700'
-
 // 격납고 특수 차고명 상수
 const HANGAR_GARAGE_NAMES = Object.freeze({
   HANGAR: '격납고 격납층',
@@ -590,18 +584,6 @@ const toast = ref({ open: false, text: '', type: 'success' })
 
 // 토스트 자동 닫힘 타이머
 let toastTimer = null
-
-// 차고 필터 변경 시 행 하이라이트 초기화
-watch(selectedGarageIds, () => {
-  activeRowKey.value = ''
-})
-
-// 모달 닫힘 시 행 하이라이트 초기화
-watch(showModal, (isOpen) => {
-  if (!isOpen) {
-    activeRowKey.value = ''
-  }
-})
 
 // 모든 일반 차고가 접혀있는지 여부
 const allGarageCollapsed = computed(() => {
@@ -825,84 +807,6 @@ const specialStorageGroups = computed(() => {
   return []
 })
 
-// 차고 목록을 기반으로 화면에 표시할 슬롯 구조 생성
-const slotRows = computed(() => {
-  const result = []
-
-  garageList.value.forEach((garage) => {
-    const garageId = garage.garageId
-    const garageName = garage.garageName
-    const displayGarageName = garage.alias ? garage.alias : garage.garageName
-    const slotCount = Number(garage.slotCount ?? 0)
-
-    // 격납고 특수 보관 3종은 일반 차고 리스트에서 제외
-    if (
-      garageName === getHangarGarageName('HANGAR') ||
-      garageName === getHangarGarageName('HANGAR_STORAGE') ||
-      garageName === getHangarGarageName('HANGAR_VINEWOOD')
-    ) {
-      return
-    }
-
-    result.push({
-      id: `garage-header-${garageId}`,
-      type: 'garageHeader',
-      garageId,
-      garage: garageName,
-      alias: garage.alias ?? null,
-      description: garage.description ?? null
-    })
-
-    if (collapsedGarageIds.value.has(garageId)) {
-      return
-    }
-
-    for (let slotNo = 1; slotNo <= slotCount; slotNo++) {
-      const slotKey = `${garageId}-${slotNo}`
-      const found = slotRowMap.value.get(slotKey)
-
-      if (found) {
-        result.push({
-          ...found,
-          type: 'slot',
-          garageId,
-          garage: displayGarageName,
-          alias: garage.alias ?? found.alias ?? null,
-          slot: slotNo,
-          upgradeLocation: found.upgradeLocation ?? '',
-          isEmpty: false
-        })
-      } else {
-        result.push({
-          id: `empty-${garageId}-${slotNo}`,
-          type: 'slot',
-          garageId,
-          garage: displayGarageName,
-          alias: garage.alias ?? null,
-          slot: slotNo,
-          manufacturer: '-',
-          name: '-',
-          category: '-',
-          isEmpty: true
-        })
-      }
-    }
-  })
-
-  return result
-})
-
-// 차고 필터 적용 후 슬롯 행 목록
-const filteredSlotRows = computed(() => {
-  if (selectedGarageIds.value.length === 0) {
-    return slotRows.value
-  }
-
-  return slotRows.value.filter((row) => {
-    return selectedGarageIds.value.includes(String(row.garageId))
-  })
-})
-
 // 미배치 행 목록
 const unassignedRows = computed(() => {
   return rows.value
@@ -978,137 +882,6 @@ const hangarVinewoodRows = computed(() => {
       ...row,
       type: 'hangarVinewood'
     }))
-})
-
-// 격납고 크기별 사용 수
-const hangarUsage = computed(() => {
-  const usage = {
-    small: 0,
-    medium: 0,
-    large: 0,
-    xlarge: 0
-  }
-
-  hangarRows.value.forEach((row) => {
-    const features = String(row.features || '')
-
-    if (features.includes('HGX')) {
-      usage.xlarge += 1
-      return
-    }
-
-    if (features.includes('HGL')) {
-      usage.large += 1
-      return
-    }
-
-    if (features.includes('HGM')) {
-      usage.medium += 1
-      return
-    }
-
-    if (features.includes('HGS')) {
-      usage.small += 1
-    }
-  })
-
-  return usage
-})
-
-// 미배치 표시용 행 목록
-const unassignedDisplayRows = computed(() => {
-  if (unassignedRows.value.length === 0) {
-    return []
-  }
-
-  return [
-    {
-      id: 'unassigned-header',
-      type: 'garageHeader',
-      garage: '미배치'
-    },
-    ...unassignedRows.value
-  ]
-})
-
-// 페가수스 표시용 행 목록
-const pegasusDisplayRows = computed(() => {
-  if (pegasusRows.value.length === 0) {
-    return []
-  }
-
-  return [
-    {
-      id: 'pegasus-header',
-      type: 'garageHeader',
-      garage: '페가수스'
-    },
-    ...pegasusRows.value
-  ]
-})
-
-// 격납고 3종 표시용 행 목록
-const hangarDisplayRows = computed(() => {
-  const result = []
-
-  // 격납고 격납층 표시
-  if (hangarRows.value.length > 0) {
-    result.push({
-      id: 'hangar-header',
-      type: 'garageHeader',
-      garage: getHangarGarageName('HANGAR')
-    })
-
-    result.push(...hangarRows.value)
-  }
-
-  // 격납고 저장소 표시
-  if (hangarStorageRows.value.length > 0) {
-    result.push({
-      id: 'hangar-storage-header',
-      type: 'garageHeader',
-      garage: getHangarGarageName('HANGAR_STORAGE')
-    })
-
-    result.push(...hangarStorageRows.value)
-  }
-
-  // 격납고 바인우드 클럽 보관소 표시
-  if (hangarVinewoodRows.value.length > 0) {
-    result.push({
-      id: 'hangar-vinewood-header',
-      type: 'garageHeader',
-      garage: getHangarGarageName('HANGAR_VINEWOOD')
-    })
-
-    result.push(...hangarVinewoodRows.value)
-  }
-
-  return result
-})
-
-// 테이블에 최종 표시할 행 목록
-const displayRows = computed(() => {
-  if (selectedGarageIds.value.includes('unassigned')) {
-    return unassignedDisplayRows.value
-  }
-
-  if (selectedGarageIds.value.includes('pegasus')) {
-    return pegasusDisplayRows.value
-  }
-
-  // 격납고 필터 선택 시 격납고 전용 목록 표시
-  if (selectedGarageIds.value.includes('hangar')) {
-    return hangarDisplayRows.value
-  }
-
-  const minRows = 15
-  const emptyCount = Math.max(0, minRows - filteredSlotRows.value.length)
-
-  return [
-    ...filteredSlotRows.value,
-    ...Array.from({ length: emptyCount }, () => null)
-  ]
 })
 
 // 차고 필터 드롭다운 옵션 목록
@@ -1257,29 +1030,6 @@ function moveToSearchResult(row)
 function getHangarGarageName(storageType)
 {
   return HANGAR_GARAGE_NAMES[storageType] ?? ''
-}
-
-// 차고명 기준 차고 ID 조회
-function findGarageIdByName(garageName)
-{
-  const matched = garageList.value.find((garage) => {
-    return garage.garageName === garageName
-  })
-
-  return matched?.garageId ?? null
-}
-
-// 특정 차고 펼침 처리
-function expandGarage(garageId)
-{
-  if (!garageId) {
-    return
-  }
-
-  const next = new Set(collapsedGarageIds.value)
-  next.delete(garageId)
-
-  collapsedGarageIds.value = next
 }
 
 // 검색 결과를 화면 상태(차고/선택/상세패널)에 반영
@@ -1449,8 +1199,6 @@ function handleRowClick(row)
     return
   }
 
-  activeRowKey.value = getRowHighlightKey(row)
-
   // 상세 페이지 이동임을 표시
   navigatingToDetail = true
 
@@ -1536,14 +1284,6 @@ function getRowHighlightKey(row)
   return ''
 }
 
-// 행 하이라이트 클래스 반환
-function getRowHighlightClass(row)
-{
-  return getRowHighlightKey(row) === activeRowKey.value
-    ? 'bg-blue-900/40'
-    : ''
-}
-
 // 현재 드롭 대상 여부 판단
 function isDropTarget(row)
 {
@@ -1606,65 +1346,6 @@ function handleDragOver(e, row)
 
   activeDropSlotKey.value = getSlotKey(row)
   e.preventDefault()
-}
-
-// 오피스 차고 여부 판단
-function isOfficeGarage(garageName)
-{
-  if (!garageName) {
-    return false
-  }
-
-  return garageName.includes('오피스 차고')
-}
-
-// 오피스 차고 번호 추출
-function extractOfficeGarageNumber(garageName)
-{
-  if (!garageName) {
-    return null
-  }
-
-  const match = garageName.match(/오피스\s*차고\s*(\d+)/)
-
-  if (!match) {
-    return null
-  }
-
-  return Number(match[1])
-}
-
-// 오피스 차고 구역 라벨 생성
-function getOfficeSectionLabel(row)
-{
-  if (!row || row.type !== 'slot') {
-    return ''
-  }
-
-  if (!isOfficeGarage(row.garage)) {
-    return ''
-  }
-
-  const officeNo = extractOfficeGarageNumber(row.garage)
-  const slot = Number(row.slot)
-
-  if (!officeNo || !slot) {
-    return ''
-  }
-
-  if (slot >= 1 && slot <= 6) {
-    return `${officeNo}A`
-  }
-
-  if (slot >= 7 && slot <= 13) {
-    return `${officeNo}B`
-  }
-
-  if (slot >= 14 && slot <= 20) {
-    return `${officeNo}C`
-  }
-
-  return ''
 }
 
 // 차고 설정 모달 열기
@@ -1959,10 +1640,7 @@ async function handleOwnedTransportSuccess(successMessage)
 {
   showModal.value = false     // 모달 닫기
   editTarget.value = null     // 편집 대상 초기화
-  activeRowKey.value = ''     // 행 하이라이트 초기화
-
   showToast(successMessage)   // 성공 토스트 표시
-
   await load()                // 목록 새로고침
 }
 
