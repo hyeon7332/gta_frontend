@@ -56,7 +56,7 @@
               </div>
 
               <div class="shrink-0 w-[250px] text-right text-[12px] text-neutral-400 truncate">
-                {{ getLocationLabel(row) }}
+                {{ formatStorageLocation(row) }}
               </div>
             </div>
           </button>
@@ -97,7 +97,7 @@
 
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from 'vue'
-import { formatFeatureBadges } from '@/utils/format'
+import { formatFeatureBadges, formatStorageLocation } from '@/utils/format'
 
 // 부모 컴포넌트에서 전달받는 모달 상태 및 검색 결과
 const props = defineProps({
@@ -150,22 +150,6 @@ function handleKeyDown(e)
   if (e.key === 'Escape') {
     close()
   }
-}
-
-/** 보관 위치 표시 문구 생성 */
-function getLocationLabel(row)
-{
-  if (row.storageType === 'PEGASUS') {
-    return '페가수스'
-  }
-
-  if (row.storageType === 'UNASSIGNED' || (!row.storageType && !row.garageId)) {
-    return '미배치'
-  }
-
-  const garageName = row.alias || row.garageAlias || row.garage || '-'
-
-  return `${garageName} / ${row.slot || '-'}번 슬롯`
 }
 
 // 모달이 닫힐 때 선택 상태 초기화

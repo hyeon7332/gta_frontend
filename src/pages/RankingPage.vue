@@ -252,9 +252,24 @@
                           </span>
                         </div>
 
-                        <p class="mt-1 text-right text-sm font-bold leading-tight text-neutral-800">
-                          {{ formatRankingValue(top3List[1]) }}
-                        </p>
+                        <!-- 차종 / 가격 / 기록 -->
+                        <div class="mt-1 flex items-center justify-between gap-2">
+
+                          <!-- 차종 / 가격 -->
+                          <div class="truncate text-[11px] leading-tight text-neutral-500">
+                            {{ top3List[1].transportCategory }}
+                            <span class="mx-0.5">•</span>
+                            <span class="mx-0.5 font-semibold">
+                              {{ format.formatCurrencyUSD(top3List[1].price) }}
+                            </span>
+                          </div>
+
+                          <!-- 기록 -->
+                          <p class="shrink-0 text-sm font-bold leading-tight text-neutral-800">
+                            {{ formatRankingValue(top3List[1]) }}
+                          </p>
+
+                        </div>
                       </div>
                     </div>
 
@@ -333,9 +348,22 @@
                           </span>
                         </div>
 
-                        <p class="mt-1 text-right text-sm font-bold leading-tight text-neutral-800">
-                          {{ formatRankingValue(top3List[0]) }}
-                        </p>
+                        <!-- 차종 / 가격 / 기록 -->
+                        <div class="mt-1 flex items-center justify-between gap-2">
+
+                          <div class="truncate text-[11px] leading-tight text-neutral-500">
+                            {{ top3List[0].transportCategory }}
+                            <span class="mx-0.5">•</span>
+                            <span class="mx-0.5 font-semibold">
+                              {{ format.formatCurrencyUSD(top3List[0].price) }}
+                            </span>
+                          </div>
+
+                          <p class="shrink-0 text-sm font-bold leading-tight text-neutral-800">
+                            {{ formatRankingValue(top3List[0]) }}
+                          </p>
+
+                        </div>
                       </div>
                     </div>
 
@@ -414,9 +442,22 @@
                           </span>
                         </div>
 
-                        <p class="mt-1 text-right text-sm font-bold leading-tight text-neutral-800">
-                          {{ formatRankingValue(top3List[2]) }}
-                        </p>
+                        <!-- 차종 / 가격 / 기록 -->
+                        <div class="mt-1 flex items-center justify-between gap-2">
+
+                          <div class="truncate text-[11px] leading-tight text-neutral-500">
+                            {{ top3List[2].transportCategory }}
+                            <span class="mx-0.5">•</span>
+                            <span class="mx-0.5 font-semibold">
+                              {{ format.formatCurrencyUSD(top3List[2].price) }}
+                            </span>
+                          </div>
+
+                          <p class="shrink-0 text-sm font-bold leading-tight text-neutral-800">
+                            {{ formatRankingValue(top3List[2]) }}
+                          </p>
+
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -505,14 +546,28 @@
                           </span>
                         </div>
 
-                        <!-- 랩타임 / 최고속도 -->
-                        <p
-                          class="mt-1 text-right
-                                 text-[13px] font-bold leading-tight
-                                 text-neutral-800"
-                        >
-                          {{ formatRankingValue(item) }}
-                        </p>
+                        <!-- 차종 / 가격 / 기록 -->
+                        <div class="mt-1 flex items-center justify-between gap-2">
+
+                          <!-- 차종 / 가격 -->
+                          <div class="truncate text-[11px] leading-tight text-neutral-500">
+                            {{ item.transportCategory }}
+                            <span class="mx-0.5">•</span>
+                            <span class="mx-0.5 font-semibold">
+                              {{ format.formatCurrencyUSD(item.price) }}
+                            </span>
+                          </div>
+
+                          <!-- 기록 -->
+                          <p
+                            class="shrink-0
+                                  text-[13px] font-bold leading-tight
+                                  text-neutral-800"
+                          >
+                            {{ formatRankingValue(item) }}
+                          </p>
+
+                        </div>
                       </div>
                     </div>
                   </div>

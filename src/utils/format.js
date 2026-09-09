@@ -141,3 +141,28 @@ export function formatMultiSelectLabel(list, defaultLabel, options = null) {
 
   return `${selectedList[0]} 외 ${selectedList.length - 1}건`
 }
+
+/** 보관 위치 표시 문구 생성 */
+export function formatStorageLocation(row)
+{
+  if (!row) {
+    return '-'
+  }
+
+  if (row.storageType === 'PEGASUS') {
+    return '페가수스'
+  }
+
+  if (row.storageType === 'UNASSIGNED' || (!row.storageType && !row.garageId)) {
+    return '미배치'
+  }
+
+  const garageName =
+    row.alias ||
+    row.garageAlias ||
+    row.garageName ||
+    row.garage ||
+    '-'
+
+  return `${garageName} / ${row.slot || '-'}번 슬롯`
+}
