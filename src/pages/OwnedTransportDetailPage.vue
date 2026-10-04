@@ -340,6 +340,78 @@
               </template>
             </div>
 
+            <!-- 개인 랩타임 -->
+            <div class="border-t border-neutral-700 px-1 py-3">
+              <template v-if="row?.personalLapTime">
+                <div class="mb-1 flex justify-between text-[13px]">
+                  <span class="text-neutral-400">
+                    개인 랩타임
+                  </span>
+
+                  <span class="text-neutral-400">
+                    <template v-if="row?.personalLapRank">
+                      <span :class="getRankClass(row?.personalLapRank)">
+                        전체 {{ row.personalLapRank }}위
+                      </span>
+
+                      <span v-if="row?.personalLapTotalCount">
+                        (총 {{ row.personalLapTotalCount }}대)
+                      </span>
+                    </template>
+
+                    <template v-if="row?.personalLapCategoryRank">
+                      <span> / </span>
+
+                      <span :class="getRankClass(row?.personalLapCategoryRank)">
+                        {{ (row?.category || '-') }}
+                        {{ row.personalLapCategoryRank }}위
+                      </span>
+
+                      <span v-if="row?.personalLapCategoryTotalCount">
+                        (총 {{ row.personalLapCategoryTotalCount }}대)
+                      </span>
+                    </template>
+
+                    <template v-if="!row?.personalLapRank && !row?.personalLapCategoryRank">
+                      <span>-</span>
+                    </template>
+                  </span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <div
+                    class="h-[6px] flex-1 overflow-hidden
+                          rounded bg-neutral-700"
+                  >
+                    <div
+                      class="h-[6px] rounded bg-violet-400
+                            transition-all duration-700 ease-out"
+                      :style="{ width: animatedPersonalLapWidth + '%' }"
+                    ></div>
+                  </div>
+
+                  <span
+                    class="w-[90px] text-right text-[13px]
+                          tabular-nums text-neutral-100"
+                  >
+                    {{ formatLapTime(row?.personalLapTime) }}
+                  </span>
+                </div>
+              </template>
+
+              <template v-else>
+                <div class="flex justify-between text-[13px]">
+                  <span class="text-neutral-400">
+                    개인 랩타임
+                  </span>
+
+                  <span class="text-neutral-500">
+                    정보없음
+                  </span>
+                </div>
+              </template>
+            </div>
+
             <!-- 가격 -->
             <div
               class="flex items-center justify-between gap-4
@@ -446,6 +518,9 @@ const animatedLapWidth = ref(0)
 // 최고속도 그래프 너비
 const animatedTopSpeedWidth = ref(0)
 
+// 개인 랩타임 그래프 너비
+const animatedPersonalLapWidth = ref(0)
+
 // 특징 코드 목록
 const featureOptions = ref([])
 
@@ -545,12 +620,14 @@ async function runBarAnimation()
 
   animatedLapWidth.value = 0
   animatedTopSpeedWidth.value = 0
+  animatedPersonalLapWidth.value = 0
 
   await nextTick()
 
   animationTimer = setTimeout(() => {
     animatedLapWidth.value = getLapTimePercent(row.value?.lapTime)
     animatedTopSpeedWidth.value = getTopSpeedPercent(row.value?.topSpeed)
+    animatedPersonalLapWidth.value = getLapTimePercent(row.value?.personalLapTime)
   }, 30)
 }
 
