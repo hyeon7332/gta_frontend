@@ -586,6 +586,21 @@ function getStorageDisplayText(targetRow)
   return garageName || '-'
 }
 
+// 개인 랩타임 그래프 비율 계산
+function getPersonalLapTimePercent(value)
+{
+  if (!value) {
+    return 0
+  }
+
+  const min = 60000   // 1분 = 100%
+  const max = 300000  // 5분 = 0%
+
+  const percent = 100 - ((Number(value) - min) / (max - min)) * 100
+
+  return Math.max(0, Math.min(100, percent))
+}
+
 // 랩타임 그래프 비율 계산
 function getLapTimePercent(value)
 {
@@ -627,7 +642,7 @@ async function runBarAnimation()
   animationTimer = setTimeout(() => {
     animatedLapWidth.value = getLapTimePercent(row.value?.lapTime)
     animatedTopSpeedWidth.value = getTopSpeedPercent(row.value?.topSpeed)
-    animatedPersonalLapWidth.value = getLapTimePercent(row.value?.personalLapTime)
+    animatedPersonalLapWidth.value = getPersonalLapTimePercent(row.value?.personalLapTime)
   }, 30)
 }
 
