@@ -204,54 +204,38 @@
                     랩타임
                   </span>
 
-                  <span class="text-neutral-400">
-                    <template v-if="row?.lapRank">
-                      <span :class="getRankClass(row?.lapRank)">
-                        전체 {{ row.lapRank }}위
-                      </span>
-
-                      <span v-if="row?.lapTotalCount">
-                        (총 {{ row.lapTotalCount }}대)
-                      </span>
-                    </template>
-
-                    <template v-if="row?.lapCategoryRank">
-                      <span> / </span>
-
-                      <span :class="getRankClass(row?.lapCategoryRank)">
-                        {{ (row?.category || '-') }}
-                        {{ row.lapCategoryRank }}위
-                      </span>
-
-                      <span v-if="row?.lapCategoryTotalCount">
-                        (총 {{ row.lapCategoryTotalCount }}대)
-                      </span>
-                    </template>
-
-                    <template v-if="!row?.lapRank && !row?.lapCategoryRank">
-                      <span>-</span>
-                    </template>
+                  <span class="tabular-nums text-neutral-100">
+                    {{ formatLapTime(row?.lapTime) }}
                   </span>
                 </div>
 
-                <div class="flex items-center gap-3">
-                  <div
-                    class="h-[6px] flex-1 overflow-hidden
-                           rounded bg-neutral-700"
-                  >
-                    <div
-                      class="h-[6px] rounded bg-blue-400
-                             transition-all duration-700 ease-out"
-                      :style="{ width: animatedLapWidth + '%' }"
-                    ></div>
-                  </div>
+                <div class="text-right text-[13px] text-neutral-400">
+                  <template v-if="row?.lapRank">
+                    <span :class="getRankClass(row?.lapRank)">
+                      전체 {{ row.lapRank }}위
+                    </span>
 
-                  <span
-                    class="w-[90px] text-right text-[13px]
-                           tabular-nums text-neutral-100"
-                  >
-                    {{ formatLapTime(row?.lapTime) }}
-                  </span>
+                    <span v-if="row?.lapTotalCount">
+                      (총 {{ row.lapTotalCount }}대)
+                    </span>
+                  </template>
+
+                  <template v-if="row?.lapCategoryRank">
+                    <span> / </span>
+
+                    <span :class="getRankClass(row?.lapCategoryRank)">
+                      {{ (row?.category || '-') }}
+                      {{ row.lapCategoryRank }}위
+                    </span>
+
+                    <span v-if="row?.lapCategoryTotalCount">
+                      (총 {{ row.lapCategoryTotalCount }}대)
+                    </span>
+                  </template>
+
+                  <template v-if="!row?.lapRank && !row?.lapCategoryRank">
+                    <span>-</span>
+                  </template>
                 </div>
               </template>
 
@@ -276,54 +260,38 @@
                     최고속도
                   </span>
 
-                  <span class="text-neutral-400">
-                    <template v-if="row?.speedRank">
-                      <span :class="getRankClass(row?.speedRank)">
-                        전체 {{ row.speedRank }}위
-                      </span>
-
-                      <span v-if="row?.speedTotalCount">
-                        (총 {{ row.speedTotalCount }}대)
-                      </span>
-                    </template>
-
-                    <template v-if="row?.speedCategoryRank">
-                      <span> / </span>
-
-                      <span :class="getRankClass(row?.speedCategoryRank)">
-                        {{ (row?.category || '-') }}
-                        {{ row.speedCategoryRank }}위
-                      </span>
-
-                      <span v-if="row?.speedCategoryTotalCount">
-                        (총 {{ row.speedCategoryTotalCount }}대)
-                      </span>
-                    </template>
-
-                    <template v-if="!row?.speedRank && !row?.speedCategoryRank">
-                      <span>-</span>
-                    </template>
+                  <span class="tabular-nums text-neutral-100">
+                    {{ format.formatSpeed(row?.topSpeed) }}
                   </span>
                 </div>
 
-                <div class="flex items-center gap-3">
-                  <div
-                    class="h-[6px] flex-1 overflow-hidden
-                           rounded bg-neutral-700"
-                  >
-                    <div
-                      class="h-[6px] rounded bg-green-400
-                             transition-all duration-700 ease-out"
-                      :style="{ width: animatedTopSpeedWidth + '%' }"
-                    ></div>
-                  </div>
+                <div class="text-right text-[13px] text-neutral-400">
+                  <template v-if="row?.speedRank">
+                    <span :class="getRankClass(row?.speedRank)">
+                      전체 {{ row.speedRank }}위
+                    </span>
 
-                  <span
-                    class="w-[90px] text-right
-                           text-[13px] text-neutral-100"
-                  >
-                    {{ format.formatSpeed(row?.topSpeed) }}
-                  </span>
+                    <span v-if="row?.speedTotalCount">
+                      (총 {{ row.speedTotalCount }}대)
+                    </span>
+                  </template>
+
+                  <template v-if="row?.speedCategoryRank">
+                    <span> / </span>
+
+                    <span :class="getRankClass(row?.speedCategoryRank)">
+                      {{ (row?.category || '-') }}
+                      {{ row.speedCategoryRank }}위
+                    </span>
+
+                    <span v-if="row?.speedCategoryTotalCount">
+                      (총 {{ row.speedCategoryTotalCount }}대)
+                    </span>
+                  </template>
+
+                  <template v-if="!row?.speedRank && !row?.speedCategoryRank">
+                    <span>-</span>
+                  </template>
                 </div>
               </template>
 
@@ -348,54 +316,38 @@
                     개인 랩타임
                   </span>
 
-                  <span class="text-neutral-400">
-                    <template v-if="row?.personalLapRank">
-                      <span :class="getRankClass(row?.personalLapRank)">
-                        전체 {{ row.personalLapRank }}위
-                      </span>
-
-                      <span v-if="row?.personalLapTotalCount">
-                        (총 {{ row.personalLapTotalCount }}대)
-                      </span>
-                    </template>
-
-                    <template v-if="row?.personalLapCategoryRank">
-                      <span> / </span>
-
-                      <span :class="getRankClass(row?.personalLapCategoryRank)">
-                        {{ (row?.category || '-') }}
-                        {{ row.personalLapCategoryRank }}위
-                      </span>
-
-                      <span v-if="row?.personalLapCategoryTotalCount">
-                        (총 {{ row.personalLapCategoryTotalCount }}대)
-                      </span>
-                    </template>
-
-                    <template v-if="!row?.personalLapRank && !row?.personalLapCategoryRank">
-                      <span>-</span>
-                    </template>
+                  <span class="tabular-nums text-neutral-100">
+                    {{ formatLapTime(row?.personalLapTime) }}
                   </span>
                 </div>
 
-                <div class="flex items-center gap-3">
-                  <div
-                    class="h-[6px] flex-1 overflow-hidden
-                          rounded bg-neutral-700"
-                  >
-                    <div
-                      class="h-[6px] rounded bg-violet-400
-                            transition-all duration-700 ease-out"
-                      :style="{ width: animatedPersonalLapWidth + '%' }"
-                    ></div>
-                  </div>
+                <div class="text-right text-[13px] text-neutral-400">
+                  <template v-if="row?.personalLapRank">
+                    <span :class="getRankClass(row?.personalLapRank)">
+                      전체 {{ row.personalLapRank }}위
+                    </span>
 
-                  <span
-                    class="w-[90px] text-right text-[13px]
-                          tabular-nums text-neutral-100"
-                  >
-                    {{ formatLapTime(row?.personalLapTime) }}
-                  </span>
+                    <span v-if="row?.personalLapTotalCount">
+                      (총 {{ row.personalLapTotalCount }}대)
+                    </span>
+                  </template>
+
+                  <template v-if="row?.personalLapCategoryRank">
+                    <span> / </span>
+
+                    <span :class="getRankClass(row?.personalLapCategoryRank)">
+                      {{ (row?.category || '-') }}
+                      {{ row.personalLapCategoryRank }}위
+                    </span>
+
+                    <span v-if="row?.personalLapCategoryTotalCount">
+                      (총 {{ row.personalLapCategoryTotalCount }}대)
+                    </span>
+                  </template>
+
+                  <template v-if="!row?.personalLapRank && !row?.personalLapCategoryRank">
+                    <span>-</span>
+                  </template>
                 </div>
               </template>
 
@@ -496,7 +448,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, onBeforeUnmount, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { X } from 'lucide-vue-next'
 import { http } from '@/api/http'
@@ -512,20 +464,8 @@ const row = ref(null)
 // 상세 조회 중 여부
 const loading = ref(false)
 
-// 랩타임 그래프 너비
-const animatedLapWidth = ref(0)
-
-// 최고속도 그래프 너비
-const animatedTopSpeedWidth = ref(0)
-
-// 개인 랩타임 그래프 너비
-const animatedPersonalLapWidth = ref(0)
-
 // 특징 코드 목록
 const featureOptions = ref([])
-
-// 그래프 애니메이션 타이머
-let animationTimer = null
 
 // 이미지 로딩 상태
 const imageLoading = ref(true)
@@ -584,66 +524,6 @@ function getStorageDisplayText(targetRow)
   }
 
   return garageName || '-'
-}
-
-// 개인 랩타임 그래프 비율 계산
-function getPersonalLapTimePercent(value)
-{
-  if (!value) {
-    return 0
-  }
-
-  const min = 60000   // 1분 = 100%
-  const max = 300000  // 5분 = 0%
-
-  const percent = 100 - ((Number(value) - min) / (max - min)) * 100
-
-  return Math.max(0, Math.min(100, percent))
-}
-
-// 랩타임 그래프 비율 계산
-function getLapTimePercent(value)
-{
-  if (!value) {
-    return 0
-  }
-
-  const max = 180000
-
-  return Math.max(0, 100 - (Number(value) / max) * 100)
-}
-
-// 최고속도 그래프 비율 계산
-function getTopSpeedPercent(value)
-{
-  if (!value) {
-    return 0
-  }
-
-  const max = 400
-
-  return Math.min((Number(value) / max) * 100, 100)
-}
-
-// 성능 그래프 애니메이션 실행
-async function runBarAnimation()
-{
-  if (animationTimer) {
-    clearTimeout(animationTimer)
-    animationTimer = null
-  }
-
-  animatedLapWidth.value = 0
-  animatedTopSpeedWidth.value = 0
-  animatedPersonalLapWidth.value = 0
-
-  await nextTick()
-
-  animationTimer = setTimeout(() => {
-    animatedLapWidth.value = getLapTimePercent(row.value?.lapTime)
-    animatedTopSpeedWidth.value = getTopSpeedPercent(row.value?.topSpeed)
-    animatedPersonalLapWidth.value = getPersonalLapTimePercent(row.value?.personalLapTime)
-  }, 30)
 }
 
 // 랩타임 포맷 변환
@@ -706,7 +586,6 @@ async function loadDetail()
 
     imageLoading.value = Boolean(row.value?.imageUrl)
 
-    await runBarAnimation()
   } catch (err) {
     console.error('보유 이동수단 상세 조회 실패:', err)
     row.value = null
@@ -782,11 +661,4 @@ onMounted(async () => {
   ])
 })
 
-// 컴포넌트 종료 시 타이머 제거
-onBeforeUnmount(() => {
-  if (animationTimer) {
-    clearTimeout(animationTimer)
-    animationTimer = null
-  }
-})
 </script>
