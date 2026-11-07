@@ -308,62 +308,6 @@
               </template>
             </div>
 
-            <!-- 개인 랩타임 -->
-            <div class="border-t border-neutral-700 px-1 py-3">
-              <template v-if="row?.personalLapTime">
-                <div class="mb-1 flex justify-between text-[13px]">
-                  <span class="text-neutral-400">
-                    개인 랩타임
-                  </span>
-
-                  <span class="tabular-nums text-neutral-100">
-                    {{ formatLapTime(row?.personalLapTime) }}
-                  </span>
-                </div>
-
-                <div class="text-right text-[13px] text-neutral-400">
-                  <template v-if="row?.personalLapRank">
-                    <span :class="getRankClass(row?.personalLapRank)">
-                      전체 {{ row.personalLapRank }}위
-                    </span>
-
-                    <span v-if="row?.personalLapTotalCount">
-                      (총 {{ row.personalLapTotalCount }}대)
-                    </span>
-                  </template>
-
-                  <template v-if="row?.personalLapCategoryRank">
-                    <span> / </span>
-
-                    <span :class="getRankClass(row?.personalLapCategoryRank)">
-                      {{ (row?.category || '-') }}
-                      {{ row.personalLapCategoryRank }}위
-                    </span>
-
-                    <span v-if="row?.personalLapCategoryTotalCount">
-                      (총 {{ row.personalLapCategoryTotalCount }}대)
-                    </span>
-                  </template>
-
-                  <template v-if="!row?.personalLapRank && !row?.personalLapCategoryRank">
-                    <span>-</span>
-                  </template>
-                </div>
-              </template>
-
-              <template v-else>
-                <div class="flex justify-between text-[13px]">
-                  <span class="text-neutral-400">
-                    개인 랩타임
-                  </span>
-
-                  <span class="text-neutral-500">
-                    정보없음
-                  </span>
-                </div>
-              </template>
-            </div>
-
             <!-- 가격 -->
             <div
               class="flex items-center justify-between gap-4

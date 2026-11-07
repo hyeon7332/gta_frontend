@@ -655,7 +655,7 @@ import { http } from '@/api/http'
 import * as format from '@/utils/format'
 
 // 현재 선택된 랭킹 기준
-const selectedRankingType = ref('PERSONAL_LAP_TIME')
+const selectedRankingType = ref('LAP_TIME')
 
 // 현재 선택된 차량 분류
 const selectedCategories = ref([])
@@ -732,10 +732,6 @@ const rankingTypes = [
   {
     label: '최고속도',
     value: 'TOP_SPEED'
-  },
-  {
-    label: '개인 랩타임',
-    value: 'PERSONAL_LAP_TIME'
   }
 ]
 
@@ -829,12 +825,12 @@ function resetRanking()
 {
   // 현재 조회 조건이 기본 상태인지 확인
   const isDefault =
-    selectedRankingType.value === 'PERSONAL_LAP_TIME' &&
+    selectedRankingType.value === 'LAP_TIME' &&
     selectedCategories.value.length === 0 &&
     currentPage.value === 1
 
   // 랭킹 기준을 기본값으로 초기화
-  selectedRankingType.value = 'PERSONAL_LAP_TIME'
+  selectedRankingType.value = 'LAP_TIME'
 
   // 이동수단 분류를 기본값으로 초기화
   selectedCategories.value = []
@@ -889,11 +885,6 @@ function formatRankingValue(item)
   if (selectedRankingType.value === 'LAP_TIME')
   {
     return formatLapTime(item.lapTime)
-  }
-
-  if (selectedRankingType.value === 'PERSONAL_LAP_TIME')
-  {
-    return formatLapTime(item.personalLapTime)
   }
 
   return format.formatSpeed(item.topSpeed)
