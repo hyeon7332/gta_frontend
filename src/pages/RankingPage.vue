@@ -476,11 +476,8 @@
                            min-[1400px]:grid-cols-5"
                   >
                     <div
-                      v-for="(item, index) in rankingList"
-                      :key="item.ownedId || item.modelId"
-                      class="min-w-0 overflow-hidden
-                             rounded-lg border border-neutral-300
-                             bg-neutral-100 shadow-sm"
+                      v-for="item in rankingList" :key="item.ownedId || item.modelId"
+                      class="min-w-0 overflow-hidden rounded-lg border border-neutral-300 bg-neutral-100 shadow-sm"
                     >
                       <!-- 이미지 -->
                       <div
@@ -495,11 +492,7 @@
                           class="h-full w-full object-cover"
                         />
 
-                        <div
-                          v-else
-                          class="flex h-full items-center justify-center
-                                 text-[12px] text-neutral-500"
-                        >
+                        <div v-else class="flex h-full items-center justify-center text-[12px] text-neutral-500">
                           이미지 없음
                         </div>
 
@@ -512,7 +505,7 @@
                                  text-[12px] font-bold text-neutral-800
                                  shadow"
                         >
-                          {{ 4 + (currentPage - 1) * pageSize + index }}
+                          {{ item.rank }}
                         </div>
                       </div>
 
